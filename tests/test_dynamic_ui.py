@@ -120,7 +120,8 @@ def test_real_scenario_selectors_classifier_spans_decisions_and_reset(
     unicode_id = unicode_record["id"]
     page.locator(f'[data-chat="{unicode_id}"]').click()
     expect(page.locator(".warning")).to_be_visible()
-    expect(page.locator('.warning [data-model="flagged"]')).to_be_visible()
+    expect(page.locator('.warning[data-model="flagged"]')).to_be_visible()
+    expect(page.locator(".warning-sub")).to_have_text("Tap highlighted text in the message to learn why.")
     spans = unicode_record["analysis"]["evidence_spans"]
     marks = page.locator("#thread .hl")
     assert marks.all_inner_texts() == [span["excerpt"] for span in spans]
@@ -221,7 +222,7 @@ def test_fixed_demo_chat_highlights_only_live_backend_evidence(page, live_url):
     assert page.locator("#thread .hl").all_inner_texts() == [item["excerpt"] for item in spans]
     message = page.locator("#thread .bubble-text").inner_text()
     assert all(message[item["start"]:item["end"]] == item["excerpt"] for item in spans)
-    expect(page.locator('.warning [data-model="not-flagged"]')).to_be_visible()
+    expect(page.locator('.warning[data-model="not-flagged"]')).to_be_visible()
     home(page)
     page.locator('[data-chat="u1"]').click()
     expect(page.locator('[data-scan="clean"]')).to_be_visible()
@@ -312,3 +313,111 @@ def test_real_server_inference_errors_never_create_sample_results(page, classifi
     expect(page.locator(".warning, .hl")).to_have_count(0)
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     assert not errors
+
+
+def test_highlight_explanations_open_and_dismiss_from_the_keyboard(page, live_url):
+    from playwright.sync_api import expect
+
+    scan_responses = []
+    page.on("response", lambda response: scan_responses.append(response.json())
+            if response.url.endswith("/api/scan") and response.status == 200 else None)
+    load(page, live_url)
+    page.locator('[data-chat="u2"]').click()
+    expect(page.locator(".warning")).to_be_visible()
+    spans = next(item for item in scan_responses if item["is_scam"])["evidence_spans"]
+    popup = page.locator("#evidence-pop")
+    marks = page.locator("#thread .hl")
+    labels = {item["key"]: item["label"] for item in window_scenarios()}
+
+    # Every highlight is a focusable button; Enter and Space open it, Escape returns focus.
+    for index, key in enumerate(["Enter", " "]):
+        mark = marks.nth(index)
+        expect(mark).to_have_attribute("role", "button")
+        expect(mark).to_have_attribute("tabindex", "0")
+        mark.focus()
+        page.keyboard.press(key)
+        expect(popup).to_be_visible()
+        expect(page.locator("#evidence-pop-phrase")).to_have_text(f'\u201c{spans[index]["excerpt"]}\u201d')
+        expect(page.locator("#evidence-pop-category")).to_have_text(labels[spans[index]["category"]])
+        expect(page.locator("#evidence-pop-text")).to_have_text(spans[index]["explanation"])
+        expect(page.get_by_role("button", name="Close explanation")).to_be_focused()
+        page.keyboard.press("Escape")
+        expect(popup).to_be_hidden()
+        expect(mark).to_be_focused()
+
+    # Tapping elsewhere also dismisses it, and the actions stay usable underneath.
+    marks.first.click()
+    expect(popup).to_be_visible()
+    page.locator("#chat-name").click()
+    expect(popup).to_be_hidden()
+    expect(page.get_by_role("button", name="Block", exact=True)).to_be_visible()
+    expect(page.get_by_role("button", name="Accept Anyway", exact=True)).to_be_visible()
+
+
+@pytest.mark.parametrize("width,height", [(390, 844), (320, 568)])
+@pytest.mark.parametrize("spans", ["missing", "invalid"])
+def test_flagged_message_without_valid_spans_offers_review_of_real_evidence_only(
+    page, live_url, width, height, spans
+):
+    """Only the span list is altered; verdict, reasons and model flag are the real analyzer's."""
+    import json
+    from playwright.sync_api import expect
+
+    page.set_viewport_size({"width": width, "height": height})
+    real = []
+
+    def strip_spans(route):
+        response = route.fetch()
+        body = response.json()
+        if body.get("is_scam"):
+            real.append(json.loads(json.dumps(body)))
+            if spans == "missing":
+                body.pop("evidence_spans", None)
+            else:
+                body["evidence_spans"] = [
+                    {"start": 9000, "end": 9010, "excerpt": "not in message", "category": "urgency_pressure",
+                     "explanation": "Out of range."},
+                    {"start": 0, "end": 5, "excerpt": "wrong", "category": "urgency_pressure",
+                     "explanation": "Excerpt does not match the message."},
+                    "nonsense",
+                ]
+        route.fulfill(response=response, body=json.dumps(body), content_type="application/json")
+
+    page.route("**/api/scan", strip_spans)
+    load(page, live_url)
+    page.locator('[data-chat="u2"]').click()
+    warning = page.locator(".warning")
+    expect(warning).to_be_visible()
+    expect(page.locator("#thread .hl")).to_have_count(0)
+    expect(warning.locator("h2")).to_have_text("Potential job scam detected")
+    assert "Tap highlighted text" not in warning.inner_text()
+    review = page.get_by_role("button", name="Review why this was flagged")
+    expect(review).to_be_in_viewport(ratio=1)
+    for name in ["Block", "Accept Anyway"]:
+        expect(page.get_by_role("button", name=name, exact=True)).to_be_in_viewport(ratio=1)
+
+    review.focus()
+    page.keyboard.press("Enter")
+    popup = page.locator("#evidence-pop")
+    expect(popup).to_be_visible()
+    expect(popup).to_be_in_viewport(ratio=1)
+    expect(page.locator("#evidence-pop-phrase")).to_be_hidden()
+    reasons = real[0]["reasons"]
+    assert reasons and real[0]["model_flagged"] is False
+    items = page.locator("#evidence-pop-list li")
+    expect(items).to_have_count(len(reasons))
+    for index, reason in enumerate(reasons):
+        expect(items.nth(index)).to_have_attribute("data-reason", reason["category"])
+        expect(items.nth(index)).to_contain_text(reason["evidence"])
+    expect(page.locator("#evidence-pop-text")).to_contain_text("evidence rules")
+    expect(page.locator("#evidence-pop-text")).not_to_contain_text("ML classifier flagged")
+    expect(page.locator("#evidence-pop-note")).to_contain_text("not an explanation of the ML model")
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    page.wait_for_timeout(250)
+    if spans == "missing":
+        page.screenshot(path=str(SHOTS / f"warning-review-{width}.png"))
+    page.keyboard.press("Escape")
+    expect(popup).to_be_hidden()
+    expect(review).to_be_focused()
+    page.get_by_role("button", name="Accept Anyway", exact=True).click()
+    expect(page.locator('[data-state="accepted"]')).to_be_visible()

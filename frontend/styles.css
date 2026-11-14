@@ -100,7 +100,7 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 .test-open .screen-home { transform: translateX(-22%); visibility: hidden; }
 .test-open .screen-test { transform: none; visibility: visible; transition-delay: 0s; }
 
-.home-body, .thread, .warning-reasons { scrollbar-width: thin; scrollbar-color: rgba(17, 27, 33, 0.25) transparent; }
+.home-body, .thread, .evidence-pop { scrollbar-width: thin; scrollbar-color: rgba(17, 27, 33, 0.25) transparent; }
 
 /* ---------- header ---------- */
 
@@ -355,6 +355,7 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
   max-width: 340px; margin: 0 auto; padding: 10px 12px 11px 14px;
   background: #fff; border-radius: 12px; border-left: 4px solid #f0a020;
   box-shadow: 0 8px 28px rgba(17, 27, 33, 0.3);
+  overflow-y: auto; overscroll-behavior: contain;
   animation: rise 0.16s var(--ease);
 }
 .evidence-pop[hidden] { display: none; }
@@ -368,6 +369,10 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
   max-height: 4.2em; overflow-y: auto;
 }
 .evidence-pop-text { margin: 7px 0 0; font-size: 13.500px; line-height: 1.4; color: #3b4a54; }
+.evidence-pop-list { list-style: none; margin: 6px 0 0; padding: 0; }
+.evidence-pop-list li { padding: 6px 0; border-top: 1px solid var(--divider); font-size: 13px; line-height: 1.35; color: #3b4a54; }
+.evidence-pop-list strong { display: block; font-weight: 600; color: #111b21; }
+.evidence-pop-phrase[hidden], .evidence-pop-list[hidden], .evidence-pop-note[hidden] { display: none; }
 .evidence-pop-note { margin: 6px 0 0; font-size: 11.500px; color: var(--muted); }
 
 /* ---------- dock: composer, blocked bar, warning panel ---------- */
@@ -398,8 +403,7 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 
 .warning {
   display: flex; flex-direction: column;
-  max-height: min(62vh, 470px);
-  padding: 16px 16px 14px;
+  padding: 14px 16px 14px;
   background: #fff;
   border-top: 3px solid #f59e0b;
   border-radius: 16px 16px 0 0;
@@ -408,7 +412,7 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 }
 @keyframes sheet-up { from { transform: translateY(100%); } }
 
-.warning-head { flex: none; display: flex; gap: 12px; align-items: flex-start; }
+.warning-head { flex: none; display: flex; gap: 12px; align-items: center; }
 .warning-icon {
   flex: none; width: 36px; height: 36px; padding: 8px;
   border-radius: 50%; background: var(--warn-bg); color: #d97706;
@@ -416,28 +420,8 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 .warning h2 { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.25; }
 .warning-head p { margin: 3px 0 0; font-size: 13.500px; color: var(--muted); }
 
-.warning-reasons {
-  flex: 1 1 auto; min-height: 0; overflow-y: auto;
-  list-style: none; margin: 12px 0 0; padding: 4px 12px;
-  background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: 10px;
-}
-.warning-reasons li { display: flex; gap: 9px; align-items: flex-start; padding: 7px 0; }
-.warning-reasons li + li { border-top: 1px solid #fde6c8; }
-.warning-reasons .ico { width: 14px; height: 14px; margin-top: 3px; }
-.reason-label { font-size: 14px; font-weight: 500; }
-.reason-evidence { font-size: 12.500px; color: #6b5a45; }
-
-.warning-split { flex: none; display: flex; gap: 8px; margin: 10px 0 0; }
-.warning-split > div {
-  flex: 1; min-width: 0; padding: 6px 10px; border-radius: 8px;
-  background: #f0f2f5; border: 1px solid var(--divider);
-}
-.warning-split dt { font-size: 11px; color: var(--muted); }
-.warning-split dd { margin: 0; font-size: 13.500px; font-weight: 600; }
-.warning-split [data-model="flagged"] dd { color: #9a3412; }
-.warning-reasons { margin-top: 8px; }
-
-.warning-source { flex: none; margin: 8px 0 0; font-size: 11.500px; color: var(--muted); text-align: center; }
+.warning-review { font-size: inherit; text-align: left; }
+.warning-review.is-active { text-decoration: underline; }
 
 .warning-actions { flex: none; display: flex; gap: 10px; margin-top: 12px; }
 .btn {
@@ -515,11 +499,7 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 /* Small phones: tighter warning panel so the message and both actions stay reachable. */
 @media (max-height: 620px) {
   .warning { padding: 12px 14px 10px; }
-  .warning-head p { font-size: 12.500px; }
-  .warning-split { margin-top: 8px; }
-  .warning-split > div { padding: 4px 9px; }
-  .warning-source { margin-top: 6px; font-size: 11px; }
-  .warning-actions { margin-top: 8px; }
+  .warning-actions { margin-top: 10px; }
   .btn { height: 42px; }
 }
 

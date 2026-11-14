@@ -485,39 +485,24 @@
     if (hadFocus) input.focus();
   }
 
-  // The warning panel. The model's prediction and the evidence-rule findings are reported separately.
+  // The warning panel stays minimal: the highlighted phrases in the message carry the detail.
+  // The model/evidence distinction stays in the data attributes and in the explanation popup.
   function buildWarning(chat, scan, decision) {
-    var reasons = el("ul", { class: "warning-reasons", tabindex: "0", "aria-label": "Message evidence; scroll for all reasons" });
-    scan.reasons.forEach(function (r) {
-      reasons.appendChild(el("li", { "data-reason": r.key },
-        icon("warn", "ico-warn"),
-        el("div", null,
-          el("div", { class: "reason-label", text: r.label }),
-          r.evidence ? el("div", { class: "reason-evidence", text: r.evidence }) : null)));
-    });
-
-    var count = scan.reasons.length;
     var accepted = decision === "accepted";
-    return el("section", { class: "warning", role: "region", "aria-labelledby": "warning-title" },
+    var review = el("button", { class: "link-btn warning-review", type: "button", "data-action": "review-warning",
+      "aria-haspopup": "dialog", text: "Review why this was flagged" });
+    review.addEventListener("click", function () { toggleReview(review, scan); });
+    return el("section", { class: "warning", role: "region", "aria-labelledby": "warning-title",
+      "data-warning-source": scan.warningSource || "",
+      "data-model": scan.modelFlagged ? "flagged" : "not-flagged",
+      "data-evidence-count": String(scan.reasons.length) },
       el("div", { class: "warning-head" },
         el("span", { class: "warning-icon", html: ICONS.warn }),
         el("div", null,
           el("h2", { id: "warning-title", text: "Potential job scam detected" }),
-          el("p", { text: scan.warningSource === "evidence"
-            ? "Evidence-based warning. The ML classifier did not flag this message."
-            : scan.warningSource === "both"
-              ? "The ML classifier and separate evidence rules both flagged this message."
-              : "The ML classifier flagged this message based on wording learned from job postings." }))),
-      el("dl", { class: "warning-split" },
-        el("div", { "data-model": scan.modelFlagged ? "flagged" : "not-flagged" },
-          el("dt", { text: "Model prediction" }),
-          el("dd", { text: scan.modelFlagged ? "Flagged" : "Not flagged" })),
-        el("div", { "data-evidence-count": String(count) },
-          el("dt", { text: "Evidence rules" }),
-          el("dd", { text: count === 0 ? "No findings" : count === 1 ? "1 finding" : count + " findings" }))),
-      count ? reasons : null,
-      el("p", { class: "warning-source", text: (scan.spans.length ? "Tap highlighted text in the message for details. " : "") +
-        "Rule observations, not model explanations. A warning is not proof of fraud." }),
+          scan.spans.length
+            ? el("p", { class: "warning-sub", text: "Tap highlighted text in the message to learn why." })
+            : el("p", { class: "warning-sub" }, review))),
       el("div", { class: "warning-actions" },
         el("button", { class: "btn btn-danger", type: "button", "data-action": "block", text: "Block",
           onclick: function () { decide(chat, "blocked"); } }),
@@ -546,28 +531,71 @@
 
   // ---------- evidence explanation popup ----------
 
-  var activeMark = null;
+  var activeMark = null;   // the highlight (or review button) the popup belongs to
+  var RULE_NOTE = "Rule-based observation from the analyzer, not an explanation of the ML model. Not proof of fraud.";
+  var MODEL_NOTE = "A model prediction, not an explanation. Not proof of fraud.";
 
+  // Explanation for one highlighted phrase, using the span the backend supplied.
   function toggleEvidence(mark, span) {
     if (activeMark === mark) { closeEvidence(true); return; }
+    showPop(mark, {
+      title: span.label,
+      phrase: span.phrase,
+      text: span.explanation || "The analyzer did not supply an explanation for this match.",
+      note: RULE_NOTE
+    });
+  }
+
+  // Fallback when a message is flagged but nothing could be highlighted:
+  // list whatever the backend actually returned, and nothing else.
+  function toggleReview(button, scan) {
+    if (activeMark === button) { closeEvidence(true); return; }
+    var modelText = scan.modelFlagged
+      ? "The ML classifier flagged this message based on wording learned from job postings. It does not point to specific phrases."
+      : "";
+    showPop(button, {
+      title: "Why this was flagged",
+      text: scan.reasons.length
+        ? (scan.modelFlagged ? modelText + " Separate evidence rules also noted:" : "The analyzer\u2019s evidence rules noted:")
+        : modelText || "The analyzer flagged this message but supplied no details.",
+      reasons: scan.reasons,
+      note: scan.reasons.length ? RULE_NOTE : scan.modelFlagged ? MODEL_NOTE : ""
+    });
+  }
+
+  function showPop(anchor, content) {
     closeEvidence();
-    activeMark = mark;
-    mark.classList.add("is-active");
+    activeMark = anchor;
+    anchor.classList.add("is-active");
 
     var pop = $("evidence-pop");
-    $("evidence-pop-category").textContent = span.label;
-    $("evidence-pop-phrase").textContent = "“" + span.phrase + "”";
-    $("evidence-pop-text").textContent = span.explanation || "The analyzer did not supply an explanation for this match.";
+    $("evidence-pop-category").textContent = content.title;
+    $("evidence-pop-phrase").hidden = !content.phrase;
+    $("evidence-pop-phrase").textContent = content.phrase ? "\u201c" + content.phrase + "\u201d" : "";
+    $("evidence-pop-text").textContent = content.text;
+    var list = $("evidence-pop-list");
+    list.textContent = "";
+    (content.reasons || []).forEach(function (reason) {
+      list.appendChild(el("li", { "data-reason": reason.key },
+        el("strong", { text: reason.label }),
+        reason.evidence ? el("span", { text: reason.evidence }) : null));
+    });
+    list.hidden = !list.childNodes.length;
+    $("evidence-pop-note").hidden = !content.note;
+    $("evidence-pop-note").textContent = content.note || "";
     pop.hidden = false;
+    pop.scrollTop = 0;
 
-    // Place the popup just below the phrase, or above it when there is no room.
+    // Place the popup just below its anchor, or above it when there is no room.
     var screen = $("screen-chat").getBoundingClientRect();
     var header = $("screen-chat").querySelector(".appbar").getBoundingClientRect();
-    var rect = mark.getBoundingClientRect();
+    var rect = anchor.getBoundingClientRect();
+    var minTop = header.bottom - screen.top + 6;
+    pop.style.maxHeight = Math.max(120, screen.height - minTop - 8) + "px";
     var height = pop.offsetHeight;
     var top = rect.bottom - screen.top + 8;
     if (top + height > screen.height - 8) top = rect.top - screen.top - height - 8;
-    top = Math.max(header.bottom - screen.top + 6, Math.min(top, screen.height - height - 8));
+    top = Math.max(minTop, Math.min(top, screen.height - height - 8));
     pop.style.top = top + "px";
     $("evidence-pop-close").focus({ preventScroll: true });
   }
@@ -870,7 +898,7 @@
   document.addEventListener("click", function (event) {
     closeMenu();
     if (!event.target.closest("#scenario-menu")) closeScenarioMenu();
-    if (!event.target.closest(".hl, #evidence-pop")) closeEvidence();
+    if (!event.target.closest(".hl, .warning-review, #evidence-pop")) closeEvidence();
   });
   document.addEventListener("keydown", function (event) {
     if (event.key !== "Escape") return;
