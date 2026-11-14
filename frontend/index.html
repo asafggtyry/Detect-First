@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#008069">
+  <title>Detect First</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23008069'/%3E%3Cpath fill='%23fff' d='M12 4 6 6.300v4.500c0 3.800 2.600 7.100 6 8.200 3.400-1.100 6-4.400 6-8.200V6.300L12 4Zm-.9 10.700-2.600-2.600 1-1 1.600 1.500 3.400-3.400 1 1.100-4.400 4.400Z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="stage">
+    <main class="phone" id="phone">
+
+      <!-- Screen 1: messaging home -->
+      <section class="screen screen-home" id="screen-home" aria-label="Chats">
+        <header class="appbar">
+          <h1 class="appbar-title">Detect First</h1>
+          <div class="menu-wrap">
+            <button class="icon-btn" id="menu-btn" type="button" aria-label="More options" aria-haspopup="true" aria-expanded="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+            </button>
+            <div class="menu" id="menu" role="menu" hidden>
+              <button type="button" role="menuitem" data-action="reset">Reset demo</button>
+            </div>
+          </div>
+        </header>
+        <div class="home-body">
+          <div class="chat-list" id="chat-list" role="list"></div>
+          <p class="list-foot">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.600-1.600 8-6 8-11V5l-8-3Zm-1.200 14.200-3.500-3.500 1.400-1.400 2.100 2.100 4.500-4.500 1.400 1.400-5.900 5.900Z"/></svg>
+            <span>First messages from unknown senders are checked for job scams. Saved contacts are never scanned.</span>
+          </p>
+        </div>
+      </section>
+
+      <!-- Screen 2: conversation (with warning panel, screen 3, docked at the bottom) -->
+      <section class="screen screen-chat" id="screen-chat" aria-label="Conversation" inert>
+        <header class="appbar chatbar">
+          <button class="icon-btn" id="back-btn" type="button" aria-label="Back to chats">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11H7.800l5.600-5.600L12 4l-8 8 8 8 1.400-1.400L7.800 13H20v-2Z"/></svg>
+          </button>
+          <div class="avatar avatar-sm" id="chat-avatar"></div>
+          <div class="chatbar-text">
+            <div class="chatbar-name" id="chat-name"></div>
+            <div class="chatbar-sub" id="chat-sub"></div>
+          </div>
+        </header>
+        <div class="thread" id="thread"></div>
+        <div class="dock" id="dock"></div>
+      </section>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </main>
+
+    <!-- Desktop-only caption beside the phone preview -->
+    <aside class="notes" aria-label="About this demo">
+      <h2>Detect First</h2>
+      <p>A familiar messaging app that quietly checks the first message from unknown senders for job-scam patterns.</p>
+      <p class="notes-status" id="scan-status"></p>
+      <button class="notes-reset" type="button" data-action="reset">Reset demo</button>
+    </aside>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="demo-fixtures.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
