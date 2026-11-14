@@ -1,0 +1,94 @@
+{
+  "job_source": {
+    "source_rows_with_text": 12725,
+    "class_distribution_before_deduplication": {
+      "0": 12174,
+      "1": 551
+    },
+    "rows_after_exact_deduplication": 12525,
+    "duplicate_rows_removed": 200,
+    "class_distribution_after_deduplication": {
+      "0": 11992,
+      "1": 533
+    },
+    "md5": "80f28af7c3569233f4b8b9012c2c245b"
+  },
+  "sms_source": {
+    "source": "https://archive.ics.uci.edu/static/public/228/sms+spam+collection.zip",
+    "sha256": "1587ea43e58e82b14ff1f5425c88e17f8496bfcdb67a583dbff9eefaf9963ce3",
+    "raw_rows": 5574,
+    "retained_rows": 5134,
+    "conflicting_templates_removed": 0,
+    "duplicate_or_conflicting_rows_removed": 440,
+    "class_counts": {
+      "0": 4517,
+      "1": 617
+    },
+    "label_meaning": {
+      "0": "ham",
+      "1": "spam (not necessarily fraud)"
+    }
+  },
+  "partitions": {
+    "job_train": {
+      "examples": 6572,
+      "class_counts": {
+        "0": 6309,
+        "1": 263
+      },
+      "membership_sha256": "7a6a45212016d2978fe3bd9a3d8a299b8bd09abd400b5e262b7087e8c53e101e"
+    },
+    "job_dev": {
+      "examples": 2214,
+      "class_counts": {
+        "0": 2110,
+        "1": 104
+      },
+      "membership_sha256": "f746de06edae51697e9b7b16f69b71fdeacde16d413282230fbe5a5ea4753814"
+    },
+    "job_test": {
+      "examples": 2505,
+      "class_counts": {
+        "0": 2398,
+        "1": 107
+      },
+      "membership_sha256": "2bda9fe96081b1bf86027f94974390ff9368628304147ea26889c87d19760929"
+    },
+    "sms_train": {
+      "examples": 3077,
+      "class_counts": {
+        "0": 2684,
+        "1": 393
+      },
+      "membership_sha256": "3780b31a58d2a31125a94baf7b0a87c328c7f64d99b12ce2d33c218a630bb453"
+    },
+    "sms_dev": {
+      "examples": 1030,
+      "class_counts": {
+        "0": 919,
+        "1": 111
+      },
+      "membership_sha256": "171570ecbe76ed57eb3bc68c2f8f6af9804b3082efc6679456e451eb2144ce21"
+    },
+    "sms_test": {
+      "examples": 1027,
+      "class_counts": {
+        "0": 914,
+        "1": 113
+      },
+      "membership_sha256": "caf0ad9a59c2c5aa4cdf9115b433fb5eafe688fc05feb373b0e366d483ee676c"
+    }
+  },
+  "job_training_rows_purged_against_historical_test": 1234,
+  "sms_cross_source_rows_excluded": 0,
+  "group_overlap_between_partitions": 0,
+  "similarity_threshold": 0.9,
+  "components": 15304,
+  "cache_sha256": "e82e8741f781d7c6ea6fbe3613dc4e31bc70598f2a62615b8a3739fa0a777798",
+  "original_model_sha256": "6e6359e96e201c8814fdc183f070acef1c35daa963b699b6206bf83eceff2c42",
+  "synthetic_sha256": "e4e81f6b40849761443bcb1634a9b0fc16253061737bcfc49da5cd4383156256",
+  "length_words": {
+    "job_postings": 154.0,
+    "sms": 12.0
+  }
+}

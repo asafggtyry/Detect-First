@@ -1,0 +1,15 @@
+{
+  "project_files_checked": 32,
+  "project_files_and_git_status_unchanged": true,
+  "protected_integration_paths": [
+    "models/job_posting_classifier.joblib",
+    "reports/job_posting_metrics.json",
+    "reports/synthetic_evaluation.json",
+    "data/synthetic/evaluation.jsonl",
+    "detect_first/server.py",
+    "detect_first/evidence.py",
+    "frontend"
+  ],
+  "protected_integration_git_diff_empty": true,
+  "frozen_candidate_and_reports_byte_identical": true
+}

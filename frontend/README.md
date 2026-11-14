@@ -1,102 +1,105 @@
 # Detect First frontend
 
-A static, mobile-first messaging UI (plain HTML, CSS and JavaScript, no build step and no dependencies). It contains no detection logic: every verdict and every warning reason comes from the Python classifier through one HTTP endpoint.
+Fable's WhatsApp-inspired UI uses plain HTML, CSS and JavaScript, with no build
+step. Run it through the Python server from the **repository root**:
 
-## Run it
-
-```
-cd frontend
-python -m http.server 8000
+```powershell
+.\.venv\Scripts\python.exe -m detect_first.server
 ```
 
-Open http://localhost:8000. On a desktop the app is shown in a 390px phone frame; on a phone it fills the screen.
+Open http://127.0.0.1:8000/. See the [root README](../README.md) for setup,
+the complete API contract, model limitations, and tests. A standalone static
+server cannot provide `/api/scan` or `/api/reset`.
 
-With no backend running, the UI falls back to hand-written sample responses from `demo-fixtures.js` and says so on screen ("Sample result — the classifier is not connected"). These are placeholders for layout work, not model output.
+The frontend calls `POST /api/scan` with `message`, `sender`,
+`is_saved_contact`, and `is_first_message`. Responses include the legacy
+`is_scam` warning decision and `reasons`, plus `model_flagged`,
+`evidence_flagged`, `warning_source`, `scanned`, `skipped_reason`, and `cached`.
+The ML prediction stays separate from evidence rules. Each reason has a
+`category`, an `evidence` explanation, and `source: "evidence_rule"`.
 
-## Files
+- Saved contacts are not sent to the API. The server enforces the exclusion too.
+- Only the first incoming message is scanned. Replies stay in the simulation.
+- The warning states whether it came from the model, evidence rules, or both.
+- `config.js` uses the same-origin live API. All sample fallback code is removed
+  from `app.js`; the retained `demo-fixtures.js` file is not loaded.
+- Missing server, non-2xx responses, invalid JSON/schema and timeouts show a
+  connection error with a retry button, never a substitute prediction.
+- Block, Accept Anyway, reopening the warning, chat navigation and local reply
+  persistence keep their original behavior.
+- Reset first calls `/api/reset`, then clears this browser's simulated decisions
+  and replies and requests fresh scans. A failed reset leaves saved decisions
+  intact and shows an error.
 
-| File | Purpose |
-| --- | --- |
-| `index.html` | Page shell: chat list screen, conversation screen, desktop caption |
-| `styles.css` | All styling and transitions |
-| `app.js` | Demo chats, navigation, Block / Accept Anyway / Reset state, the call to the backend |
-| `config.js` | Backend URL and mode. The only file to edit when connecting the backend |
-| `demo-fixtures.js` | Sample responses used only when the backend is unreachable |
+## Incoming messages and evidence highlights
 
-## Connecting the Python classifier
+**Receive random message** (the green button on the chat list) asks the backend
+simulation for one incoming message and shows it as a new chat, or as a further
+message in the chat of a sender who already exists. The arrow beside it opens an
+optional presenter menu: Random, family or friend, everyday unknown sender, or
+recruiter-style offer. The menu only chooses the kind of sample text requested.
+Every verdict still comes from `/api/scan` (or from an analysis the simulation
+returns with the message), and nothing is generated when a chat is opened.
 
-The backend needs one endpoint. The UI calls it once for the first incoming message of each sender who is not a saved contact. Saved contacts are never sent.
+Inside a flagged first message, the phrases the analyzer reported are
+highlighted. Tapping one opens a small explanation with the matched phrase, the
+evidence category and the analyzer's explanation. The frontend holds no keyword
+lists: it marks only text the backend points to, and silently skips any span
+that does not fit the message. Messages with no warning get no highlights.
 
-**Request** — `POST /api/scan`, JSON body:
+All requests and all response parsing are in `api.js`; `app.js` never reads raw
+JSON. Received chats, decisions and replies are kept in `localStorage` until
+**Reset demo**.
+
+### Backend integration (provisional)
+
+`docs/DYNAMIC_API.md` did not exist when this was built, so the simulation call
+is a best guess isolated in `api.js` (`receiveMessage`, `normalizeIncoming`,
+`collectSpans`) and `config.js` (`simulateEndpoint`, `scenarios`). On a server
+without the endpoint the button shows a clear error and adds nothing.
+
+Request currently sent: `POST /api/simulate` with `{"scenario": "random"}`.
+Scenario values are `random`, `saved_contact`, `unknown_harmless`, `recruiter`
+and can be remapped in `config.js`.
+
+Response currently understood (other field names need a small change in
+`normalizeIncoming`):
 
 ```json
-{
-  "message": "Hello! We are hiring students for remote work. ...",
-  "sender": "732-882-1944",
-  "is_saved_contact": false,
-  "is_first_message": true
-}
+{"sender": "555-0142", "is_saved_contact": false, "message": "Hi! We are hiring..."}
 ```
 
-**Response** — JSON:
+- `sender` (1-200 characters), `message` (1-5,000) and a real boolean
+  `is_saved_contact` are required. Nested `sender: {"name", "is_saved_contact"}`
+  and `message: {"text"}` are also read.
+- Optional `analysis`: a result in the `/api/scan` shape. If present for an
+  unsaved sender the frontend uses it and does not call `/api/scan` for that
+  message until the page reloads.
+- For unsaved senders without `analysis`, the frontend calls `/api/scan` with
+  `is_first_message: true`, so the sender name must be 200 characters or fewer.
 
-```json
-{
-  "is_scam": true,
-  "reasons": [
-    { "category": "unrealistic_earnings", "evidence": "earning up to $300 per day" },
-    { "category": "urgency_pressure" }
-  ]
-}
-```
+Evidence spans are read from a scan/analyze result in any of these forms:
 
-- `is_scam` (boolean, required): `true` shows the warning panel, `false` leaves the message unflagged.
-- `reasons` (array, may be empty): only the categories the model found. The UI shows exactly what is returned, in order. Each item is either an object with `category` and optional `evidence` (a short quote or note shown under the label), or just the category string.
-- Category ids: `unsolicited_job_offer`, `unrealistic_earnings`, `vague_job_details`, `urgency_pressure`, `unverified_employer`. The display labels (for example `"Urgency / pressure"`) are accepted too. An unrecognised value is shown as-is.
-- Any non-2xx status, a timeout (`timeoutMs`, default 4s) or invalid JSON counts as a failed scan.
+- today's `reasons[].snippet`, located by exact match in the message;
+- `reasons[].spans` (or `span`) as `{"start", "end"}`;
+- a top-level `spans` list of `{"start", "end", "category", "explanation"}`.
 
-If your classifier already returns a different shape, either adapt it in the endpoint or adjust `normalizeResult()` in `app.js`, which is the single place responses are read.
+`start`/`end` are treated as Python string indices (code points, end exclusive).
+An optional `text` on a span is checked against the message. Spans that are out
+of range, empty, non-integer, mismatched or overlapping an earlier span are not
+rendered; the warning panel still lists the reason.
 
-### Example endpoint (Flask)
+Browser checks for all of this are in `tests/test_dynamic_ui.py`. They answer
+`/api/simulate` inside the browser with the provisional shape above and use the
+real server and saved model for scanning.
 
-`classify_message` below stands for whatever function your project already exposes; this frontend was built without access to the backend code, so the name is a placeholder.
+Files: `index.html` (page shell), `styles.css` (original design with release scrolling/accessibility fixes), `app.js`
+(UI and state), `api.js` (all backend requests and response parsing), `config.js` (same-origin connection settings),
+and unused historical `demo-fixtures.js`. Automated browser tests live in
+`tests/test_browser.py` and exercise the full app at mobile sizes.
 
-```python
-from flask import Flask, jsonify, request, send_from_directory
-from your_module import classify_message  # existing classifier
-
-app = Flask(__name__, static_folder="frontend", static_url_path="")
-
-@app.get("/")
-def index():
-    return send_from_directory("frontend", "index.html")
-
-@app.post("/api/scan")
-def scan():
-    data = request.get_json()
-    result = classify_message(data["message"])
-    return jsonify({"is_scam": result.is_scam, "reasons": result.reasons})
-```
-
-Serving the `frontend/` folder from the same app keeps everything on one origin, so `config.js` needs no changes. If the API runs on a different origin, set `apiBase` in `config.js` (for example `"http://localhost:5000"`) and enable CORS for `POST /api/scan` on the backend.
-
-### Modes (`config.js`)
-
-| `mode` | Behaviour |
-| --- | --- |
-| `"auto"` (default) | Call the backend; if it cannot be reached, show labelled sample results |
-| `"live"` | Call the backend only; a failure shows "Couldn't check this message" with a retry |
-| `"demo"` | Never call the backend |
-
-Use `"live"` for any real demo of the model so a backend failure can never be mistaken for a prediction.
-
-## Behaviour
-
-- Saved contacts (Mom) are not scanned.
-- For unsaved senders, the first incoming message is scanned when the app loads.
-- An unflagged message shows a small "nothing suspicious found" note in the chat.
-- A flagged message shows a warning icon in the chat list and the warning panel in the conversation, with **Block** and **Accept Anyway**.
-- Block marks the chat as blocked and disables replying. Accept Anyway closes the panel and enables replying; the "Flagged" tag on the message reopens the panel, so the sender can still be blocked later.
-- Decisions, read state and sent messages are kept in `localStorage`. **Reset demo** (the ⋮ menu, or the button beside the phone on desktop) clears them and rescans.
-
-Demo conversations are defined in the `CHATS` array at the top of `app.js`.
+Release polish adds an explicit fictional-prototype label, cautious rule labels,
+keyboard scrolling for the evidence list, corrupt-localStorage recovery, and a
+non-scrollable outer phone frame so navigation cannot shift the app sideways.
+The message thread and evidence list each scroll inside that frame. See the
+[release report](../reports/release_verification.md) for final test counts.

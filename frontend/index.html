@@ -21,16 +21,42 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
             </button>
             <div class="menu" id="menu" role="menu" hidden>
+              <button type="button" role="menuitem" data-action="test-message">Test Message</button>
               <button type="button" role="menuitem" data-action="reset">Reset demo</button>
             </div>
           </div>
         </header>
         <div class="home-body">
+          <p class="prototype-note">Prototype · fictional chats · no real messages sent</p>
+          <div class="receive-error" id="receive-error" role="alert" hidden>
+            <span id="receive-error-text"></span>
+            <button class="link-btn" id="receive-error-dismiss" type="button">Dismiss</button>
+          </div>
           <div class="chat-list" id="chat-list" role="list"></div>
           <p class="list-foot">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.600-1.600 8-6 8-11V5l-8-3Zm-1.200 14.200-3.500-3.500 1.400-1.400 2.100 2.100 4.500-4.500 1.400 1.400-5.900 5.900Z"/></svg>
             <span>First messages from unknown senders are checked for job scams. Saved contacts are never scanned.</span>
           </p>
+          <p class="list-foot" id="scan-status" role="status" aria-live="polite"></p>
+        </div>
+
+        <!-- Simulated incoming message, with an optional presenter scenario -->
+        <div class="receive">
+          <div class="scenario-menu" id="scenario-menu" role="menu" aria-label="Demo scenario" hidden>
+            <div id="scenario-options"></div>
+            <p class="scenario-note">Chooses the kind of sample message only. The classifier decides every verdict.</p>
+          </div>
+          <div class="receive-fab">
+            <button class="receive-main" id="receive-btn" type="button">
+              <span class="receive-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Zm-3 9h-4v4h-2v-4H7V9h4V5h2v4h4v2Z"/></svg>
+              </span>
+              <span id="receive-label">Receive random message</span>
+            </button>
+            <button class="receive-caret" id="scenario-btn" type="button" aria-label="Choose demo scenario" aria-haspopup="true" aria-expanded="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 14 5-5 5 5H7Z"/></svg>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -48,6 +74,44 @@
         </header>
         <div class="thread" id="thread"></div>
         <div class="dock" id="dock"></div>
+
+        <!-- Explanation for a tapped highlight -->
+        <div class="evidence-pop" id="evidence-pop" role="dialog" aria-labelledby="evidence-pop-category" hidden>
+          <div class="evidence-pop-head">
+            <span class="evidence-pop-category" id="evidence-pop-category"></span>
+            <button class="evidence-pop-close" id="evidence-pop-close" type="button" aria-label="Close explanation">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.400 17.600 5 12 10.600 6.400 5 5 6.400 10.600 12 5 17.600 6.400 19 12 13.400 17.600 19 19 17.600 13.400 12 19 6.400Z"/></svg>
+            </button>
+          </div>
+          <blockquote class="evidence-pop-phrase" id="evidence-pop-phrase"></blockquote>
+          <p class="evidence-pop-text" id="evidence-pop-text"></p>
+          <p class="evidence-pop-note">Evidence-rule match from the analyzer, not a model explanation.</p>
+        </div>
+      </section>
+
+      <!-- Screen 3: isolated one-off message analysis -->
+      <section class="screen screen-test" id="screen-test" aria-label="Test Message" inert>
+        <header class="appbar testbar">
+          <button class="icon-btn" id="test-back-btn" type="button" aria-label="Back to chats">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11H7.800l5.600-5.600L12 4l-8 8 8 8 1.400-1.400L7.800 13H20v-2Z"/></svg>
+          </button>
+          <h1 class="appbar-title">Test Message</h1>
+        </header>
+        <div class="test-body">
+          <p class="test-intro">Try any first-contact message. Analysis runs locally through the same Python model and evidence rules used by the demo.</p>
+          <form id="test-form" class="test-form">
+            <label for="test-message">Message to analyze</label>
+            <textarea id="test-message" name="message" rows="6" maxlength="5000" required
+              aria-describedby="test-privacy" spellcheck="true"></textarea>
+            <div class="test-controls">
+              <button class="btn btn-primary" id="analyze-btn" type="submit">Analyze</button>
+              <button class="btn btn-ghost" id="reset-test-btn" type="button">Reset test</button>
+            </div>
+          </form>
+          <p class="test-privacy" id="test-privacy">Your text is sent only to this local app for analysis; it is not saved or sent to a third-party AI service.</p>
+          <p class="test-status" id="test-status" role="status" aria-live="polite"></p>
+          <div class="test-result" id="test-result" aria-live="polite"></div>
+        </div>
       </section>
 
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -56,14 +120,13 @@
     <!-- Desktop-only caption beside the phone preview -->
     <aside class="notes" aria-label="About this demo">
       <h2>Detect First</h2>
-      <p>A familiar messaging app that quietly checks the first message from unknown senders for job-scam patterns.</p>
-      <p class="notes-status" id="scan-status"></p>
+      <p>A local messaging prototype that checks the first message from unknown senders for job-scam patterns. Not connected to WhatsApp. No employer verification.</p>
       <button class="notes-reset" type="button" data-action="reset">Reset demo</button>
     </aside>
   </div>
 
   <script src="config.js"></script>
-  <script src="demo-fixtures.js"></script>
+  <script src="api.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

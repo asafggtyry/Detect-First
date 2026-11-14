@@ -1,0 +1,8 @@
+# These frozen experiment hashes were computed from Windows working-tree bytes.
+# Preserve report bytes exactly, even when cloned with core.autocrlf=false.
+reports/selection.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+reports/data_split_audit.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+reports/improvement_evaluation.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+reports/experiment_protocol.md -text whitespace=trailing-space,space-before-tab,cr-at-eol
+data/synthetic/evaluation.jsonl text eol=crlf
+*.joblib binary
