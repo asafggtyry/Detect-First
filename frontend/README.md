@@ -38,6 +38,18 @@ indices and rejects mismatched ranges. When real spans overlap, the UI keeps
 leftmost spans and chooses the longest at a shared start; it never relocates a
 match. Model output and rule-derived findings remain distinct.
 
+The warning panel is deliberately minimal: "Potential job scam detected", the
+line "Tap highlighted text in the message to learn why.", and the Block and
+Accept Anyway buttons. Tapping a highlight (or pressing Enter/Space on it) opens
+a popup with the exact phrase, the evidence category and the backend's
+explanation, labelled as a rule-based observation rather than an ML
+explanation; Escape, the close button or a tap elsewhere dismisses it. When a
+message is flagged but has no valid spans, the guidance line becomes a
+"Review why this was flagged" button that lists only what the backend returned
+(rule findings, and whether the model flagged it). The panel keeps
+`data-model`, `data-warning-source` and `data-evidence-count` attributes; the
+Test Message screen still shows the model result and rule findings side by side.
+
 All 30 messages are fictional synthetic fixtures, not training or evaluation
 data. The backend fixture check is limited to these examples, not real-world
 accuracy. At integration time the saved model flagged 3/10 recruiter fixtures;
