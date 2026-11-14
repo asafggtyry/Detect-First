@@ -9,3 +9,4 @@ data/raw/*
 !data/raw/.gitkeep
 
 # Keep the trained model and evaluation reports as deliverables.
+models/experiments/

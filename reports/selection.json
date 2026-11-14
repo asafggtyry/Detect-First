@@ -1,0 +1,1254 @@
+{
+  "status": "frozen_before_final_evaluation",
+  "selected_candidate": "joint_hybrid_prefix",
+  "selection_rule": "mean job/SMS development F1; <=5% FPR each; thresholds 0.35/0.5/0.65",
+  "scikit_learn_version": "1.9.1",
+  "candidates": {
+    "job_word": {
+      "validation_options": [
+        {
+          "threshold": 0.35,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.919602529358627,
+              "precision": 0.31683168316831684,
+              "recall": 0.6153846153846154,
+              "f1": 0.41830065359477125,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    1972,
+                    138
+                  ],
+                  [
+                    40,
+                    64
+                  ]
+                ]
+              },
+              "true_negatives": 1972,
+              "false_positives": 138,
+              "false_negatives": 40,
+              "true_positives": 64
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.8961165048543689,
+              "precision": 0.525,
+              "recall": 0.3783783783783784,
+              "f1": 0.4397905759162304,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    881,
+                    38
+                  ],
+                  [
+                    69,
+                    42
+                  ]
+                ]
+              },
+              "true_negatives": 881,
+              "false_positives": 38,
+              "false_negatives": 69,
+              "true_positives": 42
+            }
+          },
+          "eligible": false,
+          "mean_domain_f1": 0.42904561475550085
+        },
+        {
+          "threshold": 0.5,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.962059620596206,
+              "precision": 0.6282051282051282,
+              "recall": 0.47115384615384615,
+              "f1": 0.5384615384615384,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    2081,
+                    29
+                  ],
+                  [
+                    55,
+                    49
+                  ]
+                ]
+              },
+              "true_negatives": 2081,
+              "false_positives": 29,
+              "false_negatives": 55,
+              "true_positives": 49
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.8932038834951457,
+              "precision": 0.6666666666666666,
+              "recall": 0.018018018018018018,
+              "f1": 0.03508771929824561,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    918,
+                    1
+                  ],
+                  [
+                    109,
+                    2
+                  ]
+                ]
+              },
+              "true_negatives": 918,
+              "false_positives": 1,
+              "false_negatives": 109,
+              "true_positives": 2
+            }
+          },
+          "eligible": true,
+          "mean_domain_f1": 0.286774628879892
+        },
+        {
+          "threshold": 0.65,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.964769647696477,
+              "precision": 0.825,
+              "recall": 0.3173076923076923,
+              "f1": 0.4583333333333333,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    2103,
+                    7
+                  ],
+                  [
+                    71,
+                    33
+                  ]
+                ]
+              },
+              "true_negatives": 2103,
+              "false_positives": 7,
+              "false_negatives": 71,
+              "true_positives": 33
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.8922330097087379,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    919,
+                    0
+                  ],
+                  [
+                    111,
+                    0
+                  ]
+                ]
+              },
+              "true_negatives": 919,
+              "false_positives": 0,
+              "false_negatives": 111,
+              "true_positives": 0
+            }
+          },
+          "eligible": true,
+          "mean_domain_f1": 0.22916666666666666
+        }
+      ],
+      "chosen": {
+        "threshold": 0.5,
+        "domains": {
+          "job": {
+            "examples": 2214,
+            "accuracy": 0.962059620596206,
+            "precision": 0.6282051282051282,
+            "recall": 0.47115384615384615,
+            "f1": 0.5384615384615384,
+            "confusion_matrix": {
+              "labels": [
+                "legitimate",
+                "fraudulent"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  2081,
+                  29
+                ],
+                [
+                  55,
+                  49
+                ]
+              ]
+            },
+            "true_negatives": 2081,
+            "false_positives": 29,
+            "false_negatives": 55,
+            "true_positives": 49
+          },
+          "sms": {
+            "examples": 1030,
+            "accuracy": 0.8932038834951457,
+            "precision": 0.6666666666666666,
+            "recall": 0.018018018018018018,
+            "f1": 0.03508771929824561,
+            "confusion_matrix": {
+              "labels": [
+                "legitimate",
+                "fraudulent"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  918,
+                  1
+                ],
+                [
+                  109,
+                  2
+                ]
+              ]
+            },
+            "true_negatives": 918,
+            "false_positives": 1,
+            "false_negatives": 109,
+            "true_positives": 2
+          }
+        },
+        "eligible": true,
+        "mean_domain_f1": 0.286774628879892
+      },
+      "artifact_sha256": "d196dc2cfc729406b8c2ec16304ba3e26143feb38b0841f8a707503034a9e3e8"
+    },
+    "job_char": {
+      "validation_options": [
+        {
+          "threshold": 0.35,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.8798554652213189,
+              "precision": 0.24528301886792453,
+              "recall": 0.75,
+              "f1": 0.3696682464454976,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    1870,
+                    240
+                  ],
+                  [
+                    26,
+                    78
+                  ]
+                ]
+              },
+              "true_negatives": 1870,
+              "false_positives": 240,
+              "false_negatives": 26,
+              "true_positives": 78
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.7116504854368932,
+              "precision": 0.24022346368715083,
+              "recall": 0.7747747747747747,
+              "f1": 0.36673773987206826,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    647,
+                    272
+                  ],
+                  [
+                    25,
+                    86
+                  ]
+                ]
+              },
+              "true_negatives": 647,
+              "false_positives": 272,
+              "false_negatives": 25,
+              "true_positives": 86
+            }
+          },
+          "eligible": false,
+          "mean_domain_f1": 0.3682029931587829
+        },
+        {
+          "threshold": 0.5,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.9467028003613369,
+              "precision": 0.4485294117647059,
+              "recall": 0.5865384615384616,
+              "f1": 0.5083333333333333,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    2035,
+                    75
+                  ],
+                  [
+                    43,
+                    61
+                  ]
+                ]
+              },
+              "true_negatives": 2035,
+              "false_positives": 75,
+              "false_negatives": 43,
+              "true_positives": 61
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.8922330097087379,
+              "precision": 0.5,
+              "recall": 0.4144144144144144,
+              "f1": 0.45320197044334976,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    873,
+                    46
+                  ],
+                  [
+                    65,
+                    46
+                  ]
+                ]
+              },
+              "true_negatives": 873,
+              "false_positives": 46,
+              "false_negatives": 65,
+              "true_positives": 46
+            }
+          },
+          "eligible": false,
+          "mean_domain_f1": 0.48076765188834153
+        },
+        {
+          "threshold": 0.65,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.960252935862692,
+              "precision": 0.625,
+              "recall": 0.38461538461538464,
+              "f1": 0.47619047619047616,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    2086,
+                    24
+                  ],
+                  [
+                    64,
+                    40
+                  ]
+                ]
+              },
+              "true_negatives": 2086,
+              "false_positives": 24,
+              "false_negatives": 64,
+              "true_positives": 40
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.8941747572815534,
+              "precision": 0.6,
+              "recall": 0.05405405405405406,
+              "f1": 0.09917355371900827,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    915,
+                    4
+                  ],
+                  [
+                    105,
+                    6
+                  ]
+                ]
+              },
+              "true_negatives": 915,
+              "false_positives": 4,
+              "false_negatives": 105,
+              "true_positives": 6
+            }
+          },
+          "eligible": true,
+          "mean_domain_f1": 0.2876820149547422
+        }
+      ],
+      "chosen": {
+        "threshold": 0.65,
+        "domains": {
+          "job": {
+            "examples": 2214,
+            "accuracy": 0.960252935862692,
+            "precision": 0.625,
+            "recall": 0.38461538461538464,
+            "f1": 0.47619047619047616,
+            "confusion_matrix": {
+              "labels": [
+                "legitimate",
+                "fraudulent"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  2086,
+                  24
+                ],
+                [
+                  64,
+                  40
+                ]
+              ]
+            },
+            "true_negatives": 2086,
+            "false_positives": 24,
+            "false_negatives": 64,
+            "true_positives": 40
+          },
+          "sms": {
+            "examples": 1030,
+            "accuracy": 0.8941747572815534,
+            "precision": 0.6,
+            "recall": 0.05405405405405406,
+            "f1": 0.09917355371900827,
+            "confusion_matrix": {
+              "labels": [
+                "legitimate",
+                "fraudulent"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  915,
+                  4
+                ],
+                [
+                  105,
+                  6
+                ]
+              ]
+            },
+            "true_negatives": 915,
+            "false_positives": 4,
+            "false_negatives": 105,
+            "true_positives": 6
+          }
+        },
+        "eligible": true,
+        "mean_domain_f1": 0.2876820149547422
+      },
+      "artifact_sha256": "95795584b93a8e197782102a775e835f4be4572352f499939f246856b271e4e9"
+    },
+    "joint_word": {
+      "validation_options": [
+        {
+          "threshold": 0.35,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.9254742547425474,
+              "precision": 0.327683615819209,
+              "recall": 0.5576923076923077,
+              "f1": 0.4128113879003559,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    1991,
+                    119
+                  ],
+                  [
+                    46,
+                    58
+                  ]
+                ]
+              },
+              "true_negatives": 1991,
+              "false_positives": 119,
+              "false_negatives": 46,
+              "true_positives": 58
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.9660194174757282,
+              "precision": 0.7714285714285715,
+              "recall": 0.972972972972973,
+              "f1": 0.8605577689243028,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    887,
+                    32
+                  ],
+                  [
+                    3,
+                    108
+                  ]
+                ]
+              },
+              "true_negatives": 887,
+              "false_positives": 32,
+              "false_negatives": 3,
+              "true_positives": 108
+            }
+          },
+          "eligible": false,
+          "mean_domain_f1": 0.6366845784123294
+        },
+        {
+          "threshold": 0.5,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.9588979223125564,
+              "precision": 0.6,
+              "recall": 0.375,
+              "f1": 0.46153846153846156,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    2084,
+                    26
+                  ],
+                  [
+                    65,
+                    39
+                  ]
+                ]
+              },
+              "true_negatives": 2084,
+              "false_positives": 26,
+              "false_negatives": 65,
+              "true_positives": 39
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.9883495145631068,
+              "precision": 0.9541284403669725,
+              "recall": 0.9369369369369369,
+              "f1": 0.9454545454545454,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    914,
+                    5
+                  ],
+                  [
+                    7,
+                    104
+                  ]
+                ]
+              },
+              "true_negatives": 914,
+              "false_positives": 5,
+              "false_negatives": 7,
+              "true_positives": 104
+            }
+          },
+          "eligible": true,
+          "mean_domain_f1": 0.7034965034965035
+        },
+        {
+          "threshold": 0.65,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.9629629629629629,
+              "precision": 0.8055555555555556,
+              "recall": 0.27884615384615385,
+              "f1": 0.4142857142857143,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    2103,
+                    7
+                  ],
+                  [
+                    75,
+                    29
+                  ]
+                ]
+              },
+              "true_negatives": 2103,
+              "false_positives": 7,
+              "false_negatives": 75,
+              "true_positives": 29
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.9893203883495145,
+              "precision": 0.9901960784313726,
+              "recall": 0.9099099099099099,
+              "f1": 0.9483568075117371,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    918,
+                    1
+                  ],
+                  [
+                    10,
+                    101
+                  ]
+                ]
+              },
+              "true_negatives": 918,
+              "false_positives": 1,
+              "false_negatives": 10,
+              "true_positives": 101
+            }
+          },
+          "eligible": true,
+          "mean_domain_f1": 0.6813212608987257
+        }
+      ],
+      "chosen": {
+        "threshold": 0.5,
+        "domains": {
+          "job": {
+            "examples": 2214,
+            "accuracy": 0.9588979223125564,
+            "precision": 0.6,
+            "recall": 0.375,
+            "f1": 0.46153846153846156,
+            "confusion_matrix": {
+              "labels": [
+                "legitimate",
+                "fraudulent"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  2084,
+                  26
+                ],
+                [
+                  65,
+                  39
+                ]
+              ]
+            },
+            "true_negatives": 2084,
+            "false_positives": 26,
+            "false_negatives": 65,
+            "true_positives": 39
+          },
+          "sms": {
+            "examples": 1030,
+            "accuracy": 0.9883495145631068,
+            "precision": 0.9541284403669725,
+            "recall": 0.9369369369369369,
+            "f1": 0.9454545454545454,
+            "confusion_matrix": {
+              "labels": [
+                "legitimate",
+                "fraudulent"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  914,
+                  5
+                ],
+                [
+                  7,
+                  104
+                ]
+              ]
+            },
+            "true_negatives": 914,
+            "false_positives": 5,
+            "false_negatives": 7,
+            "true_positives": 104
+          }
+        },
+        "eligible": true,
+        "mean_domain_f1": 0.7034965034965035
+      },
+      "artifact_sha256": "9ed5b753cab862edc80e110f66eb94383130b3b0d9b85e16da4c932768028c61"
+    },
+    "joint_hybrid": {
+      "validation_options": [
+        {
+          "threshold": 0.35,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.9444444444444444,
+              "precision": 0.4326241134751773,
+              "recall": 0.5865384615384616,
+              "f1": 0.49795918367346936,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    2030,
+                    80
+                  ],
+                  [
+                    43,
+                    61
+                  ]
+                ]
+              },
+              "true_negatives": 2030,
+              "false_positives": 80,
+              "false_negatives": 43,
+              "true_positives": 61
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.9757281553398058,
+              "precision": 0.8412698412698413,
+              "recall": 0.954954954954955,
+              "f1": 0.8945147679324894,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    899,
+                    20
+                  ],
+                  [
+                    5,
+                    106
+                  ]
+                ]
+              },
+              "true_negatives": 899,
+              "false_positives": 20,
+              "false_negatives": 5,
+              "true_positives": 106
+            }
+          },
+          "eligible": true,
+          "mean_domain_f1": 0.6962369758029794
+        },
+        {
+          "threshold": 0.5,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.9566395663956639,
+              "precision": 0.5571428571428572,
+              "recall": 0.375,
+              "f1": 0.4482758620689655,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    2079,
+                    31
+                  ],
+                  [
+                    65,
+                    39
+                  ]
+                ]
+              },
+              "true_negatives": 2079,
+              "false_positives": 31,
+              "false_negatives": 65,
+              "true_positives": 39
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.9883495145631068,
+              "precision": 0.9459459459459459,
+              "recall": 0.9459459459459459,
+              "f1": 0.9459459459459459,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    913,
+                    6
+                  ],
+                  [
+                    6,
+                    105
+                  ]
+                ]
+              },
+              "true_negatives": 913,
+              "false_positives": 6,
+              "false_negatives": 6,
+              "true_positives": 105
+            }
+          },
+          "eligible": true,
+          "mean_domain_f1": 0.6971109040074557
+        },
+        {
+          "threshold": 0.65,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.96386630532972,
+              "precision": 0.7857142857142857,
+              "recall": 0.3173076923076923,
+              "f1": 0.4520547945205479,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    2101,
+                    9
+                  ],
+                  [
+                    71,
+                    33
+                  ]
+                ]
+              },
+              "true_negatives": 2101,
+              "false_positives": 9,
+              "false_negatives": 71,
+              "true_positives": 33
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.9902912621359223,
+              "precision": 0.9902912621359223,
+              "recall": 0.918918918918919,
+              "f1": 0.9532710280373832,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    918,
+                    1
+                  ],
+                  [
+                    9,
+                    102
+                  ]
+                ]
+              },
+              "true_negatives": 918,
+              "false_positives": 1,
+              "false_negatives": 9,
+              "true_positives": 102
+            }
+          },
+          "eligible": true,
+          "mean_domain_f1": 0.7026629112789655
+        }
+      ],
+      "chosen": {
+        "threshold": 0.65,
+        "domains": {
+          "job": {
+            "examples": 2214,
+            "accuracy": 0.96386630532972,
+            "precision": 0.7857142857142857,
+            "recall": 0.3173076923076923,
+            "f1": 0.4520547945205479,
+            "confusion_matrix": {
+              "labels": [
+                "legitimate",
+                "fraudulent"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  2101,
+                  9
+                ],
+                [
+                  71,
+                  33
+                ]
+              ]
+            },
+            "true_negatives": 2101,
+            "false_positives": 9,
+            "false_negatives": 71,
+            "true_positives": 33
+          },
+          "sms": {
+            "examples": 1030,
+            "accuracy": 0.9902912621359223,
+            "precision": 0.9902912621359223,
+            "recall": 0.918918918918919,
+            "f1": 0.9532710280373832,
+            "confusion_matrix": {
+              "labels": [
+                "legitimate",
+                "fraudulent"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  918,
+                  1
+                ],
+                [
+                  9,
+                  102
+                ]
+              ]
+            },
+            "true_negatives": 918,
+            "false_positives": 1,
+            "false_negatives": 9,
+            "true_positives": 102
+          }
+        },
+        "eligible": true,
+        "mean_domain_f1": 0.7026629112789655
+      },
+      "artifact_sha256": "467f2c6fa769df3e99e715d1b902f6ba977451051d640647389bf880ea5d6cbf"
+    },
+    "joint_hybrid_prefix": {
+      "validation_options": [
+        {
+          "threshold": 0.35,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.9304426377597109,
+              "precision": 0.3546511627906977,
+              "recall": 0.5865384615384616,
+              "f1": 0.4420289855072464,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    1999,
+                    111
+                  ],
+                  [
+                    43,
+                    61
+                  ]
+                ]
+              },
+              "true_negatives": 1999,
+              "false_positives": 111,
+              "false_negatives": 43,
+              "true_positives": 61
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.9776699029126213,
+              "precision": 0.8548387096774194,
+              "recall": 0.954954954954955,
+              "f1": 0.902127659574468,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    901,
+                    18
+                  ],
+                  [
+                    5,
+                    106
+                  ]
+                ]
+              },
+              "true_negatives": 901,
+              "false_positives": 18,
+              "false_negatives": 5,
+              "true_positives": 106
+            }
+          },
+          "eligible": false,
+          "mean_domain_f1": 0.6720783225408572
+        },
+        {
+          "threshold": 0.5,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.9566395663956639,
+              "precision": 0.5512820512820513,
+              "recall": 0.41346153846153844,
+              "f1": 0.4725274725274725,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    2075,
+                    35
+                  ],
+                  [
+                    61,
+                    43
+                  ]
+                ]
+              },
+              "true_negatives": 2075,
+              "false_positives": 35,
+              "false_negatives": 61,
+              "true_positives": 43
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.9912621359223301,
+              "precision": 0.9722222222222222,
+              "recall": 0.9459459459459459,
+              "f1": 0.958904109589041,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    916,
+                    3
+                  ],
+                  [
+                    6,
+                    105
+                  ]
+                ]
+              },
+              "true_negatives": 916,
+              "false_positives": 3,
+              "false_negatives": 6,
+              "true_positives": 105
+            }
+          },
+          "eligible": true,
+          "mean_domain_f1": 0.7157157910582568
+        },
+        {
+          "threshold": 0.65,
+          "domains": {
+            "job": {
+              "examples": 2214,
+              "accuracy": 0.9629629629629629,
+              "precision": 0.7619047619047619,
+              "recall": 0.3076923076923077,
+              "f1": 0.4383561643835616,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    2100,
+                    10
+                  ],
+                  [
+                    72,
+                    32
+                  ]
+                ]
+              },
+              "true_negatives": 2100,
+              "false_positives": 10,
+              "false_negatives": 72,
+              "true_positives": 32
+            },
+            "sms": {
+              "examples": 1030,
+              "accuracy": 0.9902912621359223,
+              "precision": 1.0,
+              "recall": 0.9099099099099099,
+              "f1": 0.9528301886792453,
+              "confusion_matrix": {
+                "labels": [
+                  "legitimate",
+                  "fraudulent"
+                ],
+                "rows_actual_columns_predicted": [
+                  [
+                    919,
+                    0
+                  ],
+                  [
+                    10,
+                    101
+                  ]
+                ]
+              },
+              "true_negatives": 919,
+              "false_positives": 0,
+              "false_negatives": 10,
+              "true_positives": 101
+            }
+          },
+          "eligible": true,
+          "mean_domain_f1": 0.6955931765314034
+        }
+      ],
+      "chosen": {
+        "threshold": 0.5,
+        "domains": {
+          "job": {
+            "examples": 2214,
+            "accuracy": 0.9566395663956639,
+            "precision": 0.5512820512820513,
+            "recall": 0.41346153846153844,
+            "f1": 0.4725274725274725,
+            "confusion_matrix": {
+              "labels": [
+                "legitimate",
+                "fraudulent"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  2075,
+                  35
+                ],
+                [
+                  61,
+                  43
+                ]
+              ]
+            },
+            "true_negatives": 2075,
+            "false_positives": 35,
+            "false_negatives": 61,
+            "true_positives": 43
+          },
+          "sms": {
+            "examples": 1030,
+            "accuracy": 0.9912621359223301,
+            "precision": 0.9722222222222222,
+            "recall": 0.9459459459459459,
+            "f1": 0.958904109589041,
+            "confusion_matrix": {
+              "labels": [
+                "legitimate",
+                "fraudulent"
+              ],
+              "rows_actual_columns_predicted": [
+                [
+                  916,
+                  3
+                ],
+                [
+                  6,
+                  105
+                ]
+              ]
+            },
+            "true_negatives": 916,
+            "false_positives": 3,
+            "false_negatives": 6,
+            "true_positives": 105
+          }
+        },
+        "eligible": true,
+        "mean_domain_f1": 0.7157157910582568
+      },
+      "artifact_sha256": "a8413ef50b155b36714c2cddd49827f3c56a7885340926b3b01144a82f437f21"
+    }
+  },
+  "split_audit_sha256": "47ef5a48e82b9a09ede81310b9b6da52a0b684888b293f881c145532eb09bb12"
+}

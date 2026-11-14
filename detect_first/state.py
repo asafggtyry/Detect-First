@@ -96,6 +96,8 @@ class ConversationStore:
         if not text.strip():
             raise ValueError("Message text cannot be empty.")
         conversation = self.conversations[sender_id]
+        if not conversation.scanned:
+            self._scan_first_message(conversation, text)
         conversation.messages.append(
             Message(
                 text=text.strip(),
@@ -104,8 +106,6 @@ class ConversationStore:
                 synthetic=synthetic,
             )
         )
-        if not conversation.scanned:
-            self._scan_first_message(conversation, text)
         return conversation
 
     def add_test_conversation(
@@ -114,6 +114,8 @@ class ConversationStore:
         normalized_id = sender_id.strip()
         if not normalized_id:
             raise ValueError("A sender ID is required.")
+        if not text.strip():
+            raise ValueError("Message text cannot be empty.")
         if normalized_id in self.conversations:
             return self.add_incoming(
                 normalized_id, text, synthetic=synthetic
@@ -132,8 +134,8 @@ class ConversationStore:
             ],
             synthetic=synthetic,
         )
-        self.conversations[normalized_id] = conversation
         self._scan_first_message(conversation, text)
+        self.conversations[normalized_id] = conversation
         return conversation
 
     def send_outgoing(self, sender_id: str, text: str) -> None:

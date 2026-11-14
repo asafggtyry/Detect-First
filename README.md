@@ -65,6 +65,14 @@ The high holdout accuracy partly reflects the class imbalance. The always-legiti
 
 On the **32 synthetic messages**, the trained model reached 65.63% accuracy, 100% precision, 31.25% recall, and 47.62% F1, with 0 false positives and **11 false negatives out of 16 synthetic scams**. On the 16 subtle examples it reached 62.50% accuracy and 25.00% recall, missing **6 of 8 subtle synthetic scams**. The fixed keyword baseline reached 37.50% recall on all synthetic messages; always-legitimate reached 0%. These small, hand-authored results are not a fair estimate of real-world message performance, but they make the domain mismatch visible: the classifier misses many short scam messages. The demonstration warning for the provided recruitment text is therefore produced by multiple independent evidence signals, not by overriding or falsifying the model's negative prediction.
 
+## Candidate model review (2026-11-14)
+
+**The API keeps the original model.** The development-selected `joint_hybrid_prefix` candidate regressed on the unchanged synthetic first-contact benchmark: **4/16 scams caught versus 5/16**, and **0/8 subtle scams versus 2/8**. Both had zero false positives among 16 synthetic legitimate messages. Better SMS-spam scores did not transfer to recruitment scams; no threshold was retuned on final examples.
+
+All frozen candidate results were independently reproduced. An additional audit found near-template matches in the candidate posting holdout and development inputs, despite the historical parent-group audit. Future experiments now stop on effective-training overlaps, including posting-prefix augmentation. The reserved SMS holdout and synthetic benchmark passed this additional check, but neither provides authentic first-contact recruitment validation.
+
+See [the integration decision and full measured comparison](reports/ai_model_integration.md), [machine-readable reproduction](reports/model_integration_verification.json), and [all candidate results](reports/improvement_evaluation.json). The report includes precision, recall, F1, FP/FN, subtle results, hashes, leakage findings, 60-test verification, and reproducible commands. `models/first_contact_candidate.joblib` is retained for research only; it is not the default for `/api/scan`.
+
 ## Run locally (Windows)
 
 Use Python 3.11 or newer (tested with 3.12). One-time setup from the repository folder:
