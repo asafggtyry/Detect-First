@@ -48,3 +48,29 @@ def test_saved_contact_does_not_get_unsolicited_reason() -> None:
     categories = {item.category for item in evidence}
     assert "Unsolicited job offer" not in categories
     assert "Unverified employer identity" not in categories
+
+
+def test_spans_use_exact_unicode_input_offsets_and_are_deterministically_ordered() -> None:
+    message = "🙂 Café! We are hiring. Deposit $60, then within 24 hours; deposit $60."
+    evidence = explain_message(message, first_contact=True, saved_contact=False)
+    spans = [item for item in evidence if item.start is not None]
+
+    assert spans
+    assert spans == sorted(spans, key=lambda item: (item.start, item.end, item.category))
+    for item in spans:
+        assert item.snippet == message[item.start:item.end]
+    payment = next(item for item in spans if item.category == "Upfront payment request")
+    assert payment.snippet == "Deposit $60"
+    assert message.index(payment.snippet) == payment.start
+    assert any(item.snippet == "within 24 hours" for item in spans)
+
+
+def test_unanchored_context_reasons_do_not_create_highlights() -> None:
+    message = "We are hiring."
+    evidence = explain_message(message, first_contact=True, saved_contact=False)
+    assert any(item.category == "Vague job details" and item.start is None for item in evidence)
+    assert any(item.category == "Unverified employer identity" and item.end is None for item in evidence)
+    assert all(
+        item.start is None or item.snippet == message[item.start:item.end]
+        for item in evidence
+    )

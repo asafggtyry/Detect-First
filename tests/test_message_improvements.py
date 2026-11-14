@@ -169,12 +169,16 @@ def test_real_api_ml_predictions_match_frozen_first_contact_results(model_name, 
         assert response.status_code == 200
         result = response.json
         assert set(result) == {"is_scam", "reasons", "model_flagged", "evidence_flagged",
-                               "warning_source", "scanned", "skipped_reason", "cached"}
+                               "evidence_spans", "warning_source", "scanned",
+                               "skipped_reason", "cached"}
         assert result["scanned"] and not result["cached"]
         assert type(result["model_flagged"]) is bool
         predictions.append(int(result["model_flagged"]))
         assert result["is_scam"] == (result["model_flagged"] or result["evidence_flagged"])
         assert all(reason["source"] == "evidence_rule" for reason in result["reasons"])
+        for span in result["evidence_spans"]:
+            assert span["source"] == "evidence_rule"
+            assert span["excerpt"] == rows[len(predictions) - 1]["text"][span["start"]:span["end"]]
         retry = client.post("/api/scan", json=payload).json
         assert retry == dict(result, cached=True)
         later = client.post("/api/scan", json=payload | {"message": "Follow-up"}).json

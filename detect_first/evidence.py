@@ -9,6 +9,14 @@ class Evidence:
     category: str
     explanation: str
     snippet: str | None = None
+    start: int | None = None
+    end: int | None = None
+
+    @classmethod
+    def from_match(
+        cls, category: str, explanation: str, match: re.Match[str]
+    ) -> Evidence:
+        return cls(category, explanation, match.group(0), match.start(), match.end())
 
 
 _JOB_TERMS = re.compile(
@@ -80,29 +88,30 @@ def explain_message(
     evidence: list[Evidence] = []
     if first_contact and not saved_contact:
         job_match = _JOB_TERMS.search(text)
-        evidence.append(
-            Evidence(
-                "Unsolicited job offer",
-                "This is a work offer in the first message from an unsaved sender.",
-                job_match.group(0) if job_match else None,
+        if job_match:
+            evidence.append(
+                Evidence.from_match(
+                    "Unsolicited job offer",
+                    "This is a work offer in the first message from an unsaved sender.",
+                    job_match,
+                )
             )
-        )
     earnings_match = _high_daily_earnings_match(text)
     if earnings_match:
         evidence.append(
-            Evidence(
+            Evidence.from_match(
                 "Unrealistic earnings",
                 "The message advertises at least $200 per day; that claim is not verified.",
-                earnings_match.group(0),
+                earnings_match,
             )
         )
     payment_match = _UPFRONT_PAYMENT.search(text)
     if payment_match:
         evidence.append(
-            Evidence(
+            Evidence.from_match(
                 "Upfront payment request",
                 "The message asks for a payment to obtain or begin the job.",
-                payment_match.group(0),
+                payment_match,
             )
         )
     if not _ROLE_OR_DUTY_TERMS.search(text):
@@ -115,10 +124,10 @@ def explain_message(
     urgency_match = _URGENCY.search(text)
     if urgency_match:
         evidence.append(
-            Evidence(
+            Evidence.from_match(
                 "Urgency / pressure",
                 "The message asks for a quick response or sets a short deadline.",
-                urgency_match.group(0),
+                urgency_match,
             )
         )
 
@@ -146,6 +155,15 @@ def explain_message(
             "Unverified employer identity",
             explanation,
             employer_match.group(0) if employer_match else None,
+            employer_match.start() if employer_match else None,
+            employer_match.end() if employer_match else None,
         ))
 
-    return evidence
+    return sorted(
+        evidence,
+        key=lambda item: (
+            item.start is None,
+            item.start if item.start is not None else 0,
+            item.end if item.end is not None else 0,
+        ),
+    )
