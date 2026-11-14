@@ -137,6 +137,31 @@ def test_warning_sources_are_separate(model_flagged, message, source):
     assert result["is_scam"] is (source != "none")
 
 
+def test_api_spans_match_unicode_punctuation_and_repeated_input_exactly():
+    message = "🙂 Café! We are hiring. Deposit $60, then within 24 hours; deposit $60."
+    client = create_app(classifier=lambda _: False).test_client()
+    result = client.post("/api/analyze", json={"message": message}).json
+
+    assert result["model_flagged"] is False
+    assert all(
+        span["source"] == "evidence_rule"
+        and span["excerpt"] == message[span["start"]:span["end"]]
+        for span in result["evidence_spans"]
+    )
+    payment = next(
+        span for span in result["evidence_spans"]
+        if span["category"] == "upfront_payment_request"
+    )
+    assert payment["excerpt"] == "Deposit $60"
+    assert payment["start"] == message.index("Deposit $60")
+    assert any(
+        span["excerpt"] == "within 24 hours"
+        for span in result["evidence_spans"]
+    )
+    assert result["evidence_flagged"] is True
+    assert result["model_flagged"] is False
+
+
 def test_analyze_accepts_arbitrary_messages_without_changing_demo_scan_state(spy_app):
     app, calls = spy_app
     client = app.test_client()

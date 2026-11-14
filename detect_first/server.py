@@ -13,6 +13,8 @@ from werkzeug.exceptions import HTTPException, TooManyRequests
 
 from detect_first.evidence import explain_message
 from detect_first.model import MODEL_PATH, load_pipeline, predict_scam
+from detect_first.simulation import SeedConflict, SimulationService
+from detect_first.simulation_fixtures import SCENARIO_LABELS, SIMULATION_FIXTURES
 from detect_first.state import Conversation
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,7 +30,8 @@ CATEGORIES = {
 
 def skipped(reason: str) -> dict:
     return dict(is_scam=False, reasons=[], model_flagged=None, evidence_flagged=False,
-                warning_source="none", scanned=False, skipped_reason=reason, cached=False)
+                evidence_spans=[], warning_source="none", scanned=False,
+                skipped_reason=reason, cached=False)
 
 
 class ScanService:
@@ -53,6 +56,10 @@ class ScanService:
         evidence = explain_message(message, first_contact=True, saved_contact=False)
         conversation = Conversation("test-message", "Test Message", False, [], scanned=True,
                                     model_flagged=model_flagged, evidence=evidence)
+        evidence_spans = sorted(
+            (item for item in evidence if item.start is not None and item.end is not None),
+            key=lambda item: (item.start, item.end, item.category),
+        )
         evidence_flagged = len(evidence) >= 2
         source = ("both" if model_flagged and evidence_flagged else "model" if model_flagged
                   else "evidence" if evidence_flagged else "none")
@@ -61,6 +68,12 @@ class ScanService:
             reasons=[dict(category=CATEGORIES[item.category],
                           evidence=item.explanation, snippet=item.snippet,
                           source="evidence_rule") for item in evidence],
+            evidence_spans=[
+                dict(category=CATEGORIES[item.category], excerpt=item.snippet,
+                     start=item.start, end=item.end, explanation=item.explanation,
+                     source="evidence_rule")
+                for item in evidence_spans
+            ],
             model_flagged=model_flagged, evidence_flagged=evidence_flagged,
             warning_source=source, scanned=True, skipped_reason=None, cached=False,
         )
@@ -120,6 +133,21 @@ def validate_analysis(data: object) -> str:
     return message
 
 
+def validate_optional_seed(data: object) -> int | str | None:
+    if data is None:
+        return None
+    if not isinstance(data, dict) or set(data) - {"seed"}:
+        raise ValueError('Expected an optional JSON object containing only "seed".')
+    seed = data.get("seed")
+    if seed is None:
+        return None
+    if type(seed) is int and abs(seed) <= 2**53:
+        return seed
+    if isinstance(seed, str) and seed.strip() and len(seed) <= 128:
+        return seed
+    raise ValueError("seed must be an integer or a non-empty string of at most 128 characters.")
+
+
 def create_app(*, model_path: Path = ROOT / MODEL_PATH,
                classifier: Callable[[str], bool] | None = None) -> Flask:
     app = Flask(__name__, static_folder=str(ROOT / "frontend"), static_url_path="")
@@ -130,12 +158,17 @@ def create_app(*, model_path: Path = ROOT / MODEL_PATH,
         pipeline = load_pipeline(model_path)
         classifier = lambda text: predict_scam(text, pipeline)
     service = ScanService(classifier)
+    simulation = SimulationService()
     app.extensions["scan_service"] = service
+    app.extensions["demo_simulation"] = simulation
 
     def session_id() -> str:
         if "scan_session" not in session:
             session["scan_session"] = secrets.token_hex(24)
         return session["scan_session"]
+
+    def optional_json_body() -> object:
+        return request.get_json() if request.get_data(cache=True) else None
 
     @app.before_request
     def same_origin():
@@ -190,9 +223,102 @@ def create_app(*, model_path: Path = ROOT / MODEL_PATH,
 
     @app.post("/api/reset")
     def reset():
-        service.reset(session_id())
+        old_session_id = session_id()
+        service.reset(old_session_id)
+        simulation.reset(old_session_id)
         session["scan_session"] = secrets.token_hex(24)
         return jsonify(reset=True)
+
+    @app.get("/api/demo/history")
+    def demo_history():
+        return jsonify(simulation.history(session_id()))
+
+    @app.get("/api/demo/check")
+    def demo_check():
+        counts = {
+            label: {
+                "fixtures": 0,
+                "scanned": 0,
+                "model_flagged": 0,
+                "warning_flagged": 0,
+            }
+            for label in SCENARIO_LABELS
+        }
+        try:
+            for fixture in SIMULATION_FIXTURES:
+                summary = counts[fixture.scenario_label]
+                summary["fixtures"] += 1
+                if fixture.saved_contact:
+                    continue
+                result = service.analyze(fixture.message)
+                summary["scanned"] += 1
+                summary["model_flagged"] += result["model_flagged"] is True
+                summary["warning_flagged"] += result["is_scam"] is True
+        except Exception:
+            app.logger.error("Synthetic scenario check failed; results are unavailable.")
+            return jsonify(error="Classifier unavailable. Please retry or restart the local server."), 503
+
+        recruiter = counts["potential_fraudulent_recruiter"]
+        stranger = counts["normal_stranger"]
+        return jsonify(
+            scenarios=counts,
+            fraudulent_fixtures_missed=recruiter["fixtures"] - recruiter["warning_flagged"],
+            fraudulent_fixtures_model_missed=recruiter["fixtures"] - recruiter["model_flagged"],
+            synthetic_false_positive_warnings=stranger["warning_flagged"],
+            synthetic_model_false_positives=stranger["model_flagged"],
+            scope="Synthetic demo fixtures only; not real-world accuracy.",
+        )
+
+    @app.post("/api/demo/receive")
+    def demo_receive():
+        try:
+            seed = validate_optional_seed(optional_json_body())
+        except ValueError as error:
+            return jsonify(error=str(error)), 400
+        try:
+            result = simulation.receive(
+                session_id(),
+                lambda data: service.scan(session_id(), data),
+                seed,
+            )
+            return jsonify(result)
+        except SeedConflict as error:
+            return jsonify(error=str(error)), 409
+        except HTTPException:
+            raise
+        except Exception:
+            app.logger.error("Simulated message scan failed; request may be retried.")
+            return jsonify(error="Classifier unavailable. Please retry or restart the local server."), 503
+
+    @app.post("/api/demo/conversations/<conversation_id>/decision")
+    def demo_decision(conversation_id: str):
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict) or set(data) != {"decision"}:
+            return jsonify(error='Expected a JSON object with "decision".'), 400
+        decision = data["decision"]
+        if decision not in {"block", "accept"}:
+            return jsonify(error='decision must be "block" or "accept".'), 400
+        stored = simulation.decide(
+            session_id(), conversation_id,
+            "blocked" if decision == "block" else "accepted",
+        )
+        if stored is None:
+            return jsonify(error="Conversation not found."), 404
+        return jsonify(conversation=stored)
+
+    @app.post("/api/demo/reset")
+    def demo_reset():
+        try:
+            seed = validate_optional_seed(optional_json_body())
+        except ValueError as error:
+            return jsonify(error=str(error)), 400
+        old_session_id = session_id()
+        service.reset(old_session_id)
+        simulation.reset(old_session_id)
+        new_session_id = secrets.token_hex(24)
+        session["scan_session"] = new_session_id
+        simulation.reset(new_session_id, seed)
+        return jsonify(reset=True, seed=seed)
 
     return app
 
