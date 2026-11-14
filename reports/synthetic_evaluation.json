@@ -1,0 +1,162 @@
+{
+  "source": "evaluation.jsonl",
+  "examples": 32,
+  "class_distribution": {
+    "legitimate": 16,
+    "fraudulent": 16
+  },
+  "training_dataset_md5": "80f28af7c3569233f4b8b9012c2c245b",
+  "training_dataset_url": "https://www.openml.org/data/v1/download/22121348/fake_job_postings2.arff",
+  "exact_text_overlap_with_training": 0,
+  "difficulty_counts": {
+    "clear": 16,
+    "subtle": 16,
+    "subtle_fraudulent": 8
+  },
+  "model": {
+    "all_synthetic_examples": {
+      "examples": 32,
+      "accuracy": 0.65625,
+      "precision": 1.0,
+      "recall": 0.3125,
+      "f1": 0.47619047619047616,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            16,
+            0
+          ],
+          [
+            11,
+            5
+          ]
+        ]
+      },
+      "true_negatives": 16,
+      "false_positives": 0,
+      "false_negatives": 11,
+      "true_positives": 5
+    },
+    "clear_examples": {
+      "examples": 16,
+      "accuracy": 0.6875,
+      "precision": 1.0,
+      "recall": 0.375,
+      "f1": 0.5454545454545454,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            8,
+            0
+          ],
+          [
+            5,
+            3
+          ]
+        ]
+      },
+      "true_negatives": 8,
+      "false_positives": 0,
+      "false_negatives": 5,
+      "true_positives": 3
+    },
+    "subtle_examples": {
+      "examples": 16,
+      "accuracy": 0.625,
+      "precision": 1.0,
+      "recall": 0.25,
+      "f1": 0.4,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            8,
+            0
+          ],
+          [
+            6,
+            2
+          ]
+        ]
+      },
+      "true_negatives": 8,
+      "false_positives": 0,
+      "false_negatives": 6,
+      "true_positives": 2
+    },
+    "subtle_fraudulent_recall": 0.25
+  },
+  "baselines": {
+    "always_legitimate": {
+      "examples": 32,
+      "accuracy": 0.5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            16,
+            0
+          ],
+          [
+            16,
+            0
+          ]
+        ]
+      },
+      "true_negatives": 16,
+      "false_positives": 0,
+      "false_negatives": 16,
+      "true_positives": 0
+    },
+    "fixed_keyword_rules": {
+      "examples": 32,
+      "accuracy": 0.6875,
+      "precision": 1.0,
+      "recall": 0.375,
+      "f1": 0.5454545454545454,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            16,
+            0
+          ],
+          [
+            10,
+            6
+          ]
+        ]
+      },
+      "true_negatives": 16,
+      "false_positives": 0,
+      "false_negatives": 10,
+      "true_positives": 6
+    }
+  },
+  "limitations": [
+    "All examples are hand-authored synthetic messages, not observed messages.",
+    "The set is small and must not be used to claim real-world performance.",
+    "The job-posting classifier is evaluated here out of domain.",
+    "Training data rows after exact deduplication: 12525."
+  ]
+}

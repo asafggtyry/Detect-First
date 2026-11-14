@@ -1,0 +1,138 @@
+{
+  "dataset": {
+    "source_rows_with_text": 12725,
+    "class_distribution_before_deduplication": {
+      "0": 12174,
+      "1": 551
+    },
+    "rows_after_exact_deduplication": 12525,
+    "duplicate_rows_removed": 200,
+    "class_distribution_after_deduplication": {
+      "0": 11992,
+      "1": 533
+    },
+    "md5": "80f28af7c3569233f4b8b9012c2c245b"
+  },
+  "split": {
+    "method": "stratified 80/20 holdout",
+    "random_state": 2026,
+    "train_examples": 10020,
+    "test_examples": 2505,
+    "train_class_distribution": {
+      "legitimate": 9594,
+      "fraudulent": 426
+    },
+    "test_class_distribution": {
+      "legitimate": 2398,
+      "fraudulent": 107
+    },
+    "exact_normalized_text_overlap": 0,
+    "near_duplicate_check": "not performed"
+  },
+  "model": {
+    "name": "TF-IDF + balanced logistic regression",
+    "metrics": {
+      "examples": 2505,
+      "accuracy": 0.9680638722554891,
+      "precision": 0.6115702479338843,
+      "recall": 0.6915887850467289,
+      "f1": 0.6491228070175439,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            2351,
+            47
+          ],
+          [
+            33,
+            74
+          ]
+        ]
+      },
+      "true_negatives": 2351,
+      "false_positives": 47,
+      "false_negatives": 33,
+      "true_positives": 74
+    }
+  },
+  "baselines": {
+    "always_legitimate": {
+      "examples": 2505,
+      "accuracy": 0.9572854291417165,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            2398,
+            0
+          ],
+          [
+            107,
+            0
+          ]
+        ]
+      },
+      "true_negatives": 2398,
+      "false_positives": 0,
+      "false_negatives": 107,
+      "true_positives": 0
+    },
+    "fixed_keyword_rules": {
+      "examples": 2505,
+      "accuracy": 0.9528942115768463,
+      "precision": 0.13333333333333333,
+      "recall": 0.018691588785046728,
+      "f1": 0.03278688524590164,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            2385,
+            13
+          ],
+          [
+            105,
+            2
+          ]
+        ]
+      },
+      "true_negatives": 2385,
+      "false_positives": 13,
+      "false_negatives": 105,
+      "true_positives": 2
+    }
+  },
+  "false_positive_examples": [
+    "Staff Specialist Urologist QLD.\nWe are seeking 2x full time Specialist Urologists for a Central QLD health service.",
+    "Finance Director (Part Time)\nPreparation of monthly profit and loss reporting/management accounts for management and the directorsPreparation of cash flow statements and monitoring cash positionsOversight of budget including cash flow and profit and lossSupervision of accounts fi",
+    "Office Assistant (temporary)\nThis position provides as-needed support to the Austin office, including basic administrative support, maintaining a welcoming and creative space, and ensuring that office staff have the supplies necessary to effectively perform their responsibilities",
+    "Customer Relations - Full Time - No Call Center\nDescriptionLEI Home Enhancements is looking for entry-level sales, marketing and customer service professionals!! It is a priority for our team to provide the best customer service while maintaining quality customer relationships. W",
+    "Sharepoint Developer Required for UAE\nGreetings from VAM SYSTEMS\u2026..VAM SYSTEMS\u00a0is a Business Consulting, IT Solutions and Services\u00a0company with operations in UAE, Qatar, Bahrain, USA, Australia, Singapore &amp; India. We offers a comprehensive list of services in the field of IT "
+  ],
+  "false_negative_examples": [
+    "RN, SURGERY UNIT DIRECTOR\nApply using below link#URL_5a744616cf74f1719823126c37a06819a6d4f2b81fe3a31ab3185f64d3089234#Since it opened in 1952, Providence Memorial Hospital has been providing generations of El Pasoans with a broad spectrum of advanced healthcare programs and clini",
+    "Account Manager\nAccount ManagerJoin a growing team that combines the excitement of a startup with the stability of the biggest name in personal development!Qualified candidates will have 3-5 years recent experience working in a Sales or Business Development type positions within ",
+    "Well Test Operator\nOverall Purpose of the Job:Assists during the rigging up and down of well test equipment on work locations for the purpose of providing services during the well testing and clean up phase of a well and the preparation and maintenance of such equipment. This rol",
+    "Director of Product Management\nDirector, Product Management | San Mateo, CASan Mateo, CA, United States Seeking a talented and experienced Director of Product Management to lead the design of key components of an advanced platform for video advertising. Great for a senior product",
+    "iSeries Team Lead\nPosition:\u00a0 iSeries Team LeadLocation: Monett, MODuration:\u00a0 7+ months Contract\u00a0\u00a0Technical skills:1. 8 - 10 years of experience in IBM iSeries (earlier known as AS400) systemsa. Very Efficient in RPG codingb. Good in DB2 knowledge and RDBMS skills2. Strong in serv"
+  ],
+  "limitations": [
+    "The training and held-out examples are job postings, not first-contact messages.",
+    "The dataset is imbalanced and may not represent current scams or teenagers' messages.",
+    "Exact duplicate text is checked; near-duplicate templates are not.",
+    "Logistic-regression scores are not displayed as calibrated message-risk probabilities."
+  ]
+}
