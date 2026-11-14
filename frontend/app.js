@@ -1,33 +1,12 @@
 (function () {
   "use strict";
 
-  var CONFIG = Object.assign(
-    { apiBase: "", scanEndpoint: "/api/scan", analyzeEndpoint: "/api/analyze", mode: "live", timeoutMs: 4000 },
-    window.DETECT_FIRST_CONFIG || {}
-  );
+  // All backend requests and response parsing live in api.js.
+  var Api = window.DetectFirstApi;
   var STORAGE_KEY = "detect-first-demo-v1";
 
-  // Evidence-rule observations, separate from the machine-learning prediction.
-  var CATEGORIES = {
-    unsolicited_job_offer: "First-contact job offer",
-    upfront_payment_request: "Upfront payment request",
-    unrealistic_earnings: "High daily earnings claim",
-    vague_job_details: "Limited role details",
-    urgency_pressure: "Urgency / pressure",
-    unverified_employer: "Employer not verified by demo"
-  };
-  var CATEGORY_ALIASES = {
-    unsolicited_offer: "unsolicited_job_offer",
-    unsolicited: "unsolicited_job_offer",
-    vague_details: "vague_job_details",
-    urgency: "urgency_pressure",
-    pressure: "urgency_pressure",
-    unverified_employer_identity: "unverified_employer",
-    unverified_identity: "unverified_employer"
-  };
-
-  // Demo conversations. `saved: true` contacts are never scanned.
-  var CHATS = [
+  // The three fixed demonstration conversations. `saved: true` contacts are never scanned.
+  var DEMO_CHATS = [
     { id: "mom", name: "Mom", saved: true,
       messages: [{ dir: "in", text: "How are you?", time: "9:41 AM" }] },
     { id: "u1", name: "124-5135-2355", saved: false,
@@ -35,6 +14,8 @@
     { id: "u2", name: "732-882-1944", saved: false,
       messages: [{ dir: "in", text: "Hello! We are hiring students for remote work. Deposit $60 in the next 24 hours to secure your position and start earning up to $300 per day. Reply now for onboarding details.", time: "7:52 AM" }] }
   ];
+  var MAX_GENERATED = 200;
+  var AVATAR_COLORS = ["#6b8fb5", "#7e9a6c", "#b5846b", "#8a78b0", "#5f9ea0", "#b07891"];
 
   var ICONS = {
     person: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4.500 4.500 0 1 0 0-9 4.500 4.500 0 0 0 0 9Zm0 2c-4.400 0-8 2.200-8 5v2h16v-2c0-2.800-3.600-5-8-5Z"/></svg>',
@@ -47,34 +28,62 @@
 
   // ---------- state ----------
 
-  // Persisted: what the user did in the demo.
+  // Persisted: what the user did in the demo, and the simulated chats received so far.
   var saved = loadSaved();
   // In memory only: scan results, re-requested on every load and reset.
-  var scans = {};      // chatId -> { status: "scanning" | "done" | "error", flagged, reasons, source }
+  var scans = {};      // chatId -> { status: "scanning" | "done" | "error", flagged, reasons, spans, ... }
   var panelOpen = {};  // chatId -> true when an accepted chat's warning was reopened
   var openChatId = null;
   var navigatedInApp = false;
   var scanRun = 0;
   var analysisRun = 0;
   var analysisController = null;
+  // Incoming-message simulation.
+  var scenario = "random";
+  var receiving = false;
+  var receiveRun = 0;
+  var receiveError = "";
+  var arrival = null;  // { id, at } for the chat that just received a message
 
-  function emptySaved() { return { decisions: {}, read: {}, sent: {} }; }
+  // `sent` holds everything after a chat's first message: replies and later incoming messages.
+  function emptySaved() { return { decisions: {}, read: {}, sent: {}, order: {}, generated: [] }; }
+
+  function validMessage(message, dir) {
+    return Boolean(message) && typeof message === "object" &&
+      (dir ? message.dir === dir : message.dir === "in" || message.dir === "out") &&
+      typeof message.text === "string" && message.text.length > 0 && message.text.length <= 5000 &&
+      typeof message.time === "string" && message.time.length <= 20;
+  }
 
   function loadSaved() {
     try {
       var raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
       if (raw && typeof raw === "object" && !Array.isArray(raw)) {
         var restored = emptySaved();
-        CHATS.forEach(function (chat) {
-          var id = chat.id;
+        var ids = {};
+        DEMO_CHATS.forEach(function (chat) { ids[chat.id] = true; });
+        (Array.isArray(raw.generated) ? raw.generated : []).slice(0, MAX_GENERATED).forEach(function (chat) {
+          if (!chat || typeof chat !== "object" || typeof chat.id !== "string" ||
+              !/^g-[\w-]{1,40}$/.test(chat.id) || ids[chat.id] ||
+              typeof chat.name !== "string" || !chat.name.trim() || chat.name.length > 200 ||
+              typeof chat.saved !== "boolean" || !Array.isArray(chat.messages) ||
+              chat.messages.length !== 1 || !validMessage(chat.messages[0], "in")) return;
+          ids[chat.id] = true;
+          var first = chat.messages[0];
+          restored.generated.push({ id: chat.id, name: chat.name, saved: chat.saved,
+            messages: [{ dir: "in", text: first.text, time: first.time }] });
+        });
+        Object.keys(ids).forEach(function (id) {
           var decision = raw.decisions && raw.decisions[id];
           if (decision === "blocked" || decision === "accepted") restored.decisions[id] = decision;
-          if (raw.read && raw.read[id] === true) restored.read[id] = true;
+          var read = raw.read && raw.read[id];
+          if (read === true) restored.read[id] = 1;
+          else if (Number.isInteger(read) && read > 0) restored.read[id] = read;
           var sent = raw.sent && raw.sent[id];
-          if (Array.isArray(sent)) restored.sent[id] = sent.filter(function (message) {
-            return message && message.dir === "out" && typeof message.text === "string" &&
-              message.text.length <= 500 && typeof message.time === "string";
-          });
+          if (Array.isArray(sent)) restored.sent[id] = sent.filter(function (m) { return validMessage(m); })
+            .map(function (m) { return { dir: m.dir, text: m.text, time: m.time }; });
+          var order = raw.order && raw.order[id];
+          if (Number.isInteger(order) && order > 0) restored.order[id] = order;
         });
         return restored;
       }
@@ -86,114 +95,69 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); } catch (e) { /* ignore */ }
   }
 
-  // ---------- scanning (the only part that talks to the backend) ----------
-
-  function normalizeCategory(value) {
-    var key = String(value).toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-    key = CATEGORY_ALIASES[key] || key;
-    return { key: key, label: CATEGORIES[key] || String(value) };
-  }
-
-  function normalizeResult(raw) {
-    if (!raw || typeof raw.is_scam !== "boolean" || !Array.isArray(raw.reasons) ||
-        typeof raw.scanned !== "boolean" || typeof raw.evidence_flagged !== "boolean" ||
-        (raw.scanned ? typeof raw.model_flagged !== "boolean" : raw.model_flagged !== null) ||
-        ["none", "model", "evidence", "both"].indexOf(raw.warning_source) === -1) {
-      throw new Error("Invalid scan response");
-    }
-    var seen = {};
-    var reasons = [];
-    (Array.isArray(raw.reasons) ? raw.reasons : []).forEach(function (r) {
-      var isObj = r && typeof r === "object";
-      var name = isObj ? (r.category || r.id || r.label) : r;
-      if (!name) return;
-      var cat = normalizeCategory(name);
-      if (seen[cat.key]) return;
-      seen[cat.key] = true;
-      reasons.push({
-        key: cat.key,
-        label: cat.label,
-        evidence: isObj && r.evidence ? String(r.evidence) : "",
-        snippet: isObj && typeof r.snippet === "string" ? r.snippet : ""
-      });
-    });
-    return { flagged: raw.is_scam, reasons: reasons, modelFlagged: raw.model_flagged,
-      warningSource: raw.warning_source, scanned: raw.scanned, skippedReason: raw.skipped_reason };
-  }
-
-  function fetchLiveScan(chat, message) {
-    var controller = new AbortController();
-    var timer = setTimeout(function () { controller.abort(); }, CONFIG.timeoutMs);
-    return fetch(CONFIG.apiBase + CONFIG.scanEndpoint, {
-      method: "POST",
-      credentials: "same-origin",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: message.text,
-        sender: chat.name,
-        is_saved_contact: chat.saved,
-        is_first_message: true
-      }),
-      signal: controller.signal
-    }).then(function (res) {
-      if (!res.ok) throw new Error("Scan endpoint returned " + res.status);
-      return res.json();
-    }).finally(function () { clearTimeout(timer); });
-  }
-
-  function scanMessage(chat, message) {
-    return fetchLiveScan(chat, message).then(function (raw) {
-      return Object.assign({ source: "live" }, normalizeResult(raw));
-    });
-  }
-
-  function fetchAnalysis(message, signal) {
-    return fetch(CONFIG.apiBase + CONFIG.analyzeEndpoint, {
-      method: "POST",
-      credentials: "same-origin",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: message }),
-      signal: signal
-    }).then(function (response) {
-      if (!response.ok) throw new Error("Analysis endpoint returned " + response.status);
-      return response.json();
-    });
-  }
-
-  // Scan the first incoming message of every unsaved sender. Saved contacts are skipped.
-  function runScans() {
-    var run = ++scanRun;
-    scans = {};
-    CHATS.forEach(function (chat) {
-      if (chat.saved) return;
-      var first = chat.messages.filter(function (m) { return m.dir === "in"; })[0];
-      if (!first) return;
-      scans[chat.id] = { status: "scanning" };
-      scanMessage(chat, first).then(function (result) {
-        if (run !== scanRun) return;
-        scans[chat.id] = Object.assign({ status: "done" }, result);
-        render();
-      }, function () {
-        if (run !== scanRun) return;
-        scans[chat.id] = { status: "error" };
-        render();
-      });
-    });
-    render();
-  }
-
   // ---------- derived state ----------
 
-  function chatById(id) { return CHATS.filter(function (c) { return c.id === id; })[0] || null; }
+  function allChats() { return DEMO_CHATS.concat(saved.generated); }
+  function chatById(id) { return allChats().filter(function (c) { return c.id === id; })[0] || null; }
   function isFlagged(chat) { var s = scans[chat.id]; return Boolean(s && s.status === "done" && s.flagged); }
   function decisionFor(chat) { return saved.decisions[chat.id] || null; }
   function allMessages(chat) { return chat.messages.concat(saved.sent[chat.id] || []); }
+  function incomingCount(chat) {
+    return allMessages(chat).filter(function (m) { return m.dir === "in"; }).length;
+  }
+  function unreadCount(chat) {
+    if (decisionFor(chat) === "blocked") return 0;
+    return Math.max(0, incomingCount(chat) - (saved.read[chat.id] || 0));
+  }
+
+  // Most recent activity first. Demo chats keep their original order until something arrives.
+  function sortedChats() {
+    var base = {};
+    DEMO_CHATS.forEach(function (chat, index) { base[chat.id] = -index; });
+    function rank(chat) { return saved.order[chat.id] || base[chat.id] || 0; }
+    return allChats().sort(function (a, b) { return rank(b) - rank(a); });
+  }
+
+  function nextOrder() {
+    return Object.keys(saved.order).reduce(function (max, id) { return Math.max(max, saved.order[id]); }, 0) + 1;
+  }
 
   function warningVisible(chat) {
     if (!isFlagged(chat)) return false;
     var decision = decisionFor(chat);
     if (decision === "blocked") return false;
     return decision === "accepted" ? Boolean(panelOpen[chat.id]) : true;
+  }
+
+  function nowTime() {
+    return new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  }
+
+  // ---------- scanning ----------
+
+  // Scan a chat's first incoming message. Saved contacts are never sent to the API.
+  function scanChat(chat) {
+    if (chat.saved) return;
+    var first = chat.messages.filter(function (m) { return m.dir === "in"; })[0];
+    if (!first) return;
+    var run = scanRun;
+    scans[chat.id] = { status: "scanning" };
+    Api.scan(chat, first.text).then(function (result) {
+      if (run !== scanRun) return;
+      scans[chat.id] = Object.assign({ status: "done" }, result);
+      render();
+    }, function () {
+      if (run !== scanRun) return;
+      scans[chat.id] = { status: "error" };
+      render();
+    });
+  }
+
+  function runScans() {
+    ++scanRun;
+    scans = {};
+    allChats().forEach(scanChat);
+    render();
   }
 
   // ---------- DOM helpers ----------
@@ -221,8 +185,14 @@
     node.className = node.className.replace(/\s*avatar-(saved|unknown)/g, "") +
       (chat.saved ? " avatar-saved" : " avatar-unknown");
     node.textContent = "";
-    if (chat.saved) node.textContent = chat.name.charAt(0).toUpperCase();
-    else node.innerHTML = ICONS.person;
+    node.style.background = "";
+    if (!chat.saved) { node.innerHTML = ICONS.person; return; }
+    node.textContent = chat.name.trim().charAt(0).toUpperCase();
+    if (chat.id.indexOf("g-") === 0) {
+      var hash = 0;
+      for (var i = 0; i < chat.name.length; i++) hash = (hash * 31 + chat.name.charCodeAt(i)) % 997;
+      node.style.background = AVATAR_COLORS[hash % AVATAR_COLORS.length];
+    }
   }
 
   var $ = function (id) { return document.getElementById(id); };
@@ -287,15 +257,12 @@
     var run = ++analysisRun;
     if (analysisController) analysisController.abort();
     analysisController = new AbortController();
-    var controller = analysisController;
-    var timer = setTimeout(function () { controller.abort(); }, CONFIG.timeoutMs);
     $("analyze-btn").disabled = true;
     $("test-status").textContent = "Analyzing with the local model…";
     $("test-result").textContent = "";
 
-    fetchAnalysis(message, controller.signal).then(function (raw) {
+    Api.analyze(message, analysisController).then(function (result) {
       if (run !== analysisRun) return;
-      var result = normalizeResult(raw);
       renderTestResult(result);
       $("test-status").textContent = "Analysis complete.";
     }).catch(function () {
@@ -303,7 +270,6 @@
       $("test-result").textContent = "";
       $("test-status").textContent = "Analysis failed. No sample result was used. Check the local server and try again.";
     }).finally(function () {
-      clearTimeout(timer);
       if (run === analysisRun) {
         $("analyze-btn").disabled = false;
         analysisController = null;
@@ -325,13 +291,13 @@
   function renderList() {
     var list = $("chat-list");
     list.textContent = "";
-    CHATS.forEach(function (chat) {
+    sortedChats().forEach(function (chat) {
       var messages = allMessages(chat);
       var last = messages[messages.length - 1];
       var decision = decisionFor(chat);
       var blocked = decision === "blocked";
       var flagged = isFlagged(chat) && !blocked;
-      var unread = !saved.read[chat.id] && !blocked;
+      var unread = unreadCount(chat);
 
       var avatar = el("div", { class: "avatar" });
       avatarInto(avatar, chat);
@@ -348,29 +314,64 @@
 
       var label = chat.name + (chat.saved ? "" : ", not in your contacts") +
         (blocked ? ", blocked" : flagged ? ", possible job scam" : "") +
-        (unread ? ", 1 unread message" : "");
+        (unread ? ", " + unread + " unread message" + (unread > 1 ? "s" : "") : "");
 
-      list.appendChild(
-        el("button", {
-          class: "row" + (unread ? " is-unread" : ""), type: "button", role: "listitem",
-          "data-chat": chat.id, "aria-label": label,
-          onclick: function () { openChat(chat.id); }
-        },
-          avatar,
-          el("div", { class: "row-main" },
-            el("div", { class: "row-top" },
-              el("span", { class: "row-name", text: chat.name }),
-              el("span", { class: "row-time", text: last.time })),
-            el("div", { class: "row-bottom" },
-              preview,
-              unread ? el("span", { class: "badge", text: "1" }) : null)))
-      );
+      var row = el("button", {
+        class: "row" + (unread ? " is-unread" : ""), type: "button", role: "listitem",
+        "data-chat": chat.id, "aria-label": label,
+        onclick: function () { openChat(chat.id); }
+      },
+        avatar,
+        el("div", { class: "row-main" },
+          el("div", { class: "row-top" },
+            el("span", { class: "row-name", text: chat.name }),
+            el("span", { class: "row-time", text: last.time })),
+          el("div", { class: "row-bottom" },
+            preview,
+            unread ? el("span", { class: "badge", text: String(unread) }) : null)));
+
+      // A just-arrived chat eases in once; re-renders continue the animation rather than restart it.
+      if (arrival && arrival.id === chat.id) {
+        var elapsed = Date.now() - arrival.at;
+        if (elapsed < 1400) {
+          row.classList.add("is-new");
+          row.style.animationDelay = -elapsed + "ms";
+        }
+      }
+      list.appendChild(row);
     });
+  }
+
+  // Message text with backend-supplied evidence spans marked. Spans are sorted and non-overlapping.
+  function bubbleText(text, spans) {
+    var node = el("span", { class: "bubble-text" });
+    var cursor = 0;
+    (spans || []).forEach(function (span) {
+      if (span.start > cursor) node.appendChild(document.createTextNode(text.slice(cursor, span.start)));
+      var mark = el("mark", {
+        class: "hl", role: "button", tabindex: "0", "aria-haspopup": "dialog",
+        "data-category": span.key, text: text.slice(span.start, span.end)
+      });
+      mark.addEventListener("click", function () {
+        // Let people select highlighted text without the popup getting in the way.
+        var selection = window.getSelection && window.getSelection();
+        if (selection && !selection.isCollapsed) return;
+        toggleEvidence(mark, span);
+      });
+      mark.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggleEvidence(mark, span); }
+      });
+      node.appendChild(mark);
+      cursor = span.end;
+    });
+    if (cursor < text.length) node.appendChild(document.createTextNode(text.slice(cursor)));
+    return node;
   }
 
   function renderChat() {
     var chat = chatById(openChatId);
     if (!chat) return;
+    closeEvidence();
     var scan = scans[chat.id];
     var decision = decisionFor(chat);
     var flagged = isFlagged(chat);
@@ -397,7 +398,7 @@
       var marked = isFirstIncoming && flagged;
 
       var bubble = el("div", { class: "bubble bubble-" + m.dir + (marked ? " is-flagged" : "") },
-        el("span", { class: "bubble-text", text: m.text }),
+        bubbleText(m.text, marked ? scan.spans : null),
         el("span", { class: "bubble-meta" },
           el("span", { text: m.time }),
           m.dir === "out" ? icon("ticks", "ico-ticks") : null));
@@ -480,7 +481,7 @@
     if (hadFocus) input.focus();
   }
 
-  // Screen 3: the warning panel.
+  // The warning panel. The model's prediction and the evidence-rule findings are reported separately.
   function buildWarning(chat, scan, decision) {
     var reasons = el("ul", { class: "warning-reasons", tabindex: "0", "aria-label": "Message evidence; scroll for all reasons" });
     scan.reasons.forEach(function (r) {
@@ -491,6 +492,7 @@
           r.evidence ? el("div", { class: "reason-evidence", text: r.evidence }) : null)));
     });
 
+    var count = scan.reasons.length;
     var accepted = decision === "accepted";
     return el("section", { class: "warning", role: "region", "aria-labelledby": "warning-title" },
       el("div", { class: "warning-head" },
@@ -502,8 +504,16 @@
             : scan.warningSource === "both"
               ? "The ML classifier and separate evidence rules both flagged this message."
               : "The ML classifier flagged this message based on wording learned from job postings." }))),
-      scan.reasons.length ? reasons : null,
-      el("p", { class: "warning-source", text: "Rule observations, not model explanations. Scroll for all reasons. A warning is not proof of fraud." }),
+      el("dl", { class: "warning-split" },
+        el("div", { "data-model": scan.modelFlagged ? "flagged" : "not-flagged" },
+          el("dt", { text: "Model prediction" }),
+          el("dd", { text: scan.modelFlagged ? "Flagged" : "Not flagged" })),
+        el("div", { "data-evidence-count": String(count) },
+          el("dt", { text: "Evidence rules" }),
+          el("dd", { text: count === 0 ? "No findings" : count === 1 ? "1 finding" : count + " findings" }))),
+      count ? reasons : null,
+      el("p", { class: "warning-source", text: (scan.spans.length ? "Tap highlighted text in the message for details. " : "") +
+        "Rule observations, not model explanations. A warning is not proof of fraud." }),
       el("div", { class: "warning-actions" },
         el("button", { class: "btn btn-danger", type: "button", "data-action": "block", text: "Block",
           onclick: function () { decide(chat, "blocked"); } }),
@@ -530,6 +540,138 @@
     node.setAttribute("data-kind", kind);
   }
 
+  // ---------- evidence explanation popup ----------
+
+  var activeMark = null;
+
+  function toggleEvidence(mark, span) {
+    if (activeMark === mark) { closeEvidence(true); return; }
+    closeEvidence();
+    activeMark = mark;
+    mark.classList.add("is-active");
+
+    var pop = $("evidence-pop");
+    $("evidence-pop-category").textContent = span.label;
+    $("evidence-pop-phrase").textContent = "“" + span.phrase + "”";
+    $("evidence-pop-text").textContent = span.explanation || "The analyzer did not supply an explanation for this match.";
+    pop.hidden = false;
+
+    // Place the popup just below the phrase, or above it when there is no room.
+    var screen = $("screen-chat").getBoundingClientRect();
+    var header = $("screen-chat").querySelector(".appbar").getBoundingClientRect();
+    var rect = mark.getBoundingClientRect();
+    var height = pop.offsetHeight;
+    var top = rect.bottom - screen.top + 8;
+    if (top + height > screen.height - 8) top = rect.top - screen.top - height - 8;
+    top = Math.max(header.bottom - screen.top + 6, Math.min(top, screen.height - height - 8));
+    pop.style.top = top + "px";
+    $("evidence-pop-close").focus({ preventScroll: true });
+  }
+
+  function closeEvidence(restoreFocus) {
+    var pop = $("evidence-pop");
+    if (pop.hidden) return;
+    pop.hidden = true;
+    if (activeMark) {
+      activeMark.classList.remove("is-active");
+      if (restoreFocus && activeMark.isConnected) activeMark.focus({ preventScroll: true });
+    }
+    activeMark = null;
+  }
+
+  // ---------- incoming-message simulation ----------
+
+  function scenarioById(id) {
+    return Api.SCENARIOS.filter(function (s) { return s.id === id; })[0] || Api.SCENARIOS[0];
+  }
+
+  function renderReceive() {
+    var button = $("receive-btn");
+    button.disabled = receiving;
+    button.classList.toggle("is-busy", receiving);
+    $("receive-label").textContent = receiving ? "Receiving…"
+      : scenario === "random" ? "Receive random message"
+      : "Receive: " + scenarioById(scenario).short;
+
+    $("receive-error").hidden = !receiveError;
+    $("receive-error-text").textContent = receiveError;
+
+    var options = $("scenario-options");
+    options.textContent = "";
+    Api.SCENARIOS.forEach(function (item) {
+      options.appendChild(el("button", {
+        type: "button", role: "menuitemradio", "data-scenario": item.id,
+        "aria-checked": String(item.id === scenario), text: item.label,
+        onclick: function () {
+          scenario = item.id;
+          closeScenarioMenu();
+          renderReceive();
+          $("receive-btn").focus();
+        }
+      }));
+    });
+  }
+
+  // Ask the backend for one simulated message. Only this button does that:
+  // opening or reopening a chat never generates anything.
+  function receiveMessage() {
+    if (receiving) return;
+    var run = ++receiveRun;
+    receiving = true;
+    receiveError = "";
+    closeScenarioMenu();
+    renderReceive();
+    Api.receiveMessage(scenario).then(function (incoming) {
+      if (run === receiveRun) deliver(incoming);
+    }, function (error) {
+      if (run === receiveRun) receiveError = Api.describeError(error, "receive a message");
+    }).finally(function () {
+      if (run !== receiveRun) return;
+      receiving = false;
+      renderReceive();
+    });
+  }
+
+  function deliver(incoming) {
+    var message = { dir: "in", text: incoming.text, time: nowTime() };
+    var chat = allChats().filter(function (c) { return c.name === incoming.name; })[0];
+
+    if (chat) {
+      // A further message from a sender we already have: it joins that chat
+      // and, not being a first message, is not scanned.
+      if (decisionFor(chat) === "blocked") {
+        toast(chat.name + " is blocked. Their new message was not delivered.");
+        return;
+      }
+      (saved.sent[chat.id] = saved.sent[chat.id] || []).push(message);
+    } else {
+      if (saved.generated.length >= MAX_GENERATED) {
+        receiveError = "This demo is full. Reset the demo to receive more messages.";
+        return;
+      }
+      chat = {
+        id: "g-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 1e6).toString(36),
+        name: incoming.name, saved: incoming.saved, messages: [message]
+      };
+      saved.generated.push(chat);
+      if (incoming.analysis) scans[chat.id] = Object.assign({ status: "done" }, incoming.analysis);
+      else scanChat(chat);
+    }
+
+    saved.order[chat.id] = nextOrder();
+    if (openChatId === chat.id) saved.read[chat.id] = incomingCount(chat);
+    persist();
+    arrival = { id: chat.id, at: Date.now() };
+    render();
+    document.querySelector(".home-body").scrollTop = 0;
+    toast("New message from " + chat.name);
+  }
+
+  function closeScenarioMenu() {
+    $("scenario-menu").hidden = true;
+    $("scenario-btn").setAttribute("aria-expanded", "false");
+  }
+
   // ---------- actions ----------
 
   function decide(chat, decision) {
@@ -541,8 +683,7 @@
   }
 
   function sendMessage(chat, text) {
-    var time = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-    (saved.sent[chat.id] = saved.sent[chat.id] || []).push({ dir: "out", text: text, time: time });
+    (saved.sent[chat.id] = saved.sent[chat.id] || []).push({ dir: "out", text: text, time: nowTime() });
     persist();
     render();
     var input = $("dock").querySelector(".composer-input");
@@ -555,27 +696,25 @@
     resetting = true;
     ++scanRun;
     closeMenu();
-    var controller = new AbortController();
-    var timer = setTimeout(function () { controller.abort(); }, CONFIG.timeoutMs);
-    fetch(CONFIG.apiBase + "/api/reset", { method: "POST", credentials: "same-origin", signal: controller.signal })
-      .then(function (response) {
-        if (!response.ok) throw new Error("Reset failed");
-        return response.json();
-      }).then(function (data) {
-        if (data.reset !== true) throw new Error("Invalid reset response");
-        finishReset();
-      }).catch(function () {
-        Object.keys(scans).forEach(function (id) { scans[id] = { status: "error" }; });
-        render();
-        toast("Reset failed. Check the server and retry.");
-      }).finally(function () { clearTimeout(timer); resetting = false; });
+    Api.reset().then(finishReset, function () {
+      Object.keys(scans).forEach(function (id) { scans[id] = { status: "error" }; });
+      render();
+      toast("Reset failed. Check the server and retry.");
+    }).finally(function () { resetting = false; });
   }
 
   function finishReset() {
     saved = emptySaved();
     panelOpen = {};
+    ++receiveRun;
+    receiving = false;
+    receiveError = "";
+    arrival = null;
+    scenario = "random";
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
     closeMenu();
+    closeScenarioMenu();
+    renderReceive();
     if (openChatId) goHome();
     runScans();
     toast("Demo reset");
@@ -616,10 +755,13 @@
     var chatScreen = $("screen-chat");
     var testScreen = $("screen-test");
     var testOpen = !chat && location.hash === "#/test";
+    closeEvidence();
+    closeScenarioMenu();
 
     if (chat) {
       openChatId = chat.id;
-      if (!saved.read[chat.id]) { saved.read[chat.id] = true; persist(); }
+      var seen = incomingCount(chat);
+      if (saved.read[chat.id] !== seen) { saved.read[chat.id] = seen; persist(); }
       render();
       chatScreen.removeAttribute("inert");
       testScreen.setAttribute("inert", "");
@@ -647,7 +789,7 @@
     }
   }
 
-  // ---------- menu ----------
+  // ---------- menus and global dismissal ----------
 
   function closeMenu() {
     $("menu").hidden = true;
@@ -656,12 +798,32 @@
 
   $("menu-btn").addEventListener("click", function (event) {
     event.stopPropagation();
+    closeScenarioMenu();
     var menu = $("menu");
     menu.hidden = !menu.hidden;
     this.setAttribute("aria-expanded", String(!menu.hidden));
   });
-  document.addEventListener("click", closeMenu);
-  document.addEventListener("keydown", function (event) { if (event.key === "Escape") closeMenu(); });
+
+  $("scenario-btn").addEventListener("click", function (event) {
+    event.stopPropagation();
+    closeMenu();
+    var menu = $("scenario-menu");
+    menu.hidden = !menu.hidden;
+    this.setAttribute("aria-expanded", String(!menu.hidden));
+    if (!menu.hidden) menu.querySelector('[aria-checked="true"]').focus();
+  });
+
+  document.addEventListener("click", function (event) {
+    closeMenu();
+    if (!event.target.closest("#scenario-menu")) closeScenarioMenu();
+    if (!event.target.closest(".hl, #evidence-pop")) closeEvidence();
+  });
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "Escape") return;
+    closeMenu();
+    if (!$("scenario-menu").hidden) { closeScenarioMenu(); $("scenario-btn").focus(); }
+    closeEvidence(true);
+  });
 
   Array.prototype.forEach.call(document.querySelectorAll('[data-action="reset"]'), function (button) {
     button.addEventListener("click", resetDemo);
@@ -671,10 +833,17 @@
   $("reset-test-btn").addEventListener("click", resetTestMessage);
   $("back-btn").addEventListener("click", goHome);
   $("test-back-btn").addEventListener("click", goHome);
+  $("receive-btn").addEventListener("click", receiveMessage);
+  $("receive-error-dismiss").addEventListener("click", function () { receiveError = ""; renderReceive(); });
+  $("evidence-pop-close").addEventListener("click", function () { closeEvidence(true); });
+  // The popup is anchored to a phrase, so it goes away when that phrase moves.
+  $("thread").addEventListener("scroll", function () { closeEvidence(); }, { passive: true });
+  window.addEventListener("resize", function () { closeEvidence(); });
   window.addEventListener("hashchange", applyRoute);
 
   // ---------- start ----------
 
+  renderReceive();
   runScans();
   applyRoute();
 })();

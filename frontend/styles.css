@@ -159,7 +159,7 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 
 /* ---------- chat list ---------- */
 
-.home-body { flex: 1; overflow-y: auto; }
+.home-body { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 84px; }
 .prototype-note { margin: 0; padding: 10px 16px; background: #f0f4f3; color: #3b4a54; font-size: 12px; text-align: center; }
 
 .row {
@@ -198,6 +198,79 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
   font-size: 12px; line-height: 1.45; color: var(--muted); text-align: center;
 }
 .list-foot svg { flex: none; width: 13px; height: 13px; margin-top: 2px; }
+.list-foot + .list-foot { padding-top: 0; }
+
+/* A chat that just received a message eases in and is briefly tinted. */
+.row.is-new { animation: row-in 1.4s var(--ease) both; }
+@keyframes row-in {
+  0% { opacity: 0; transform: translateY(-10px); background: #d9fdd3; }
+  22% { opacity: 1; transform: none; background: #d9fdd3; }
+  100% { background: transparent; }
+}
+
+/* ---------- receive a simulated message ---------- */
+
+.receive-error {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 16px; background: #fdecea; color: #7a1c1c;
+  border-bottom: 1px solid #f5c6c2; font-size: 13px; line-height: 1.4;
+  animation: rise 0.2s var(--ease);
+}
+.receive-error[hidden] { display: none; }
+.receive-error span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.receive-error .link-btn { flex: none; color: #7a1c1c; }
+
+.receive {
+  position: absolute; right: 14px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 4;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  max-width: calc(100% - 28px);
+}
+.receive-fab {
+  display: flex; max-width: 100%; height: 50px; border-radius: 25px; overflow: hidden;
+  background: var(--accent); color: #fff;
+  box-shadow: 0 4px 14px rgba(17, 27, 33, 0.28);
+}
+.receive-main {
+  display: flex; align-items: center; gap: 9px; min-width: 0;
+  padding: 0 12px 0 16px; color: #fff; font-size: 15px; font-weight: 500;
+  transition: background 0.15s;
+}
+.receive-main > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.receive-ico { flex: none; width: 22px; height: 22px; }
+.receive-caret {
+  flex: none; width: 44px; padding: 13px 12px 13px 8px; color: #fff;
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  transition: background 0.15s;
+}
+.receive-main:hover, .receive-caret:hover, .receive-caret[aria-expanded="true"] { background: var(--green); }
+.receive-main:focus-visible, .receive-caret:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
+.receive-main:disabled { cursor: progress; }
+.receive-main.is-busy .receive-ico { animation: pulse 0.9s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.35; } }
+
+.scenario-menu {
+  width: 264px; max-width: 100%; padding: 6px 0 0;
+  background: #fff; border-radius: 10px;
+  box-shadow: 0 4px 18px rgba(17, 27, 33, 0.28);
+  transform-origin: bottom right;
+  animation: menu-in 0.14s var(--ease);
+}
+.scenario-menu[hidden] { display: none; }
+.scenario-menu button {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 11px 16px; text-align: left; font-size: 14.500px; color: var(--text);
+}
+.scenario-menu button::before {
+  content: ""; flex: none; width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid #8696a0;
+}
+.scenario-menu button[aria-checked="true"]::before { border: 5px solid var(--accent); }
+.scenario-menu button:hover, .scenario-menu button:focus-visible { background: #f0f2f5; outline: none; }
+.scenario-note {
+  margin: 6px 0 0; padding: 9px 16px 11px;
+  border-top: 1px solid var(--divider);
+  color: var(--muted); font-size: 12px; line-height: 1.4;
+}
 
 /* ---------- conversation ---------- */
 
@@ -263,6 +336,40 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 }
 .flag-tag .ico { width: 14px; height: 14px; }
 
+/* ---------- evidence highlights (spans supplied by the analyzer) ---------- */
+
+.hl {
+  padding: 1px 2px; margin: 0 -1px; border-radius: 3px;
+  background: #ffe28a; color: inherit;
+  box-shadow: inset 0 -2px 0 #f0a020;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  cursor: pointer; -webkit-user-select: text; user-select: text;
+  transition: background 0.15s;
+}
+.hl:hover { background: #ffd35c; }
+.hl.is-active { background: #ffc233; }
+.hl:focus-visible { outline: 2px solid var(--warn); outline-offset: 1px; }
+
+.evidence-pop {
+  position: absolute; left: 12px; right: 12px; z-index: 8;
+  max-width: 340px; margin: 0 auto; padding: 10px 12px 11px 14px;
+  background: #fff; border-radius: 12px; border-left: 4px solid #f0a020;
+  box-shadow: 0 8px 28px rgba(17, 27, 33, 0.3);
+  animation: rise 0.16s var(--ease);
+}
+.evidence-pop[hidden] { display: none; }
+.evidence-pop-head { display: flex; align-items: center; gap: 8px; }
+.evidence-pop-category { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; color: var(--warn); }
+.evidence-pop-close { flex: none; width: 32px; height: 32px; margin: -4px -6px -4px 0; padding: 7px; border-radius: 50%; color: var(--muted); }
+.evidence-pop-close:hover { background: #f0f2f5; }
+.evidence-pop-phrase {
+  margin: 6px 0 0; padding: 5px 8px; border-radius: 6px;
+  background: #fff3c9; font-size: 14px; line-height: 1.35; overflow-wrap: anywhere;
+  max-height: 4.2em; overflow-y: auto;
+}
+.evidence-pop-text { margin: 7px 0 0; font-size: 13.500px; line-height: 1.4; color: #3b4a54; }
+.evidence-pop-note { margin: 6px 0 0; font-size: 11.500px; color: var(--muted); }
+
 /* ---------- dock: composer, blocked bar, warning panel ---------- */
 
 .dock { flex: none; background: var(--wallpaper); padding-bottom: env(safe-area-inset-bottom); }
@@ -319,6 +426,16 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 .warning-reasons .ico { width: 14px; height: 14px; margin-top: 3px; }
 .reason-label { font-size: 14px; font-weight: 500; }
 .reason-evidence { font-size: 12.500px; color: #6b5a45; }
+
+.warning-split { flex: none; display: flex; gap: 8px; margin: 10px 0 0; }
+.warning-split > div {
+  flex: 1; min-width: 0; padding: 6px 10px; border-radius: 8px;
+  background: #f0f2f5; border: 1px solid var(--divider);
+}
+.warning-split dt { font-size: 11px; color: var(--muted); }
+.warning-split dd { margin: 0; font-size: 13.500px; font-weight: 600; }
+.warning-split [data-model="flagged"] dd { color: #9a3412; }
+.warning-reasons { margin-top: 8px; }
 
 .warning-source { flex: none; margin: 8px 0 0; font-size: 11.500px; color: var(--muted); text-align: center; }
 
@@ -393,6 +510,17 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
   .stage { padding: 0; display: block; height: 100dvh; min-height: 0; }
   .phone { width: 100%; height: 100dvh; min-height: 0; border-radius: 0; box-shadow: none; }
   .notes { display: none; }
+}
+
+/* Small phones: tighter warning panel so the message and both actions stay reachable. */
+@media (max-height: 620px) {
+  .warning { padding: 12px 14px 10px; }
+  .warning-head p { font-size: 12.500px; }
+  .warning-split { margin-top: 8px; }
+  .warning-split > div { padding: 4px 9px; }
+  .warning-source { margin-top: 6px; font-size: 11px; }
+  .warning-actions { margin-top: 8px; }
+  .btn { height: 42px; }
 }
 
 @media (min-width: 521px) and (max-width: 760px) {
