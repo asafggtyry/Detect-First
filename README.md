@@ -13,7 +13,7 @@ Detect First is a local, simulated messaging app that helps high school students
 - Explains concrete message evidence using a separate, deterministic evidence layer.
 - Lets a student mark a simulated sender blocked or accept the chat anyway.
 - Resets the demo so the scenarios can be replayed.
-- Includes a clearly labeled synthetic-message panel for trying additional fictional first-contact texts.
+- Serves Fable's frontend and the real Python scan API together. Sample-result fallback is disabled.
 
 There is no sign-in, external messaging connection, real SMS or WhatsApp access, media upload, camera, microphone, or call feature. Typed chat replies stay in the local simulation and are not sent to the classifier.
 
@@ -67,31 +67,81 @@ On the **32 synthetic messages**, the trained model reached 65.63% accuracy, 100
 
 ## Run locally (Windows)
 
-Use Python 3.10 or newer. From the project folder:
+Use Python 3.11 or newer (tested with 3.12). One-time setup from the repository folder:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python scripts\train_model.py
-python scripts\evaluate.py
-streamlit run app.py
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-The training script downloads the documented OpenML file only when it is missing, verifies its MD5 checksum, preprocesses it, trains the classifier, and writes the model and actual holdout report. The first download needs internet access; it does not require Kaggle credentials or a paid service.
-
-To retrain after changing the training code or dataset:
+**Start the full application with one command:**
 
 ```powershell
-python scripts\train_model.py
-python scripts\evaluate.py
+.\.venv\Scripts\python.exe -m detect_first.server
 ```
 
-The downloaded 16 MB source file is ignored by Git; the model and reports are kept as deliverables. To run tests:
+Open **http://127.0.0.1:8000/**. The server serves `frontend/` and the API from the same origin; no frontend build or separate static server is needed. Use `--port 8001` if port 8000 is occupied. Stop with Ctrl+C. The checked-in model is loaded once on startup; no retraining, data download or external API is needed to run the demo. scikit-learn is pinned to the artifact's training version (1.9.1). A missing/incompatible model fails startup rather than returning fabricated predictions.
+
+`app.py` remains the original, separate Streamlit prototype, including its synthetic input panel. It is not the entry point for the integrated Fable app.
+
+## Live API contract
+
+`POST /api/scan`, `Content-Type: application/json`:
+
+```json
+{"message":"Hi, we met yesterday.","sender":"124-5135-2355","is_saved_contact":false,"is_first_message":true}
+```
+
+Successful response for that message with the saved model:
+
+```json
+{
+  "is_scam": false,
+  "reasons": [],
+  "model_flagged": false,
+  "evidence_flagged": false,
+  "warning_source": "none",
+  "scanned": true,
+  "skipped_reason": null,
+  "cached": false
+}
+```
+
+- `is_scam` is the **UI warning decision**, not proof of fraud or the raw ML output. It follows the original policy: `model_flagged` OR at least two evidence categories.
+- `model_flagged` is exclusively the trained classifier's Boolean prediction; it is `null` when scanning is skipped.
+- `evidence_flagged` means at least two separate rule categories were found. `warning_source` is `none`, `model`, `evidence`, or `both`.
+- `reasons` contains objects such as `{"category":"upfront_payment_request","evidence":"The message asks for a payment to obtain or begin the job.","source":"evidence_rule"}`. These are rule observations, not learned model explanations or necessarily verbatim quotes.
+- Categories: `unsolicited_job_offer`, `upfront_payment_request`, `unrealistic_earnings`, `vague_job_details`, `urgency_pressure`, `unverified_employer`.
+- Saved contacts and later messages return `scanned:false`, `is_scam:false`, `model_flagged:null`, `reasons:[]`, and `skipped_reason` of `saved_contact`, `not_first_message`, or `already_scanned`. A skipped message is **not** a clean prediction.
+- First-message tracking is per browser session and sender. Identical first-message retries return the original result with `cached:true`, without rerunning inference. Changed messages for an already-seen sender are skipped, even if flagged as first. Concurrent retries are serialized. API clients must retain the session cookie; browsers establish it when loading `/` or `/index.html`.
+- `POST /api/reset` returns `{"reset":true}` and starts a fresh scan session for that browser. The frontend waits for success before clearing decisions/replies and rescanning. Other browser sessions are unaffected.
+- All four request fields are required. Boolean fields must be real JSON booleans. Message length is 1–5,000 characters; sender length is 1–200; whitespace-only strings are rejected. Errors return `{"error":"..."}`: 400 invalid fields/JSON, 413 oversized body, 415 wrong content type, 403 cross-origin request, 429 demo capacity reached, or 503 inference failure. No failure produces a fake clean verdict or sample result.
+
+The frontend is live-only: HTTP failures, invalid responses, and timeouts show a connection error and **Try again**. The old `demo-fixtures.js` file is retained but is neither loaded nor used. Warning text explicitly distinguishes model and evidence sources; reasons are labelled as separate evidence-rule observations.
+
+This is a single-process local demo bound to loopback, not a production messaging service. Sender/contact/first-message metadata is supplied by the client and cannot be independently verified. Session state is in memory (at most 256 sessions / 512 senders each); restart, cookie clearing or Reset starts new scan history. Raw incoming messages are not retained by the server; it stores a message hash, sender, and scan results in memory. Simulated outgoing replies and user decisions remain in browser localStorage. The first-message-only policy intentionally does not detect scams introduced in later messages.
+
+## Testing and model tooling
+
+The existing evaluation tests need the public dataset. Download it without retraining or overwriting the saved model:
 
 ```powershell
-python -m pytest -q
+.\.venv\Scripts\python.exe scripts\download_test_data.py
+.\.venv\Scripts\python.exe -m pytest -q
 ```
+
+Run **all tests, including real Chromium mobile integration tests**:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+$env:PLAYWRIGHT_BROWSERS_PATH = "$PWD\.venv\pw-browsers"
+.\.venv\Scripts\python.exe -m playwright install chromium
+.\.venv\Scripts\python.exe -m pytest -q --browser-tests
+```
+
+Browser tests start their own local server and use the real saved classifier at 390×844 and 320×568. They cover all three conversations, Block, Accept Anyway, reopening warnings, Reset, outgoing replies not being scanned, unavailable API, malformed responses, and recovery. Without `--browser-tests`, browser cases are explicitly skipped. Screenshots are saved under `reports/browser/`. The original Streamlit startup test requires local sockets; restrictive sandboxes can block it.
+
+The original training and evaluation commands remain `python scripts/train_model.py` and `python scripts/evaluate.py`. Training overwrites the original model/report, so it is not part of startup or integration testing. Raw downloaded data remains Git-ignored. Integration does not change the classifier, evidence patterns, or recorded model metrics above.
 
 ## Two-minute presentation walkthrough
 
@@ -106,7 +156,7 @@ python -m pytest -q
 
 - **Dataset:** EMSCAD-derived `fake_job_postings2`, OpenML data ID 46655; original Kaggle dataset credits the University of the Aegean Laboratory of Information & Communication Systems Security. See [source notes](data/source.md).
 - **Synthetic evaluation patterns:** U.S. Federal Trade Commission consumer guidance about job scams; synthetic examples were written for this project and are not copied as real messages.
-- **Libraries:** scikit-learn (TF-IDF and logistic regression), Streamlit (local UI), joblib (model persistence), pytest (tests).
+- **Libraries:** scikit-learn (TF-IDF and logistic regression), Flask (local API/static server), Streamlit (original prototype), joblib (model persistence), pytest and Playwright (tests).
 - **Model:** trained by this project; no pretrained model or paid API is used.
 - **AI coding assistance:** GitHub Copilot SDK in VS Code.
 - **Tutorials:** no tutorial code was copied.

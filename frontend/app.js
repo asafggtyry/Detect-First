@@ -2,15 +2,15 @@
   "use strict";
 
   var CONFIG = Object.assign(
-    { apiBase: "", scanEndpoint: "/api/scan", mode: "auto", timeoutMs: 4000 },
+    { apiBase: "", scanEndpoint: "/api/scan", mode: "live", timeoutMs: 4000 },
     window.DETECT_FIRST_CONFIG || {}
   );
-  var FIXTURES = window.DETECT_FIRST_DEMO_FIXTURES || {};
   var STORAGE_KEY = "detect-first-demo-v1";
 
-  // The five warning categories the UI knows how to label.
+  // Evidence-rule observations, separate from the machine-learning prediction.
   var CATEGORIES = {
     unsolicited_job_offer: "Unsolicited job offer",
+    upfront_payment_request: "Upfront payment request",
     unrealistic_earnings: "Unrealistic earnings",
     vague_job_details: "Vague job details",
     urgency_pressure: "Urgency / pressure",
@@ -79,12 +79,11 @@
   }
 
   function normalizeResult(raw) {
-    var verdict = raw.is_scam;
-    if (verdict === undefined) verdict = raw.flagged;
-    if (verdict === undefined) verdict = raw.suspicious;
-    if (verdict === undefined) {
-      var label = String(raw.label === undefined ? raw.prediction : raw.label).toLowerCase();
-      verdict = ["scam", "suspicious", "fraud", "fraudulent", "1", "true"].indexOf(label) !== -1;
+    if (!raw || typeof raw.is_scam !== "boolean" || !Array.isArray(raw.reasons) ||
+        typeof raw.scanned !== "boolean" || typeof raw.evidence_flagged !== "boolean" ||
+        (raw.scanned ? typeof raw.model_flagged !== "boolean" : raw.model_flagged !== null) ||
+        ["none", "model", "evidence", "both"].indexOf(raw.warning_source) === -1) {
+      throw new Error("Invalid scan response");
     }
     var seen = {};
     var reasons = [];
@@ -97,7 +96,8 @@
       seen[cat.key] = true;
       reasons.push({ key: cat.key, label: cat.label, evidence: isObj && r.evidence ? String(r.evidence) : "" });
     });
-    return { flagged: Boolean(verdict), reasons: reasons };
+    return { flagged: raw.is_scam, reasons: reasons, modelFlagged: raw.model_flagged,
+      warningSource: raw.warning_source, scanned: raw.scanned, skippedReason: raw.skipped_reason };
   }
 
   function fetchLiveScan(chat, message) {
@@ -105,6 +105,7 @@
     var timer = setTimeout(function () { controller.abort(); }, CONFIG.timeoutMs);
     return fetch(CONFIG.apiBase + CONFIG.scanEndpoint, {
       method: "POST",
+      credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message: message.text,
@@ -119,23 +120,9 @@
     }).finally(function () { clearTimeout(timer); });
   }
 
-  function demoScan(message) {
-    return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        var fixture = FIXTURES[message.text];
-        if (fixture) resolve(fixture); else reject(new Error("No sample result for this message"));
-      }, 450);
-    });
-  }
-
   function scanMessage(chat, message) {
-    var tag = function (source) {
-      return function (raw) { return Object.assign({ source: source }, normalizeResult(raw)); };
-    };
-    if (CONFIG.mode === "demo") return demoScan(message).then(tag("demo"));
-    return fetchLiveScan(chat, message).then(tag("live"), function (err) {
-      if (CONFIG.mode === "live") throw err;
-      return demoScan(message).then(tag("demo"));
+    return fetchLiveScan(chat, message).then(function (raw) {
+      return Object.assign({ source: "live" }, normalizeResult(raw));
     });
   }
 
@@ -275,6 +262,9 @@
     var thread = $("thread");
     thread.textContent = "";
     thread.appendChild(el("div", { class: "chip chip-date", text: "TODAY" }));
+    if (chat.saved) {
+      thread.appendChild(el("div", { class: "chip chip-note", text: "Saved contact · not scanned" }));
+    }
     if (!chat.saved) {
       thread.appendChild(el("div", { class: "chip chip-note", text: "This sender is not in your contacts." }));
     }
@@ -307,13 +297,15 @@
             el("span", { class: "spinner" }), el("span", { text: "Checking first message…" })));
         } else if (scan.status === "error") {
           thread.appendChild(el("div", { class: "chip chip-scan", "data-scan": "error" },
-            el("span", { text: "Couldn’t check this message. " }),
+            el("span", { text: "Connection error. Couldn’t check this message. " }),
             el("button", { class: "link-btn", type: "button", text: "Try again", onclick: runScans })));
+        } else if (!scan.scanned) {
+          thread.appendChild(el("div", { class: "chip chip-scan", "data-scan": "skipped",
+            text: "Not scanned · only the first message from an unknown sender is checked." }));
         } else if (!scan.flagged) {
           thread.appendChild(el("div", { class: "chip chip-scan", "data-scan": "clean" },
             icon("shield", "ico-ok"),
-            el("span", { text: "First message checked · nothing suspicious found" +
-              (scan.source === "demo" ? " (sample result)" : "") })));
+            el("span", { text: "First message checked · no warning triggered. This does not prove it is safe." })));
         }
       }
     });
@@ -384,11 +376,13 @@
         el("span", { class: "warning-icon", html: ICONS.warn }),
         el("div", null,
           el("h2", { id: "warning-title", text: "Potential job scam detected" }),
-          el("p", { text: "We found suspicious patterns in this first-contact message." }))),
+          el("p", { text: scan.warningSource === "evidence"
+            ? "Evidence-based warning. The ML classifier did not flag this message."
+            : scan.warningSource === "both"
+              ? "The ML classifier and separate evidence rules both flagged this message."
+              : "The ML classifier flagged this message based on wording learned from job postings." }))),
       scan.reasons.length ? reasons : null,
-      scan.source === "demo"
-        ? el("p", { class: "warning-source", text: "Sample result — the classifier is not connected." })
-        : null,
+      el("p", { class: "warning-source", text: "Reasons above are evidence-rule observations, not model explanations. A warning is not proof of fraud." }),
       el("div", { class: "warning-actions" },
         el("button", { class: "btn btn-danger", type: "button", "data-action": "block", text: "Block",
           onclick: function () { decide(chat, "blocked"); } }),
@@ -408,8 +402,6 @@
       text = "Checking messages…";
     } else if (states.some(function (s) { return s.status === "error"; })) {
       text = "Classifier unreachable. Messages could not be checked."; kind = "error";
-    } else if (states.some(function (s) { return s.source === "demo"; })) {
-      text = "Sample scan results. The Python classifier is not connected."; kind = "demo";
     } else if (states.length) {
       text = "Connected to the Detect First classifier."; kind = "live";
     }
@@ -436,7 +428,29 @@
     if (input) input.focus();
   }
 
+  var resetting = false;
   function resetDemo() {
+    if (resetting) return;
+    resetting = true;
+    ++scanRun;
+    closeMenu();
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, CONFIG.timeoutMs);
+    fetch(CONFIG.apiBase + "/api/reset", { method: "POST", credentials: "same-origin", signal: controller.signal })
+      .then(function (response) {
+        if (!response.ok) throw new Error("Reset failed");
+        return response.json();
+      }).then(function (data) {
+        if (data.reset !== true) throw new Error("Invalid reset response");
+        finishReset();
+      }).catch(function () {
+        Object.keys(scans).forEach(function (id) { scans[id] = { status: "error" }; });
+        render();
+        toast("Reset failed. Check the server and retry.");
+      }).finally(function () { clearTimeout(timer); resetting = false; });
+  }
+
+  function finishReset() {
     saved = emptySaved();
     panelOpen = {};
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }

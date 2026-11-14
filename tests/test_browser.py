@@ -1,0 +1,140 @@
+"""Real browser + HTTP + saved classifier; failures are simulated only in error tests."""
+from pathlib import Path
+from threading import Thread
+
+import pytest
+from werkzeug.serving import make_server
+
+from detect_first.server import create_app
+
+pytestmark = pytest.mark.browser
+ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture(scope="module")
+def live_url():
+    server = make_server("127.0.0.1", 0, create_app(), threaded=True)
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    yield f"http://127.0.0.1:{server.server_port}"
+    server.shutdown()
+    thread.join(timeout=5)
+    server.server_close()
+
+
+@pytest.fixture
+def page():
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        context = browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+        page = context.new_page()
+        yield page
+        context.close()
+        browser.close()
+
+
+def home(page):
+    page.get_by_role("button", name="Back to chats").click()
+    page.wait_for_function("!document.querySelector('#phone').classList.contains('chat-open')")
+
+
+@pytest.mark.parametrize("width,height", [(390, 844), (320, 568)])
+def test_mobile_scenarios_actions_and_reset(page, live_url, width, height):
+    from playwright.sync_api import expect
+    page.set_viewport_size({"width": width, "height": height})
+    requests = []
+    errors = []
+    page.on("request", lambda request: requests.append(request.post_data_json) if request.url.endswith("/api/scan") else None)
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.goto(live_url)
+    expect(page.locator("#scan-status")).to_have_attribute("data-kind", "live")
+    assert len(requests) == 2 and all(not request["is_saved_contact"] for request in requests)
+    page.locator('[data-chat="mom"]').click()
+    expect(page.get_by_text("Saved contact · not scanned", exact=True)).to_be_visible()
+    expect(page.locator(".warning")).to_have_count(0)
+    home(page)
+    page.locator('[data-chat="u1"]').click()
+    expect(page.locator('[data-scan="clean"]')).to_be_visible()
+    expect(page.locator(".warning")).to_have_count(0)
+    page.get_by_role("textbox", name="Type a message").fill("A simulated reply")
+    page.get_by_role("button", name="Send", exact=True).click()
+    expect(page.locator("#thread .bubble-text").filter(has_text="A simulated reply")).to_be_visible()
+    assert len(requests) == 2  # Replies never reach the classifier.
+    home(page)
+    page.locator('[data-chat="u2"]').click()
+    expect(page.locator(".warning")).to_be_visible()
+    expect(page.locator(".warning-head")).to_contain_text("ML classifier did not flag")
+    expect(page.locator('[data-reason="upfront_payment_request"]')).to_have_count(1)
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    for name in ["Block", "Accept Anyway"]:
+        button = page.get_by_role("button", name=name, exact=True)
+        expect(button).to_be_in_viewport(ratio=1)
+        box = button.bounding_box()
+        assert box and box["y"] >= 0 and box["y"] + box["height"] <= height
+    output = ROOT / "reports/browser"
+    output.mkdir(parents=True, exist_ok=True)
+    page.screenshot(path=str(output / f"warning-{width}.png"))
+    page.get_by_role("button", name="Accept Anyway", exact=True).click()
+    expect(page.locator('[data-state="accepted"]')).to_be_visible()
+    expect(page.get_by_role("textbox", name="Type a message")).to_be_visible()
+    page.get_by_role("button", name="Flagged as a possible job scam").click()
+    expect(page.get_by_role("button", name="Keep chatting")).to_be_visible()
+    page.get_by_role("button", name="Block", exact=True).click()
+    expect(page.locator('[data-state="blocked"]')).to_be_visible()
+    expect(page.get_by_role("textbox", name="Type a message")).to_have_count(0)
+    home(page)
+    page.get_by_role("button", name="More options").click()
+    page.get_by_role("menuitem", name="Reset demo").click()
+    expect(page.locator("#scan-status")).to_have_attribute("data-kind", "live")
+    page.locator('[data-chat="u2"]').click()
+    expect(page.get_by_role("button", name="Accept Anyway", exact=True)).to_be_visible()
+    assert len(requests) == 4
+    assert not errors
+
+
+@pytest.mark.parametrize("failure", ["offline", "malformed", "http_error", "timeout"])
+def test_failed_api_never_uses_sample_results(page, live_url, failure):
+    from playwright.sync_api import expect
+    def fail(route):
+        if failure == "offline":
+            route.abort()
+        elif failure == "timeout":
+            pass  # Leave the request pending; the app's real AbortController must fire.
+        elif failure == "malformed":
+            route.fulfill(status=200, content_type="application/json", body='{"is_scam":"false"}')
+        else:
+            route.fulfill(status=503, content_type="application/json", body='{"error":"Unavailable"}')
+    page.route("**/api/scan", fail)
+    page.goto(live_url)
+    expect(page.locator("#scan-status")).to_have_attribute("data-kind", "error")
+    page.locator('[data-chat="u2"]').click()
+    expect(page.locator('[data-scan="error"]')).to_be_visible()
+    expect(page.locator(".warning")).to_have_count(0)
+    expect(page.locator('[data-scan="clean"]')).to_have_count(0)
+    assert "Sample result" not in page.locator("body").inner_text()
+    page.unroute("**/api/scan", fail)
+    page.get_by_role("button", name="Try again").click()
+    expect(page.locator(".warning")).to_be_visible()
+
+
+def test_failed_reset_preserves_decisions_and_reload_reuses_scans(page, live_url):
+    from playwright.sync_api import expect
+    responses = []
+    page.on("response", lambda response: responses.append(response.json())
+            if response.url.endswith("/api/scan") and response.status == 200 else None)
+    page.goto(live_url)
+    expect(page.locator("#scan-status")).to_have_attribute("data-kind", "live")
+    page.reload()
+    expect(page.locator("#scan-status")).to_have_attribute("data-kind", "live")
+    assert len(responses) == 4 and all(result["cached"] for result in responses[2:])
+    page.locator('[data-chat="u2"]').click()
+    page.get_by_role("button", name="Block", exact=True).click()
+    home(page)
+    page.route("**/api/reset", lambda route: route.abort())
+    page.get_by_role("button", name="More options").click()
+    page.get_by_role("menuitem", name="Reset demo").click()
+    expect(page.locator("#toast")).to_contain_text("Reset failed")
+    page.locator('[data-chat="u2"]').click()
+    expect(page.locator('[data-state="blocked"]')).to_be_visible()
+    expect(page.locator(".warning")).to_have_count(0)

@@ -8,10 +8,8 @@ window.DETECT_FIRST_CONFIG = {
   // Endpoint that wraps the existing classifier. See README.md for the contract.
   scanEndpoint: "/api/scan",
 
-  // "auto": call the backend; if it is unreachable, show labelled sample results.
-  // "live": call the backend only; failures show a "couldn't scan" state.
-  // "demo": never call the backend; always show labelled sample results.
-  mode: "auto",
+  // Live API only. A failed scan shows a connection error, never a sample verdict.
+  mode: "live",
 
   // How long to wait for the backend before giving up, in milliseconds.
   timeoutMs: 4000
