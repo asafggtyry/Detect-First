@@ -127,6 +127,68 @@ def test_failed_api_never_uses_sample_results(page, live_url, failure):
     expect(page.locator(".warning")).to_be_visible()
 
 
+@pytest.mark.parametrize("width,height", [(320, 568), (1280, 900)])
+def test_test_message_lab_uses_live_api_without_changing_demo_state(page, live_url, width, height):
+    from playwright.sync_api import expect
+    page.set_viewport_size({"width": width, "height": height})
+    scan_requests = []
+    analysis_requests = []
+    request_urls = []
+    page.on("request", lambda request: request_urls.append(request.url))
+    page.on("request", lambda request: scan_requests.append(request.post_data_json)
+            if request.url.endswith("/api/scan") else None)
+    page.on("request", lambda request: analysis_requests.append(request.post_data_json)
+            if request.url.endswith("/api/analyze") else None)
+    page.goto(live_url)
+    expect(page.locator("#scan-status")).to_have_attribute("data-kind", "live")
+    assert len(scan_requests) == 2
+
+    page.get_by_role("button", name="More options").click()
+    page.get_by_role("menuitem", name="Test Message").click()
+    expect(page.locator("#screen-test")).to_be_visible()
+    message = "Hi, we're hiring for a remote assistant. Deposit $25 today to get started. Reply now for details."
+    page.get_by_role("textbox", name="Message to analyze").fill(message)
+    page.get_by_role("button", name="Analyze", exact=True).click()
+    expect(page.locator("#test-status")).to_have_text("Analysis complete.")
+    expect(page.locator("[data-model-result]")).to_be_visible()
+    expect(page.locator('[data-evidence="upfront_payment_request"]')).to_contain_text("Deposit $25")
+    assert analysis_requests == [{"message": message}]
+    assert len(scan_requests) == 2
+    assert all(url.startswith(live_url) for url in request_urls)
+    assert message not in (page.evaluate("localStorage.getItem('detect-first-demo-v1')") or "")
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+
+    page.get_by_role("button", name="Reset test").click()
+    expect(page.get_by_role("textbox", name="Message to analyze")).to_have_value("")
+    expect(page.locator("#test-result")).to_be_empty()
+    second_message = "Thanks for sharing the recipe. I'll try it this weekend."
+    page.get_by_role("textbox", name="Message to analyze").fill(second_message)
+    page.get_by_role("button", name="Analyze", exact=True).click()
+    expect(page.locator("#test-status")).to_have_text("Analysis complete.")
+    expect(page.locator("#test-verdict")).to_have_text("No major warning signals detected")
+    expect(page.locator(".test-caution")).to_contain_text("does not prove the message is safe")
+    assert analysis_requests == [{"message": message}, {"message": second_message}]
+    page.get_by_role("button", name="Back to chats").click()
+    page.locator('[data-chat="u2"]').click()
+    expect(page.locator(".warning")).to_be_visible()
+    assert len(scan_requests) == 2
+
+
+def test_test_message_lab_api_failure_does_not_show_a_verdict(page, live_url):
+    from playwright.sync_api import expect
+    page.route("**/api/analyze", lambda route: route.fulfill(
+        status=503, content_type="application/json", body='{"error":"Unavailable"}'))
+    page.goto(live_url)
+    page.get_by_role("button", name="More options").click()
+    page.get_by_role("menuitem", name="Test Message").click()
+    message = "Private one-off message that must not be stored"
+    page.get_by_role("textbox", name="Message to analyze").fill(message)
+    page.get_by_role("button", name="Analyze", exact=True).click()
+    expect(page.locator("#test-status")).to_contain_text("Analysis failed")
+    expect(page.locator("#test-result")).to_be_empty()
+    assert message not in (page.evaluate("localStorage.getItem('detect-first-demo-v1')") or "")
+
+
 @pytest.mark.parametrize("storage", ['{broken', '{"decisions":null,"read":42,"sent":{"u1":[null,{"dir":"in","text":"bad"}]}}'])
 def test_corrupt_local_storage_recovers_with_live_scans(page, live_url, storage):
     import json

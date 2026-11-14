@@ -2,7 +2,7 @@
   "use strict";
 
   var CONFIG = Object.assign(
-    { apiBase: "", scanEndpoint: "/api/scan", mode: "live", timeoutMs: 4000 },
+    { apiBase: "", scanEndpoint: "/api/scan", analyzeEndpoint: "/api/analyze", mode: "live", timeoutMs: 4000 },
     window.DETECT_FIRST_CONFIG || {}
   );
   var STORAGE_KEY = "detect-first-demo-v1";
@@ -55,6 +55,8 @@
   var openChatId = null;
   var navigatedInApp = false;
   var scanRun = 0;
+  var analysisRun = 0;
+  var analysisController = null;
 
   function emptySaved() { return { decisions: {}, read: {}, sent: {} }; }
 
@@ -108,7 +110,12 @@
       var cat = normalizeCategory(name);
       if (seen[cat.key]) return;
       seen[cat.key] = true;
-      reasons.push({ key: cat.key, label: cat.label, evidence: isObj && r.evidence ? String(r.evidence) : "" });
+      reasons.push({
+        key: cat.key,
+        label: cat.label,
+        evidence: isObj && r.evidence ? String(r.evidence) : "",
+        snippet: isObj && typeof r.snippet === "string" ? r.snippet : ""
+      });
     });
     return { flagged: raw.is_scam, reasons: reasons, modelFlagged: raw.model_flagged,
       warningSource: raw.warning_source, scanned: raw.scanned, skippedReason: raw.skipped_reason };
@@ -137,6 +144,19 @@
   function scanMessage(chat, message) {
     return fetchLiveScan(chat, message).then(function (raw) {
       return Object.assign({ source: "live" }, normalizeResult(raw));
+    });
+  }
+
+  function fetchAnalysis(message, signal) {
+    return fetch(CONFIG.apiBase + CONFIG.analyzeEndpoint, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: message }),
+      signal: signal
+    }).then(function (response) {
+      if (!response.ok) throw new Error("Analysis endpoint returned " + response.status);
+      return response.json();
     });
   }
 
@@ -213,6 +233,93 @@
     renderList();
     renderChat();
     renderStatus();
+  }
+
+  function renderTestResult(result) {
+    var output = $("test-result");
+    output.textContent = "";
+    var reasons = el("ul", { class: "test-evidence-list" });
+    result.reasons.forEach(function (reason) {
+      reasons.appendChild(el("li", { "data-evidence": reason.key },
+        el("div", { class: "test-evidence-title", text: reason.label }),
+        reason.snippet
+          ? el("blockquote", { class: "test-snippet", text: "“" + reason.snippet + "”" })
+          : null,
+        el("p", { class: "test-explanation", text: reason.evidence })));
+    });
+
+    output.appendChild(el("section", { class: "analysis-card", "aria-labelledby": "test-verdict" },
+      el("h2", { id: "test-verdict", text: result.flagged
+        ? "Combined warning triggered"
+        : "No major warning signals detected" }),
+      el("section", { class: "analysis-part", "aria-labelledby": "test-model-title" },
+        el("h3", { id: "test-model-title", text: "Model classification" }),
+        el("p", { "data-model-result": result.modelFlagged ? "flagged" : "not-flagged",
+          text: result.modelFlagged
+            ? "The trained model flagged this message based on wording learned from job postings."
+            : "The trained model did not flag this message." }),
+        el("p", { class: "test-method-note",
+          text: "This is a binary prediction, not a probability or an explanation of the model." })),
+      el("section", { class: "analysis-part", "aria-labelledby": "test-evidence-title" },
+        el("h3", { id: "test-evidence-title", text: "Evidence-based warning categories" }),
+        el("p", { class: "test-method-note",
+          text: result.evidenceFlagged
+            ? "At least two separate rule categories matched; this is separate from the model prediction."
+            : "Fewer than two rule categories matched, so the evidence rules did not trigger a warning." }),
+        result.reasons.length ? reasons
+          : el("p", { class: "test-no-evidence", text: "No evidence categories matched this message." })),
+      !result.flagged
+        ? el("p", { class: "test-caution",
+          text: "No major warning signals were detected. This does not prove the message is safe." })
+        : el("p", { class: "test-caution",
+          text: "A warning is not proof of fraud. The rules are limited observations and do not verify employers." })));
+  }
+
+  function analyzeTestMessage(event) {
+    event.preventDefault();
+    var message = $("test-message").value.trim();
+    if (!message) {
+      $("test-status").textContent = "Enter a message to analyze.";
+      $("test-message").focus();
+      return;
+    }
+
+    var run = ++analysisRun;
+    if (analysisController) analysisController.abort();
+    analysisController = new AbortController();
+    var controller = analysisController;
+    var timer = setTimeout(function () { controller.abort(); }, CONFIG.timeoutMs);
+    $("analyze-btn").disabled = true;
+    $("test-status").textContent = "Analyzing with the local model…";
+    $("test-result").textContent = "";
+
+    fetchAnalysis(message, controller.signal).then(function (raw) {
+      if (run !== analysisRun) return;
+      var result = normalizeResult(raw);
+      renderTestResult(result);
+      $("test-status").textContent = "Analysis complete.";
+    }).catch(function () {
+      if (run !== analysisRun) return;
+      $("test-result").textContent = "";
+      $("test-status").textContent = "Analysis failed. No sample result was used. Check the local server and try again.";
+    }).finally(function () {
+      clearTimeout(timer);
+      if (run === analysisRun) {
+        $("analyze-btn").disabled = false;
+        analysisController = null;
+      }
+    });
+  }
+
+  function resetTestMessage() {
+    ++analysisRun;
+    if (analysisController) analysisController.abort();
+    analysisController = null;
+    $("test-form").reset();
+    $("test-result").textContent = "";
+    $("test-status").textContent = "";
+    $("analyze-btn").disabled = false;
+    $("test-message").focus();
   }
 
   function renderList() {
@@ -490,6 +597,12 @@
     location.hash = "#/chat/" + id;
   }
 
+  function openTestMessage() {
+    navigatedInApp = true;
+    closeMenu();
+    location.hash = "#/test";
+  }
+
   function goHome() {
     if (navigatedInApp) history.back();
     else history.replaceState(null, "", location.pathname + location.search);
@@ -500,22 +613,36 @@
     var match = /^#\/chat\/([\w-]+)$/.exec(location.hash);
     var chat = match ? chatById(match[1]) : null;
     var home = $("screen-home");
-    var screen = $("screen-chat");
+    var chatScreen = $("screen-chat");
+    var testScreen = $("screen-test");
+    var testOpen = !chat && location.hash === "#/test";
 
     if (chat) {
       openChatId = chat.id;
       if (!saved.read[chat.id]) { saved.read[chat.id] = true; persist(); }
       render();
-      screen.removeAttribute("inert");
+      chatScreen.removeAttribute("inert");
+      testScreen.setAttribute("inert", "");
       home.setAttribute("inert", "");
       $("phone").classList.add("chat-open");
+      $("phone").classList.remove("test-open");
+    } else if (testOpen) {
+      openChatId = null;
+      chatScreen.setAttribute("inert", "");
+      testScreen.removeAttribute("inert");
+      home.setAttribute("inert", "");
+      $("phone").classList.remove("chat-open");
+      $("phone").classList.add("test-open");
+      $("test-message").focus();
     } else {
       // Keep the conversation rendered while it slides away.
       openChatId = null;
       navigatedInApp = false;
       home.removeAttribute("inert");
-      screen.setAttribute("inert", "");
+      chatScreen.setAttribute("inert", "");
+      testScreen.setAttribute("inert", "");
       $("phone").classList.remove("chat-open");
+      $("phone").classList.remove("test-open");
       renderList();
     }
   }
@@ -539,7 +666,11 @@
   Array.prototype.forEach.call(document.querySelectorAll('[data-action="reset"]'), function (button) {
     button.addEventListener("click", resetDemo);
   });
+  document.querySelector('[data-action="test-message"]').addEventListener("click", openTestMessage);
+  $("test-form").addEventListener("submit", analyzeTestMessage);
+  $("reset-test-btn").addEventListener("click", resetTestMessage);
   $("back-btn").addEventListener("click", goHome);
+  $("test-back-btn").addEventListener("click", goHome);
   window.addEventListener("hashchange", applyRoute);
 
   // ---------- start ----------

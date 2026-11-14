@@ -31,6 +31,11 @@ def test_job_offer_reasons_are_tied_to_observed_patterns() -> None:
         "Unverified employer identity",
     }
     assert "not independently verify" in evidence[-1].explanation
+    by_category = {item.category: item for item in evidence}
+    assert by_category["Unsolicited job offer"].snippet == "hiring"
+    assert by_category["Upfront payment request"].snippet == "Deposit $60"
+    assert by_category["Urgency / pressure"].snippet == "next 24 hours"
+    assert by_category["Vague job details"].snippet is None
 
 
 def test_saved_contact_does_not_get_unsolicited_reason() -> None:

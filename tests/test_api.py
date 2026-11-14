@@ -137,6 +137,50 @@ def test_warning_sources_are_separate(model_flagged, message, source):
     assert result["is_scam"] is (source != "none")
 
 
+def test_analyze_accepts_arbitrary_messages_without_changing_demo_scan_state(spy_app):
+    app, calls = spy_app
+    client = app.test_client()
+    messages = [
+        "A specific one-off test message",
+        "A different message from the same anonymous tester",
+    ]
+
+    for message in messages:
+        response = client.post("/api/analyze", json={"message": message})
+        assert response.status_code == 200
+        assert response.json["scanned"] is True
+        assert response.json["model_flagged"] is False
+        assert response.json["warning_source"] == "none"
+
+    assert calls == messages
+    assert app.extensions["scan_service"].sessions == {}
+    assert client.post("/api/scan", json=payload()).json["scanned"] is True
+    assert client.post("/api/analyze", json={"message": messages[0]}).json["scanned"] is True
+    assert calls == messages + [payload()["message"], messages[0]]
+
+
+@pytest.mark.parametrize("data", [
+    {}, [], {"message": ""}, {"message": " "}, {"message": None},
+    {"message": 42}, {"message": "x" * 5001},
+])
+def test_analyze_rejects_invalid_input_without_calling_classifier(spy_app, data):
+    app, calls = spy_app
+    response = app.test_client().post("/api/analyze", json=data)
+    assert response.status_code == 400
+    assert "error" in response.json
+    assert calls == []
+
+
+def test_analyze_inference_failure_returns_error_not_clean_result():
+    def fail(_):
+        raise RuntimeError("failure")
+
+    client = create_app(classifier=fail).test_client()
+    response = client.post("/api/analyze", json={"message": "An arbitrary message"})
+    assert response.status_code == 503
+    assert "is_scam" not in response.json
+
+
 def test_static_files_same_origin_and_private_files_unavailable(spy_app):
     app, calls = spy_app
     client = app.test_client()

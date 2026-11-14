@@ -2,16 +2,18 @@
 
 **A local messaging prototype that helps students pause before replying to unfamiliar job offers.** Built for the Veritas AI 2026 hackathon; intended track: AI + Finance. Official requirements still need confirmation.
 
-The WhatsApp-inspired demo includes three fictional conversations, a real trained classifier, evidence warnings, **Block**, **Accept Anyway**, and **Reset demo**. It is not connected to WhatsApp or a phone, does not independently verify employers, and is not financial advice.
+This branch is an experiment based on the verified `release/veritas-2026` commit. It adds a **Test Message** screen while preserving the original model and demo behavior; it has not been merged into or promoted over the verified release. Use a checkout of `experiment/live-detection-lab` to try it; the branch may remain local until explicitly published.
+
+The WhatsApp-inspired demo includes three fictional conversations, a real trained classifier, evidence warnings, **Block**, **Accept Anyway**, and **Reset demo**. The Test Message screen sends arbitrary text only to the same-origin local API and shows ML and evidence-rule results separately. It is not connected to WhatsApp or a phone, does not independently verify employers, and is not financial advice.
 
 ## Windows setup: start here
 
 You need **64-bit Python 3.12**, Git (if cloning), and a current browser. Tested on Windows with Python 3.12.14 and Chromium. Other platforms/versions are not certified by this release. Install once while online; the installed demo needs no API key, raw dataset, training or frontend build.
 
-Open PowerShell where you want the project. Clone the **release branch**, because the default GitHub branch is the earlier frontend:
+Open PowerShell where you want the project. Once the experiment branch is published, it can be cloned separately from the verified release:
 
 ```powershell
-git clone --branch release/veritas-2026 https://github.com/asafggtyry/Detect-First.git
+git clone --branch experiment/live-detection-lab https://github.com/asafggtyry/Detect-First.git
 cd Detect-First
 python --version
 python -m venv .venv
@@ -21,7 +23,7 @@ python -m venv .venv
 
 Open **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)**. Keep PowerShell open. Stop with **Ctrl+C**. No virtual-environment activation or PowerShell policy change is needed. For a branch ZIP, extract it and open PowerShell in the directory containing this README before the `python --version` step.
 
-The server serves both `frontend/` and `/api/scan` from the same origin. Wait for **Live classifier connected**. Do not open `index.html` directly or use a separate static server. The app never falls back to sample responses.
+The server serves `frontend/`, `/api/scan`, and `/api/analyze` from the same origin. Wait for **Live classifier connected**. Do not open `index.html` directly or use a separate static server. The app never falls back to sample responses.
 
 For later runs, from the repository root:
 
@@ -49,10 +51,11 @@ If port 8000 is occupied, run `.\.venv\Scripts\python.exe -m detect_first.server
 3. Open **732-882-1944**: inspect the $60 deposit, up to $300/day claim and quick-reply pressure. Scroll the evidence list.
 4. Point out **the ML classifier did not flag this message**. Separate rules trigger this warning. No employer was independently verified.
 5. **Block** removes the reply box. **Accept Anyway** allows simulated replies and reopening the warning. **Reset demo** clears choices/replies and requests fresh scans.
+6. Open **More options → Test Message** to try arbitrary first-contact text. **Analyze** calls the live local backend; compare its model prediction with evidence categories and snippets. **Reset test** clears the page-only draft and result. Test messages are not saved.
 
 The home screen starts the two unknown-sender scans. Saved contacts and outgoing replies are not sent for classification. Later messages are outside this first-message-only policy.
 
-Submission assets: [two-minute demo script](docs/DEMO.md), [short write-up](docs/SUBMISSION.md), [remaining checklist](docs/SUBMISSION_CHECKLIST.md), [complete test report](reports/release_verification.md).
+Submission assets: [two-minute demo script](docs/DEMO.md), [short write-up](docs/SUBMISSION.md), [remaining checklist](docs/SUBMISSION_CHECKLIST.md), [complete test report](reports/release_verification.md), [first-contact model research](docs/MODEL_RESEARCH.md).
 
 ## Model versus evidence rules
 
@@ -65,7 +68,7 @@ The original model is **TF-IDF word unigrams/bigrams + balanced logistic regress
 
 Rules inspect work-offer wording, payment wording, daily earnings of at least $200, a limited role/duty word list, urgency, and sender context. The earnings threshold is only a prototype heuristic. Unknown contact does not prove unsolicited contact, and unverified employer does not mean fake employer; the UI labels make these limits clearer.
 
-**An unknown first-contact job message can trigger a warning from two context categories alone.** Categories can be correlated. Rules can misread negation/context and cause false warnings. No employer lookup or calibrated risk probability is provided. See the [API contract](docs/API.md).
+**An unknown first-contact job message can trigger a warning from two context categories alone.** Categories can be correlated. Rules can misread negation/context and cause false warnings. No employer lookup or calibrated risk probability is provided. See the [API contract](docs/API.md). The Test Message endpoint is stateless and does not interfere with demo sender/session scan history.
 
 ## Dataset, baselines and actual metrics
 
@@ -91,7 +94,7 @@ The classifier catches **5/16 synthetic scams**, including **2/8 subtle scams**.
 
 The rejected research candidate catches **4/16 overall and 0/8 subtle synthetic scams**, so the original remains in use. Better generic SMS-spam scores do not establish recruitment performance. **Authentic first-contact recruitment validation is unavailable.** Neither model is demonstrated reliable for that task.
 
-See [all evaluation tables and matrices](docs/EVALUATION.md), [release metric reproduction](reports/release_metrics.json), and [frozen integration audit](reports/ai_model_integration.md).
+See [all evaluation tables and matrices](docs/EVALUATION.md), the [dataset/model research report](docs/MODEL_RESEARCH.md), [release metric reproduction](reports/release_metrics.json), and [frozen integration audit](reports/ai_model_integration.md).
 
 ## Run all tests and reproduce metrics
 
@@ -103,11 +106,11 @@ From the repository root after setup:
 $env:PLAYWRIGHT_BROWSERS_PATH = "$PWD\.venv\pw-browsers"
 .\.venv\Scripts\python.exe -m playwright install chromium
 .\.venv\Scripts\python.exe -m pip check
-.\.venv\Scripts\python.exe -m pytest -q --browser-tests --junitxml=reports/release_tests.xml
+.\.venv\Scripts\python.exe -m pytest -q --browser-tests --junitxml=reports/experiment_live_detection_tests.xml
 .\.venv\Scripts\python.exe scripts\verify_release_metrics.py
 ```
 
-Tests start their own local server. They exercise the saved model, HTTP contract, sessions/caching, first-message exclusions, all conversations/actions, Reset and failure recovery in Chromium at **390×844 and 320×568**. Browser tests require local process/socket permission. Omitting `--browser-tests` explicitly skips browser cases; that is not a complete run. Mobile emulation does not certify physical devices or Safari.
+Tests start their own local server. They exercise the saved model, HTTP contract, sessions/caching, one-off analysis and failures, first-message exclusions, all conversations/actions, Reset and failure recovery in Chromium at mobile and desktop widths. Browser tests require local process/socket permission. Omitting `--browser-tests` explicitly skips browser cases; that is not a complete run. Mobile emulation does not certify physical devices or Safari.
 
 See [complete release verification](reports/release_verification.md) and [JUnit results](reports/release_tests.xml). The metric verifier compares original model/baseline results to the committed reports and checks the artifact hash without fitting anything.
 

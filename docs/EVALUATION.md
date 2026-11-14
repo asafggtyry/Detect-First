@@ -1,5 +1,9 @@
 # Actual evaluation tables
 
+For public-data provenance, duplicate/leakage checks, frozen word/character
+candidate comparisons, error examples and the model-selection decision, see
+[first-contact model research](MODEL_RESEARCH.md).
+
 All precision/recall/F1 values use the positive (fraudulent/spam) class. Matrices are rows actual, columns predicted, in [legitimate, fraudulent] order; for SMS use [ham, spam]. Zero predicted positives is reported as precision 0 by convention. These are raw model/baseline predictions, never evidence-rule UI warnings.
 
 ## Historical job-posting holdout — contaminated by near templates

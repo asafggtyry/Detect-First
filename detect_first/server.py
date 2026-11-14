@@ -43,6 +43,28 @@ class ScanService:
         with self.lock:
             self.sessions.pop(session_id, None)
 
+    def analyze(self, message: str) -> dict:
+        """Analyze a one-off message without reading or changing demo session state."""
+        with self.lock:
+            return self._analyze(message)
+
+    def _analyze(self, message: str) -> dict:
+        model_flagged = bool(self.classifier(message))
+        evidence = explain_message(message, first_contact=True, saved_contact=False)
+        conversation = Conversation("test-message", "Test Message", False, [], scanned=True,
+                                    model_flagged=model_flagged, evidence=evidence)
+        evidence_flagged = len(evidence) >= 2
+        source = ("both" if model_flagged and evidence_flagged else "model" if model_flagged
+                  else "evidence" if evidence_flagged else "none")
+        return dict(
+            is_scam=conversation.should_warn,
+            reasons=[dict(category=CATEGORIES[item.category],
+                          evidence=item.explanation, snippet=item.snippet,
+                          source="evidence_rule") for item in evidence],
+            model_flagged=model_flagged, evidence_flagged=evidence_flagged,
+            warning_source=source, scanned=True, skipped_reason=None, cached=False,
+        )
+
     def scan(self, session_id: str, data: dict) -> dict:
         sender = data["sender"].strip()
         fingerprint = hashlib.sha256(data["message"].strip().encode()).hexdigest()
@@ -67,21 +89,7 @@ class ScanService:
                     return dict(previous["result"], cached=True)
                 return skipped("already_scanned")
 
-            model_flagged = bool(self.classifier(data["message"]))
-            evidence = explain_message(data["message"], first_contact=True, saved_contact=False)
-            # Reuse the original application's policy without relabeling rules as ML.
-            conversation = Conversation(sender, sender, False, [], scanned=True,
-                                        model_flagged=model_flagged, evidence=evidence)
-            evidence_flagged = len(evidence) >= 2
-            source = ("both" if model_flagged and evidence_flagged else "model" if model_flagged
-                      else "evidence" if evidence_flagged else "none")
-            result = dict(
-                is_scam=conversation.should_warn,
-                reasons=[dict(category=CATEGORIES[e.category], evidence=e.explanation,
-                              source="evidence_rule") for e in evidence],
-                model_flagged=model_flagged, evidence_flagged=evidence_flagged,
-                warning_source=source, scanned=True, skipped_reason=None, cached=False,
-            )
+            result = self._analyze(data["message"])
             # Inference failures never consume the sender's first scan.
             senders[sender] = dict(fingerprint=fingerprint, result=result, saved=False)
             return result
@@ -99,6 +107,17 @@ def validate_scan(data: object) -> dict:
         if type(data.get(name)) is not bool:
             raise ValueError(f"{name} must be a JSON boolean.")
     return data
+
+
+def validate_analysis(data: object) -> str:
+    if not isinstance(data, dict):
+        raise ValueError("Expected a JSON object.")
+    message = data.get("message")
+    if not isinstance(message, str) or not message.strip():
+        raise ValueError("message must be a non-empty string.")
+    if len(message) > 5000:
+        raise ValueError("message must be at most 5000 characters.")
+    return message
 
 
 def create_app(*, model_path: Path = ROOT / MODEL_PATH,
@@ -155,6 +174,18 @@ def create_app(*, model_path: Path = ROOT / MODEL_PATH,
             raise
         except Exception:
             app.logger.error("Classifier scan failed; request may be retried.")
+            return jsonify(error="Classifier unavailable. Please retry or restart the local server."), 503
+
+    @app.post("/api/analyze")
+    def analyze():
+        try:
+            message = validate_analysis(request.get_json())
+        except ValueError as error:
+            return jsonify(error=str(error)), 400
+        try:
+            return jsonify(service.analyze(message))
+        except Exception:
+            app.logger.error("One-off classifier analysis failed; request may be retried.")
             return jsonify(error="Classifier unavailable. Please retry or restart the local server."), 503
 
     @app.post("/api/reset")

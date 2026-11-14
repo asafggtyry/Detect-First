@@ -21,6 +21,7 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
             </button>
             <div class="menu" id="menu" role="menu" hidden>
+              <button type="button" role="menuitem" data-action="test-message">Test Message</button>
               <button type="button" role="menuitem" data-action="reset">Reset demo</button>
             </div>
           </div>
@@ -50,6 +51,31 @@
         </header>
         <div class="thread" id="thread"></div>
         <div class="dock" id="dock"></div>
+      </section>
+
+      <!-- Screen 3: isolated one-off message analysis -->
+      <section class="screen screen-test" id="screen-test" aria-label="Test Message" inert>
+        <header class="appbar testbar">
+          <button class="icon-btn" id="test-back-btn" type="button" aria-label="Back to chats">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11H7.800l5.600-5.600L12 4l-8 8 8 8 1.400-1.400L7.800 13H20v-2Z"/></svg>
+          </button>
+          <h1 class="appbar-title">Test Message</h1>
+        </header>
+        <div class="test-body">
+          <p class="test-intro">Try any first-contact message. Analysis runs locally through the same Python model and evidence rules used by the demo.</p>
+          <form id="test-form" class="test-form">
+            <label for="test-message">Message to analyze</label>
+            <textarea id="test-message" name="message" rows="6" maxlength="5000" required
+              aria-describedby="test-privacy" spellcheck="true"></textarea>
+            <div class="test-controls">
+              <button class="btn btn-primary" id="analyze-btn" type="submit">Analyze</button>
+              <button class="btn btn-ghost" id="reset-test-btn" type="button">Reset test</button>
+            </div>
+          </form>
+          <p class="test-privacy" id="test-privacy">Your text is sent only to this local app for analysis; it is not saved or sent to a third-party AI service.</p>
+          <p class="test-status" id="test-status" role="status" aria-live="polite"></p>
+          <div class="test-result" id="test-result" aria-live="polite"></div>
+        </div>
       </section>
 
       <div class="toast" id="toast" role="status" aria-live="polite"></div>

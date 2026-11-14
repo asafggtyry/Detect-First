@@ -8,6 +8,7 @@ from dataclasses import dataclass
 class Evidence:
     category: str
     explanation: str
+    snippet: str | None = None
 
 
 _JOB_TERMS = re.compile(
@@ -52,7 +53,7 @@ _EMPLOYER_NAME = re.compile(
 )
 
 
-def _contains_high_daily_earnings(text: str) -> bool:
+def _high_daily_earnings_match(text: str) -> re.Match[str] | None:
     for pattern in (_HIGH_DAILY_EARNINGS, _HIGH_EARNINGS_REVERSED):
         for match in pattern.finditer(text):
             try:
@@ -60,8 +61,8 @@ def _contains_high_daily_earnings(text: str) -> bool:
             except ValueError:
                 continue
             if amount >= 200:
-                return True
-    return False
+                return match
+    return None
 
 
 def explain_message(
@@ -78,24 +79,30 @@ def explain_message(
 
     evidence: list[Evidence] = []
     if first_contact and not saved_contact:
+        job_match = _JOB_TERMS.search(text)
         evidence.append(
             Evidence(
                 "Unsolicited job offer",
                 "This is a work offer in the first message from an unsaved sender.",
+                job_match.group(0) if job_match else None,
             )
         )
-    if _contains_high_daily_earnings(text):
+    earnings_match = _high_daily_earnings_match(text)
+    if earnings_match:
         evidence.append(
             Evidence(
                 "Unrealistic earnings",
                 "The message advertises at least $200 per day; that claim is not verified.",
+                earnings_match.group(0),
             )
         )
-    if _UPFRONT_PAYMENT.search(text):
+    payment_match = _UPFRONT_PAYMENT.search(text)
+    if payment_match:
         evidence.append(
             Evidence(
                 "Upfront payment request",
                 "The message asks for a payment to obtain or begin the job.",
+                payment_match.group(0),
             )
         )
     if not _ROLE_OR_DUTY_TERMS.search(text):
@@ -105,17 +112,20 @@ def explain_message(
                 "No role or duty terms recognized by this prototype's limited word list were found.",
             )
         )
-    if _URGENCY.search(text):
+    urgency_match = _URGENCY.search(text)
+    if urgency_match:
         evidence.append(
             Evidence(
                 "Urgency / pressure",
                 "The message asks for a quick response or sets a short deadline.",
+                urgency_match.group(0),
             )
         )
 
     employer_verified = metadata.get("employer_verified") is True
     employer_name = metadata.get("employer_name")
-    name_appears_in_message = bool(_EMPLOYER_NAME.search(text))
+    employer_match = _EMPLOYER_NAME.search(text)
+    name_appears_in_message = employer_match is not None
     if not employer_verified:
         if employer_name:
             explanation = (
@@ -132,6 +142,10 @@ def explain_message(
                 "No employer name appears in the message or sender metadata; "
                 "this demo cannot independently verify the sender."
             )
-        evidence.append(Evidence("Unverified employer identity", explanation))
+        evidence.append(Evidence(
+            "Unverified employer identity",
+            explanation,
+            employer_match.group(0) if employer_match else None,
+        ))
 
     return evidence
