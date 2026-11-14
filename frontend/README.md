@@ -31,7 +31,13 @@ The ML prediction stays separate from evidence rules. Each reason has a
   and replies and requests fresh scans. A failed reset leaves saved decisions
   intact and shows an error.
 
-Files: `index.html` (page shell), `styles.css` (original styling), `app.js`
+Files: `index.html` (page shell), `styles.css` (original design with release scrolling/accessibility fixes), `app.js`
 (UI/state and live requests), `config.js` (same-origin connection settings),
 and unused historical `demo-fixtures.js`. Automated browser tests live in
 `tests/test_browser.py` and exercise the full app at mobile sizes.
+
+Release polish adds an explicit fictional-prototype label, cautious rule labels,
+keyboard scrolling for the evidence list, corrupt-localStorage recovery, and a
+non-scrollable outer phone frame so navigation cannot shift the app sideways.
+The message thread and evidence list each scroll inside that frame. See the
+[release report](../reports/release_verification.md) for final test counts.

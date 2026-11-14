@@ -1,0 +1,261 @@
+{
+  "status": "all_original_metrics_and_baselines_reproduced",
+  "model_sha256": "6e6359e96e201c8814fdc183f070acef1c35daa963b699b6206bf83eceff2c42",
+  "training_performed": false,
+  "job_posting_holdout": {
+    "model": {
+      "examples": 2505,
+      "accuracy": 0.9680638722554891,
+      "precision": 0.6115702479338843,
+      "recall": 0.6915887850467289,
+      "f1": 0.6491228070175439,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            2351,
+            47
+          ],
+          [
+            33,
+            74
+          ]
+        ]
+      },
+      "true_negatives": 2351,
+      "false_positives": 47,
+      "false_negatives": 33,
+      "true_positives": 74
+    },
+    "always_legitimate": {
+      "examples": 2505,
+      "accuracy": 0.9572854291417165,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            2398,
+            0
+          ],
+          [
+            107,
+            0
+          ]
+        ]
+      },
+      "true_negatives": 2398,
+      "false_positives": 0,
+      "false_negatives": 107,
+      "true_positives": 0
+    },
+    "fixed_keyword_rules": {
+      "examples": 2505,
+      "accuracy": 0.9528942115768463,
+      "precision": 0.13333333333333333,
+      "recall": 0.018691588785046728,
+      "f1": 0.03278688524590164,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            2385,
+            13
+          ],
+          [
+            105,
+            2
+          ]
+        ]
+      },
+      "true_negatives": 2385,
+      "false_positives": 13,
+      "false_negatives": 105,
+      "true_positives": 2
+    }
+  },
+  "synthetic": {
+    "source": "evaluation.jsonl",
+    "examples": 32,
+    "class_distribution": {
+      "legitimate": 16,
+      "fraudulent": 16
+    },
+    "training_dataset_md5": "80f28af7c3569233f4b8b9012c2c245b",
+    "training_dataset_url": "https://www.openml.org/data/v1/download/22121348/fake_job_postings2.arff",
+    "exact_text_overlap_with_training": 0,
+    "difficulty_counts": {
+      "clear": 16,
+      "subtle": 16,
+      "subtle_fraudulent": 8
+    },
+    "model": {
+      "all_synthetic_examples": {
+        "examples": 32,
+        "accuracy": 0.65625,
+        "precision": 1.0,
+        "recall": 0.3125,
+        "f1": 0.47619047619047616,
+        "confusion_matrix": {
+          "labels": [
+            "legitimate",
+            "fraudulent"
+          ],
+          "rows_actual_columns_predicted": [
+            [
+              16,
+              0
+            ],
+            [
+              11,
+              5
+            ]
+          ]
+        },
+        "true_negatives": 16,
+        "false_positives": 0,
+        "false_negatives": 11,
+        "true_positives": 5
+      },
+      "clear_examples": {
+        "examples": 16,
+        "accuracy": 0.6875,
+        "precision": 1.0,
+        "recall": 0.375,
+        "f1": 0.5454545454545454,
+        "confusion_matrix": {
+          "labels": [
+            "legitimate",
+            "fraudulent"
+          ],
+          "rows_actual_columns_predicted": [
+            [
+              8,
+              0
+            ],
+            [
+              5,
+              3
+            ]
+          ]
+        },
+        "true_negatives": 8,
+        "false_positives": 0,
+        "false_negatives": 5,
+        "true_positives": 3
+      },
+      "subtle_examples": {
+        "examples": 16,
+        "accuracy": 0.625,
+        "precision": 1.0,
+        "recall": 0.25,
+        "f1": 0.4,
+        "confusion_matrix": {
+          "labels": [
+            "legitimate",
+            "fraudulent"
+          ],
+          "rows_actual_columns_predicted": [
+            [
+              8,
+              0
+            ],
+            [
+              6,
+              2
+            ]
+          ]
+        },
+        "true_negatives": 8,
+        "false_positives": 0,
+        "false_negatives": 6,
+        "true_positives": 2
+      },
+      "subtle_fraudulent_recall": 0.25
+    },
+    "baselines": {
+      "always_legitimate": {
+        "examples": 32,
+        "accuracy": 0.5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "confusion_matrix": {
+          "labels": [
+            "legitimate",
+            "fraudulent"
+          ],
+          "rows_actual_columns_predicted": [
+            [
+              16,
+              0
+            ],
+            [
+              16,
+              0
+            ]
+          ]
+        },
+        "true_negatives": 16,
+        "false_positives": 0,
+        "false_negatives": 16,
+        "true_positives": 0
+      },
+      "fixed_keyword_rules": {
+        "examples": 32,
+        "accuracy": 0.6875,
+        "precision": 1.0,
+        "recall": 0.375,
+        "f1": 0.5454545454545454,
+        "confusion_matrix": {
+          "labels": [
+            "legitimate",
+            "fraudulent"
+          ],
+          "rows_actual_columns_predicted": [
+            [
+              16,
+              0
+            ],
+            [
+              10,
+              6
+            ]
+          ]
+        },
+        "true_negatives": 16,
+        "false_positives": 0,
+        "false_negatives": 10,
+        "true_positives": 6
+      }
+    },
+    "limitations": [
+      "All examples are hand-authored synthetic messages, not observed messages.",
+      "The set is small and must not be used to claim real-world performance.",
+      "The job-posting classifier is evaluated here out of domain.",
+      "Training data rows after exact deduplication: 12525."
+    ]
+  },
+  "historical_original_training_overlap": {
+    "exact_overlaps": 3,
+    "near_overlaps_at_090": 548,
+    "maximum_cosine_similarity": 1.000000000000004
+  },
+  "limits": [
+    "Posting holdout has known near-template contamination; historical comparison only.",
+    "Synthetic messages are not real-world validation.",
+    "Authentic first-contact recruitment validation is unavailable.",
+    "Metrics measure classifier predictions, not combined evidence-rule warnings."
+  ]
+}

@@ -68,7 +68,7 @@ def download_dataset(destination: Path) -> None:
 def load_dataset(path: Path) -> tuple[list[Example], dict[str, object]]:
     if not path.exists():
         raise FileNotFoundError(
-            f"Training data not found at {path}. Run scripts/train_model.py "
+            f"Training data not found at {path}. Run scripts/download_test_data.py "
             "to download the public dataset."
         )
 

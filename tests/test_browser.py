@@ -67,6 +67,15 @@ def test_mobile_scenarios_actions_and_reset(page, live_url, width, height):
     expect(page.locator(".warning-head")).to_contain_text("ML classifier did not flag")
     expect(page.locator('[data-reason="upfront_payment_request"]')).to_have_count(1)
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    # Both the long message and every evidence item remain reachable on short screens.
+    page.locator("#thread").evaluate("node => node.scrollTop = 0")
+    expect(page.locator("#thread .bubble-text")).to_be_in_viewport()
+    reasons = page.get_by_label("Message evidence; scroll for all reasons")
+    reasons.focus()
+    reasons.press("End")
+    expect(page.locator('[data-reason="unverified_employer"]')).to_be_in_viewport()
+    expect(page.locator('[data-reason="unverified_employer"]')).to_contain_text("cannot independently verify")
+    reasons.evaluate("node => node.scrollTop = 0")
     for name in ["Block", "Accept Anyway"]:
         button = page.get_by_role("button", name=name, exact=True)
         expect(button).to_be_in_viewport(ratio=1)
@@ -118,8 +127,27 @@ def test_failed_api_never_uses_sample_results(page, live_url, failure):
     expect(page.locator(".warning")).to_be_visible()
 
 
-def test_failed_reset_preserves_decisions_and_reload_reuses_scans(page, live_url):
+@pytest.mark.parametrize("storage", ['{broken', '{"decisions":null,"read":42,"sent":{"u1":[null,{"dir":"in","text":"bad"}]}}'])
+def test_corrupt_local_storage_recovers_with_live_scans(page, live_url, storage):
+    import json
     from playwright.sync_api import expect
+    page.add_init_script("localStorage.setItem('detect-first-demo-v1', " + json.dumps(storage) + ")")
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.goto(live_url)
+    expect(page.locator("#scan-status")).to_have_attribute("data-kind", "live")
+    page.locator('[data-chat="u1"]').click()
+    expect(page.locator('[data-scan="clean"]')).to_be_visible()
+    home(page)
+    page.locator('[data-chat="u2"]').click()
+    expect(page.locator(".warning")).to_be_visible()
+    assert not errors
+
+
+@pytest.mark.parametrize("width,height", [(390, 844), (320, 568)])
+def test_failed_reset_preserves_decisions_and_reload_reuses_scans(page, live_url, width, height):
+    from playwright.sync_api import expect
+    page.set_viewport_size({"width": width, "height": height})
     responses = []
     page.on("response", lambda response: responses.append(response.json())
             if response.url.endswith("/api/scan") and response.status == 200 else None)
@@ -135,6 +163,9 @@ def test_failed_reset_preserves_decisions_and_reload_reuses_scans(page, live_url
     page.get_by_role("button", name="More options").click()
     page.get_by_role("menuitem", name="Reset demo").click()
     expect(page.locator("#toast")).to_contain_text("Reset failed")
+    expect(page.locator("#toast")).to_be_in_viewport(ratio=1)
+    assert page.locator("#phone").evaluate("node => node.scrollLeft") == 0
+    page.screenshot(path=str(ROOT / f"reports/browser/reset-error-{width}.png"))
     page.locator('[data-chat="u2"]').click()
     expect(page.locator('[data-state="blocked"]')).to_be_visible()
     expect(page.locator(".warning")).to_have_count(0)

@@ -144,8 +144,9 @@ def train_and_save(
 def load_pipeline(model_path: Path = MODEL_PATH) -> Pipeline:
     if not model_path.exists():
         raise FileNotFoundError(
-            f"Trained model not found at {model_path}. Run "
-            "`python scripts/train_model.py` first."
+            f"Trained model not found at {model_path}. Restore "
+            "models/job_posting_classifier.joblib from the release checkout. "
+            "The demo does not require retraining."
         )
     artifact = joblib.load(model_path)
     if (
@@ -158,7 +159,8 @@ def load_pipeline(model_path: Path = MODEL_PATH) -> Pipeline:
         raise RuntimeError(
             "The saved model was trained with scikit-learn "
             f"{artifact.get('scikit_learn_version')}, but {sklearn.__version__} "
-            "is installed. Retrain it with `python scripts/train_model.py`."
+            "is installed. Install the release requirements with "
+            "`python -m pip install -r requirements.txt`. Do not retrain for the demo."
         )
     return artifact["pipeline"]
 

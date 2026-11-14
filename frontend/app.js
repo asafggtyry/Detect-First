@@ -9,12 +9,12 @@
 
   // Evidence-rule observations, separate from the machine-learning prediction.
   var CATEGORIES = {
-    unsolicited_job_offer: "Unsolicited job offer",
+    unsolicited_job_offer: "First-contact job offer",
     upfront_payment_request: "Upfront payment request",
-    unrealistic_earnings: "Unrealistic earnings",
-    vague_job_details: "Vague job details",
+    unrealistic_earnings: "High daily earnings claim",
+    vague_job_details: "Limited role details",
     urgency_pressure: "Urgency / pressure",
-    unverified_employer: "Unverified employer identity"
+    unverified_employer: "Employer not verified by demo"
   };
   var CATEGORY_ALIASES = {
     unsolicited_offer: "unsolicited_job_offer",
@@ -61,7 +61,21 @@
   function loadSaved() {
     try {
       var raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (raw && typeof raw === "object") return Object.assign(emptySaved(), raw);
+      if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+        var restored = emptySaved();
+        CHATS.forEach(function (chat) {
+          var id = chat.id;
+          var decision = raw.decisions && raw.decisions[id];
+          if (decision === "blocked" || decision === "accepted") restored.decisions[id] = decision;
+          if (raw.read && raw.read[id] === true) restored.read[id] = true;
+          var sent = raw.sent && raw.sent[id];
+          if (Array.isArray(sent)) restored.sent[id] = sent.filter(function (message) {
+            return message && message.dir === "out" && typeof message.text === "string" &&
+              message.text.length <= 500 && typeof message.time === "string";
+          });
+        });
+        return restored;
+      }
     } catch (e) { /* storage unavailable or corrupt: start fresh */ }
     return emptySaved();
   }
@@ -361,7 +375,7 @@
 
   // Screen 3: the warning panel.
   function buildWarning(chat, scan, decision) {
-    var reasons = el("ul", { class: "warning-reasons" });
+    var reasons = el("ul", { class: "warning-reasons", tabindex: "0", "aria-label": "Message evidence; scroll for all reasons" });
     scan.reasons.forEach(function (r) {
       reasons.appendChild(el("li", { "data-reason": r.key },
         icon("warn", "ico-warn"),
@@ -382,7 +396,7 @@
               ? "The ML classifier and separate evidence rules both flagged this message."
               : "The ML classifier flagged this message based on wording learned from job postings." }))),
       scan.reasons.length ? reasons : null,
-      el("p", { class: "warning-source", text: "Reasons above are evidence-rule observations, not model explanations. A warning is not proof of fraud." }),
+      el("p", { class: "warning-source", text: "Rule observations, not model explanations. Scroll for all reasons. A warning is not proof of fraud." }),
       el("div", { class: "warning-actions" },
         el("button", { class: "btn btn-danger", type: "button", "data-action": "block", text: "Block",
           onclick: function () { decide(chat, "blocked"); } }),
@@ -403,7 +417,7 @@
     } else if (states.some(function (s) { return s.status === "error"; })) {
       text = "Classifier unreachable. Messages could not be checked."; kind = "error";
     } else if (states.length) {
-      text = "Connected to the Detect First classifier."; kind = "live";
+      text = "Live classifier connected."; kind = "live";
     }
     node.textContent = text;
     node.setAttribute("data-kind", kind);

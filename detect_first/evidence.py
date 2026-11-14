@@ -102,7 +102,7 @@ def explain_message(
         evidence.append(
             Evidence(
                 "Vague job details",
-                "The message does not describe a specific role or work duties.",
+                "No role or duty terms recognized by this prototype's limited word list were found.",
             )
         )
     if _URGENCY.search(text):

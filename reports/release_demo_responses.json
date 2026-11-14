@@ -1,0 +1,92 @@
+{
+  "url": "http://127.0.0.1:8765",
+  "frontend_scan_requests": [
+    {
+      "request": {
+        "message": "Hi, we met yesterday.",
+        "sender": "124-5135-2355",
+        "is_saved_contact": false,
+        "is_first_message": true
+      },
+      "status": 200,
+      "response": {
+        "cached": false,
+        "evidence_flagged": false,
+        "is_scam": false,
+        "model_flagged": false,
+        "reasons": [],
+        "scanned": true,
+        "skipped_reason": null,
+        "warning_source": "none"
+      }
+    },
+    {
+      "request": {
+        "message": "Hello! We are hiring students for remote work. Deposit $60 in the next 24 hours to secure your position and start earning up to $300 per day. Reply now for onboarding details.",
+        "sender": "732-882-1944",
+        "is_saved_contact": false,
+        "is_first_message": true
+      },
+      "status": 200,
+      "response": {
+        "cached": false,
+        "evidence_flagged": true,
+        "is_scam": true,
+        "model_flagged": false,
+        "reasons": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unrealistic_earnings",
+            "evidence": "The message advertises at least $200 per day; that claim is not verified.",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "upfront_payment_request",
+            "evidence": "The message asks for a payment to obtain or begin the job.",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "urgency_pressure",
+            "evidence": "The message asks for a quick response or sets a short deadline.",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "source": "evidence_rule"
+          }
+        ],
+        "scanned": true,
+        "skipped_reason": null,
+        "warning_source": "evidence"
+      }
+    }
+  ],
+  "saved_contact_direct_api": {
+    "cached": false,
+    "evidence_flagged": false,
+    "is_scam": false,
+    "model_flagged": null,
+    "reasons": [],
+    "scanned": false,
+    "skipped_reason": "saved_contact",
+    "warning_source": "none"
+  },
+  "all_page_requests_same_origin": true,
+  "fixture_script_loaded": false,
+  "javascript_errors": [],
+  "private_paths_http_status": {
+    "/models/job_posting_classifier.joblib": 404,
+    "/.git/config": 404,
+    "/data/raw/fake_job_postings2.arff": 404
+  }
+}

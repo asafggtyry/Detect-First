@@ -1,174 +1,139 @@
 # Detect First
 
-Detect First is a local, simulated messaging app that helps high school students pause and review unfamiliar job offers before replying. It was built for the AI + Finance track of the Veritas AI International High School Hackathon 2026.
+**A local messaging prototype that helps students pause before replying to unfamiliar job offers.** Built for the Veritas AI 2026 hackathon; intended track: AI + Finance. Official requirements still need confirmation.
 
-> **This project is a prototype and is not financial advice.**
+The WhatsApp-inspired demo includes three fictional conversations, a real trained classifier, evidence warnings, **Block**, **Accept Anyway**, and **Reset demo**. It is not connected to WhatsApp or a phone, does not independently verify employers, and is not financial advice.
 
-## What it does
+## Windows setup: start here
 
-- Shows a mobile-friendly, WhatsApp-inspired chat list and simulated conversations.
-- Skips saved contacts.
-- Runs a locally trained scikit-learn text classifier once on the first incoming message from each unsaved sender. Later messages from that sender are not scanned again.
-- Keeps ordinary first-contact messages visible without an intrusive warning.
-- Explains concrete message evidence using a separate, deterministic evidence layer.
-- Lets a student mark a simulated sender blocked or accept the chat anyway.
-- Resets the demo so the scenarios can be replayed.
-- Serves Fable's frontend and the real Python scan API together. Sample-result fallback is disabled.
+You need **64-bit Python 3.12**, Git (if cloning), and a current browser. Tested on Windows with Python 3.12.14 and Chromium. Other platforms/versions are not certified by this release. Install once while online; the installed demo needs no API key, raw dataset, training or frontend build.
 
-There is no sign-in, external messaging connection, real SMS or WhatsApp access, media upload, camera, microphone, or call feature. Typed chat replies stay in the local simulation and are not sent to the classifier.
-
-## How the AI works
-
-The project trains a real text classifier using scikit-learn's `TfidfVectorizer` and balanced `LogisticRegression`. It combines job-posting titles and descriptions, uses a fixed stratified 80/20 holdout split, and does not tune on the final holdout or synthetic evaluation examples. Training and evaluation commands are deterministic.
-
-The model's domain is **job postings**, not first-contact recruitment messages. It is included to demonstrate a genuine trained model and a careful evaluation workflow, not to claim that it can reliably detect chat scams. No risk probability is displayed. The app shows the model's binary result separately from message-pattern evidence.
-
-The warning is shown when the model flags the message **or** the separate evidence layer finds at least two concrete categories. This policy catches explicit red flags even when the out-of-domain classifier misses them; it does not change or overwrite the model prediction. Evidence categories are based on words in the message and available sender metadata:
-
-- **Unsolicited job offer:** work is offered in a first message from an unsaved sender.
-- **Upfront payment request:** the message asks for a fee or deposit to get or begin the job.
-- **Unrealistic earnings:** a daily amount of at least $200 is advertised. This threshold is a prototype heuristic, not a financial standard.
-- **Vague job details:** the message names no recognizable role or work duties.
-- **Urgency / pressure:** the message includes a quick-reply request or short deadline.
-- **Unverified employer identity:** the sender or employer has not been independently verified by the prototype. The UI states this limitation and never calls the sender a proven scammer.
-
-These are review signals, not proof. In particular, this prototype does not independently look up or verify employers.
-
-## Dataset, source and limitations
-
-Training uses OpenML dataset **46655, `fake_job_postings2`**, a public EMSCAD-derived dataset. The measured file contains **12,725** job postings: **12,174 legitimate** and **551 fraudulent** (about 4.3% fraudulent). See [data/source.md](data/source.md) for provenance, licence notes, class distribution, relevance, and the download checksum.
-
-The Kaggle page for the original “Real / Fake Job Posting Prediction” dataset credits the University of the Aegean Laboratory of Information & Communication Systems Security and displays a CC0 licence. Its download requires a Kaggle subscription/login, so this project instead downloads the public OpenML copy without signing in. OpenML's licence field says only `Kaggle`; the original Kaggle page's CC0 metadata and OpenML provenance are documented rather than treating that OpenML field as a precise licence.
-
-The separate [synthetic evaluation set](data/synthetic/evaluation.jsonl) is balanced and hand-authored from public FTC job-scam patterns. It includes clear and subtle cases, is not EMSCAD data, and is never used for training or threshold tuning. The synthetic set is small and cannot validate real-world behavior. Since training texts are long job postings while application inputs are short messages, performance on the synthetic messages is an out-of-domain stress test only.
-
-Preprocessing removes exact duplicate normalized title/description text and rejects conflicting labels. The training script checks that no exact normalized text overlaps the train and test splits. Near-duplicate descriptions and repeated employer templates are not automatically detected. Current scams, teen-specific contexts, class-prior shifts, and non-English content are additional limitations.
-
-## Baselines and actual results
-
-Two fixed baselines are evaluated: predicting every posting as legitimate and a small keyword detector. The keyword rules are comparison baselines, not the app's classifier. Reports contain precision, recall, F1, accuracy, confusion matrices, false-positive and false-negative counts, and example errors.
-
-The actual saved reports are generated by the commands below:
-
-- [`reports/job_posting_metrics.json`](reports/job_posting_metrics.json): actual held-out EMSCAD-derived metrics and baselines.
-- [`reports/synthetic_evaluation.json`](reports/synthetic_evaluation.json): actual evaluation-only synthetic results, including the subtle subset.
-
-The recorded 80/20 posting holdout contains 2,505 examples (2,398 legitimate and 107 fraudulent). The model reached **96.81% accuracy, 61.16% precision, 69.16% recall, and 64.91% F1**. Its confusion matrix, with rows actual and columns predicted in `[legitimate, fraudulent]` order, is `[[2351, 47], [33, 74]]`: **47 false positives and 33 false negatives**.
-
-| Job-posting holdout method | Accuracy | Precision | Recall | F1 | False positives | False negatives |
-|---|---:|---:|---:|---:|---:|---:|
-| TF-IDF + logistic regression | 0.9681 | 0.6116 | 0.6916 | 0.6491 | 47 | 33 |
-| Always predict legitimate | 0.9573 | 0.0000 | 0.0000 | 0.0000 | 0 | 107 |
-| Fixed keyword rules | 0.9529 | 0.1333 | 0.0187 | 0.0328 | 13 | 105 |
-
-The high holdout accuracy partly reflects the class imbalance. The always-legitimate baseline gets 95.73% accuracy while catching no fraudulent postings, so accuracy alone is not meaningful.
-
-On the **32 synthetic messages**, the trained model reached 65.63% accuracy, 100% precision, 31.25% recall, and 47.62% F1, with 0 false positives and **11 false negatives out of 16 synthetic scams**. On the 16 subtle examples it reached 62.50% accuracy and 25.00% recall, missing **6 of 8 subtle synthetic scams**. The fixed keyword baseline reached 37.50% recall on all synthetic messages; always-legitimate reached 0%. These small, hand-authored results are not a fair estimate of real-world message performance, but they make the domain mismatch visible: the classifier misses many short scam messages. The demonstration warning for the provided recruitment text is therefore produced by multiple independent evidence signals, not by overriding or falsifying the model's negative prediction.
-
-## Candidate model review (2026-11-14)
-
-**The API keeps the original model.** The development-selected `joint_hybrid_prefix` candidate regressed on the unchanged synthetic first-contact benchmark: **4/16 scams caught versus 5/16**, and **0/8 subtle scams versus 2/8**. Both had zero false positives among 16 synthetic legitimate messages. Better SMS-spam scores did not transfer to recruitment scams; no threshold was retuned on final examples.
-
-All frozen candidate results were independently reproduced. An additional audit found near-template matches in the candidate posting holdout and development inputs, despite the historical parent-group audit. Future experiments now stop on effective-training overlaps, including posting-prefix augmentation. The reserved SMS holdout and synthetic benchmark passed this additional check, but neither provides authentic first-contact recruitment validation.
-
-See [the integration decision and full measured comparison](reports/ai_model_integration.md), [machine-readable reproduction](reports/model_integration_verification.json), and [all candidate results](reports/improvement_evaluation.json). The report includes precision, recall, F1, FP/FN, subtle results, hashes, leakage findings, 60-test verification, and reproducible commands. `models/first_contact_candidate.joblib` is retained for research only; it is not the default for `/api/scan`.
-
-## Run locally (Windows)
-
-Use Python 3.11 or newer (tested with 3.12). One-time setup from the repository folder:
+Open PowerShell where you want the project. Clone the **release branch**, because the default GitHub branch is the earlier frontend:
 
 ```powershell
+git clone --branch release/veritas-2026 https://github.com/asafggtyry/Detect-First.git
+cd Detect-First
+python --version
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt -c requirements-lock.txt
+.\.venv\Scripts\python.exe -m detect_first.server
 ```
 
-**Start the full application with one command:**
+Open **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)**. Keep PowerShell open. Stop with **Ctrl+C**. No virtual-environment activation or PowerShell policy change is needed. For a branch ZIP, extract it and open PowerShell in the directory containing this README before the `python --version` step.
+
+The server serves both `frontend/` and `/api/scan` from the same origin. Wait for **Live classifier connected**. Do not open `index.html` directly or use a separate static server. The app never falls back to sample responses.
+
+For later runs, from the repository root:
 
 ```powershell
 .\.venv\Scripts\python.exe -m detect_first.server
 ```
 
-Open **http://127.0.0.1:8000/**. The server serves `frontend/` and the API from the same origin; no frontend build or separate static server is needed. Use `--port 8001` if port 8000 is occupied. Stop with Ctrl+C. The checked-in model is loaded once on startup; no retraining, data download or external API is needed to run the demo. scikit-learn is pinned to the artifact's training version (1.9.1). A missing/incompatible model fails startup rather than returning fabricated predictions.
+If port 8000 is occupied, run `.\.venv\Scripts\python.exe -m detect_first.server --port 8001` and open `http://127.0.0.1:8001/`. Use the same origin consistently.
 
-`app.py` remains the original, separate Streamlit prototype, including its synthetic input panel. It is not the entry point for the integrated Fable app.
+| Problem | Fix |
+|---|---|
+| `python` opens the Store or is missing | Install full Python 3.12 with pip from [python.org](https://www.python.org/downloads/), enable PATH, and reopen PowerShell. |
+| `venv` reports missing `ensurepip` | Use a full Python distribution. The bundled agent runtime lacked it during verification; pip was bootstrapped separately into the fresh environment. |
+| Missing/incompatible model | Restore `models/job_posting_classifier.joblib` from the release checkout and reinstall requirements. Do not retrain to fix the demo. |
+| Connection error | Start/restart the server, open its loopback URL and use **Try again**. No substitute verdict is shown. |
+| Old choices/replies remain | **More options → Reset demo** with the API running. Clearing this site's browser data also removes local choices. |
+| Session capacity reached | Reset this browser or restart the local server. |
 
-## Live API contract
+`app.py` is the earlier standalone Streamlit prototype, retained for history/testing. **It is not the final demo entry point.**
 
-`POST /api/scan`, `Content-Type: application/json`:
+## Demo walkthrough
 
-```json
-{"message":"Hi, we met yesterday.","sender":"124-5135-2355","is_saved_contact":false,"is_first_message":true}
-```
+1. Open **Mom**: saved contact, not scanned. This is a scope rule, not proof of safety.
+2. Open **124-5135-2355**: a harmless unknown sender's first message is scanned once and triggers no warning. No warning is not a safety guarantee.
+3. Open **732-882-1944**: inspect the $60 deposit, up to $300/day claim and quick-reply pressure. Scroll the evidence list.
+4. Point out **the ML classifier did not flag this message**. Separate rules trigger this warning. No employer was independently verified.
+5. **Block** removes the reply box. **Accept Anyway** allows simulated replies and reopening the warning. **Reset demo** clears choices/replies and requests fresh scans.
 
-Successful response for that message with the saved model:
+The home screen starts the two unknown-sender scans. Saved contacts and outgoing replies are not sent for classification. Later messages are outside this first-message-only policy.
 
-```json
-{
-  "is_scam": false,
-  "reasons": [],
-  "model_flagged": false,
-  "evidence_flagged": false,
-  "warning_source": "none",
-  "scanned": true,
-  "skipped_reason": null,
-  "cached": false
-}
-```
+Submission assets: [two-minute demo script](docs/DEMO.md), [short write-up](docs/SUBMISSION.md), [remaining checklist](docs/SUBMISSION_CHECKLIST.md), [complete test report](reports/release_verification.md).
 
-- `is_scam` is the **UI warning decision**, not proof of fraud or the raw ML output. It follows the original policy: `model_flagged` OR at least two evidence categories.
-- `model_flagged` is exclusively the trained classifier's Boolean prediction; it is `null` when scanning is skipped.
-- `evidence_flagged` means at least two separate rule categories were found. `warning_source` is `none`, `model`, `evidence`, or `both`.
-- `reasons` contains objects such as `{"category":"upfront_payment_request","evidence":"The message asks for a payment to obtain or begin the job.","source":"evidence_rule"}`. These are rule observations, not learned model explanations or necessarily verbatim quotes.
-- Categories: `unsolicited_job_offer`, `upfront_payment_request`, `unrealistic_earnings`, `vague_job_details`, `urgency_pressure`, `unverified_employer`.
-- Saved contacts and later messages return `scanned:false`, `is_scam:false`, `model_flagged:null`, `reasons:[]`, and `skipped_reason` of `saved_contact`, `not_first_message`, or `already_scanned`. A skipped message is **not** a clean prediction.
-- First-message tracking is per browser session and sender. Identical first-message retries return the original result with `cached:true`, without rerunning inference. Changed messages for an already-seen sender are skipped, even if flagged as first. Concurrent retries are serialized. API clients must retain the session cookie; browsers establish it when loading `/` or `/index.html`.
-- `POST /api/reset` returns `{"reset":true}` and starts a fresh scan session for that browser. The frontend waits for success before clearing decisions/replies and rescanning. Other browser sessions are unaffected.
-- All four request fields are required. Boolean fields must be real JSON booleans. Message length is 1–5,000 characters; sender length is 1–200; whitespace-only strings are rejected. Errors return `{"error":"..."}`: 400 invalid fields/JSON, 413 oversized body, 415 wrong content type, 403 cross-origin request, 429 demo capacity reached, or 503 inference failure. No failure produces a fake clean verdict or sample result.
+## Model versus evidence rules
 
-The frontend is live-only: HTTP failures, invalid responses, and timeouts show a connection error and **Try again**. The old `demo-fixtures.js` file is retained but is neither loaded nor used. Warning text explicitly distinguishes model and evidence sources; reasons are labelled as separate evidence-rule observations.
+The original model is **TF-IDF word unigrams/bigrams + balanced logistic regression**, trained with scikit-learn 1.9.1 on job-posting titles/descriptions. It uses a stratified 80/20 split, seed 2026. No release training or threshold tuning was performed.
 
-This is a single-process local demo bound to loopback, not a production messaging service. Sender/contact/first-message metadata is supplied by the client and cannot be independently verified. Session state is in memory (at most 256 sessions / 512 senders each); restart, cookie clearing or Reset starts new scan history. Raw incoming messages are not retained by the server; it stores a message hash, sender, and scan results in memory. Simulated outgoing replies and user decisions remain in browser localStorage. The first-message-only policy intentionally does not detect scams introduced in later messages.
+- `model_flagged` is exclusively the learned Boolean prediction; it is `null` when skipped.
+- `reasons` and `evidence_flagged` are deterministic rule/context observations, not model explanations.
+- `is_scam` is the legacy field name for the **UI warning decision**: model flags OR at least two rule categories. It is not proof of fraud.
+- `warning_source` separates `none`, `model`, `evidence` and `both`.
 
-## Testing and model tooling
+Rules inspect work-offer wording, payment wording, daily earnings of at least $200, a limited role/duty word list, urgency, and sender context. The earnings threshold is only a prototype heuristic. Unknown contact does not prove unsolicited contact, and unverified employer does not mean fake employer; the UI labels make these limits clearer.
 
-The existing evaluation tests need the public dataset. Download it without retraining or overwriting the saved model:
+**An unknown first-contact job message can trigger a warning from two context categories alone.** Categories can be correlated. Rules can misread negation/context and cause false warnings. No employer lookup or calibrated risk probability is provided. See the [API contract](docs/API.md).
+
+## Dataset, baselines and actual metrics
+
+Training uses **OpenML 46655, `fake_job_postings2`**, an English EMSCAD-derived posting dataset: 12,725 records, including 551 fraudulent labels. Case/whitespace deduplication removes 200 records, leaving 12,525. The 2,505-record test split contains 107 fraudulent postings. [Provenance, checksum and licence caveats](data/source.md) identify the public source; raw downloads are Git-ignored.
+
+**Historical posting scores have known near-template contamination.** A stronger prior audit found 548 holdout rows at cosine ≥0.90 against training, including three exact matches after contact/number normalization. The original exact-text test missed those templates. These scores reproduce, but are historical comparisons, not clean generalization estimates or recruitment-chat accuracy.
+
+| Historical posting method | Accuracy | Precision | Recall | F1 | FP | FN |
+|---|---:|---:|---:|---:|---:|---:|
+| Original classifier | 96.81% | 61.16% | 69.16% | 64.91% | 47 | 33 |
+| Always legitimate | 95.73% | 0.00% | 0.00% | 0.00% | 0 | 107 |
+| Fixed keyword baseline | 95.29% | 13.33% | 1.87% | 3.28% | 13 | 105 |
+
+The separate 32-message evaluation is **hand-authored synthetic data**, inspired by FTC patterns. It is balanced and excluded from fitting/threshold selection, but already inspected repeatedly: neither a fresh blind test nor real-world validation.
+
+| Synthetic method (16 scams + 16 legitimate) | Accuracy | Precision | Recall | F1 | FP | FN |
+|---|---:|---:|---:|---:|---:|---:|
+| Original classifier | 65.63% | 100.00% | 31.25% | 47.62% | 0 | 11 |
+| Always legitimate | 50.00% | 0.00% | 0.00% | 0.00% | 0 | 16 |
+| Fixed keyword baseline | 68.75% | 100.00% | 37.50% | 54.55% | 0 | 10 |
+
+The classifier catches **5/16 synthetic scams**, including **2/8 subtle scams**. Zero FP on 16 synthetic negatives does not establish a low real-world false-positive rate. The keyword baseline is separate from the app's multi-category warning policy. All table metrics count classifier/baseline predictions, never combined warnings.
+
+The rejected research candidate catches **4/16 overall and 0/8 subtle synthetic scams**, so the original remains in use. Better generic SMS-spam scores do not establish recruitment performance. **Authentic first-contact recruitment validation is unavailable.** Neither model is demonstrated reliable for that task.
+
+See [all evaluation tables and matrices](docs/EVALUATION.md), [release metric reproduction](reports/release_metrics.json), and [frozen integration audit](reports/ai_model_integration.md).
+
+## Run all tests and reproduce metrics
+
+From the repository root after setup:
 
 ```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt -c requirements-lock.txt
 .\.venv\Scripts\python.exe scripts\download_test_data.py
-.\.venv\Scripts\python.exe -m pytest -q
-```
-
-Run **all tests, including real Chromium mobile integration tests**:
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 $env:PLAYWRIGHT_BROWSERS_PATH = "$PWD\.venv\pw-browsers"
 .\.venv\Scripts\python.exe -m playwright install chromium
-.\.venv\Scripts\python.exe -m pytest -q --browser-tests
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe -m pytest -q --browser-tests --junitxml=reports/release_tests.xml
+.\.venv\Scripts\python.exe scripts\verify_release_metrics.py
 ```
 
-Browser tests start their own local server and use the real saved classifier at 390×844 and 320×568. They cover all three conversations, Block, Accept Anyway, reopening warnings, Reset, outgoing replies not being scanned, unavailable API, malformed responses, and recovery. Without `--browser-tests`, browser cases are explicitly skipped. Screenshots are saved under `reports/browser/`. The original Streamlit startup test requires local sockets; restrictive sandboxes can block it.
+Tests start their own local server. They exercise the saved model, HTTP contract, sessions/caching, first-message exclusions, all conversations/actions, Reset and failure recovery in Chromium at **390×844 and 320×568**. Browser tests require local process/socket permission. Omitting `--browser-tests` explicitly skips browser cases; that is not a complete run. Mobile emulation does not certify physical devices or Safari.
 
-The original training and evaluation commands remain `python scripts/train_model.py` and `python scripts/evaluate.py`. Training overwrites the original model/report, so it is not part of startup or integration testing. Raw downloaded data remains Git-ignored. Integration does not change the classifier, evidence patterns, or recorded model metrics above.
+See [complete release verification](reports/release_verification.md) and [JUnit results](reports/release_tests.xml). The metric verifier compares original model/baseline results to the committed reports and checks the artifact hash without fitting anything.
 
-## Two-minute presentation walkthrough
+To capture actual browser/API responses from a separately running demo server, run `.\.venv\Scripts\python.exe scripts\verify_live_demo.py` in a second PowerShell window with the same `PLAYWRIGHT_BROWSERS_PATH` setting. Add `--url http://127.0.0.1:8001` if you used that port. This writes `reports/release_demo_responses.json` and home screenshots; it checks that fixture scripts and external requests are absent.
 
-1. Open Detect First and point out that this is a simulation, not connected to a phone or WhatsApp.
-2. Select **Mom**: the saved-contact note explains why scanning was skipped.
-3. Select **124-5135-2355**: the first message was scanned once and remains visible without a warning.
-4. Select **732-882-1944**: show the “Potential job scam detected” card, the separate model result, and the concrete message evidence. Emphasize that the warning is not a verdict.
-5. Demonstrate **Block sender**, then use **Reset demo** to replay; on the reset screen, use **Accept anyway** to show the alternate response.
-6. Briefly mention the holdout and synthetic reports, the dataset's job-posting/SMS mismatch, and how the evaluation-only examples remain separate from training.
+`requirements-lock.txt` records the exact tested Windows/Python 3.12 versions. Using it as constraints pins runtime setup; `pip install -r requirements-lock.txt` installs the full tested environment. Node is unnecessary for the app; it was used only to syntax-check JavaScript.
 
-## Credits
+## Reproduction files and research history
 
-- **Dataset:** EMSCAD-derived `fake_job_postings2`, OpenML data ID 46655; original Kaggle dataset credits the University of the Aegean Laboratory of Information & Communication Systems Security. See [source notes](data/source.md).
-- **Synthetic evaluation patterns:** U.S. Federal Trade Commission consumer guidance about job scams; synthetic examples were written for this project and are not copied as real messages.
-- **Libraries:** scikit-learn (TF-IDF and logistic regression), Flask (local API/static server), Streamlit (original prototype), joblib (model persistence), pytest and Playwright (tests).
-- **Model:** trained by this project; no pretrained model or paid API is used.
-- **AI coding assistance:** GitHub Copilot SDK in VS Code.
-- **Tutorials:** no tutorial code was copied.
+| Path | Purpose |
+|---|---|
+| `frontend/` | Complete no-build UI. Historical `demo-fixtures.js` is never loaded. |
+| `detect_first/` | API, model loader, evidence, state and research utilities. |
+| `models/job_posting_classifier.joblib` | Original release model; SHA-256 `6e6359e96e201c8814fdc183f070acef1c35daa963b699b6206bf83eceff2c42`. |
+| `models/first_contact_candidate.joblib` | Rejected research artifact; not the API default. |
+| `data/synthetic/`, `reports/`, `tests/`, `scripts/` | Evaluation examples, measured results, tests and source/download tools. |
+| `docs/` | Submission text, demo, API, privacy, evaluation and checklist. |
 
-## Original contribution
+All code/artifacts needed to **run the demo and reproduce release metrics** are tracked. Public datasets download with checksum verification. Four unselected intermediate experimental artifacts are not shipped; their historical metrics remain documented. The two shipped artifacts can be verified with `scripts/verify_model_integration.py --rebuild-groups` after downloading posting and SMS data as described in the [audit](reports/ai_model_integration.md).
 
-The project combines a first-contact-only scan state machine, a real but carefully caveated text classifier, independent evidence explanations, and two user actions that change the simulated conversation state. The aim is to teach students to pause and inspect a job offer rather than to label people or employers as proven scammers.
+Training scripts remain for transparency, not demo setup. `scripts/train_model.py` overwrites the original model/report. The candidate experiment is frozen and prevents rerunning into existing reports. Do not train or tune on exposed final examples for this submission.
+
+## Privacy, limits and credits
+
+This is a local single-process educational prototype, with no real messaging, employer verification, calibrated probability, authentic recruitment validation or later-message detection. Block affects only the simulation. Text is processed locally; the server retains hashes/senders/results in memory and localStorage retains choices/replies until successful Reset or browser-data clearing. Use fictional text. [Privacy and dependency notes](docs/PRIVACY.md) describe retention and scope.
+
+Credits: OpenML/EMSCAD and the University of the Aegean Laboratory of Information & Communication Systems Security; FTC guidance for synthetic patterns; the repository's Fable frontend inspired by WhatsApp (no affiliation); scikit-learn, Flask, Streamlit, joblib, pytest and Playwright. The prior README credits GitHub Copilot SDK in VS Code; **OpenAI Codex assisted release engineering, testing and documentation**. The model was trained within this project, not obtained from a pretrained-model API. Team names/roles and complete AI disclosures need team confirmation.
+
+Official rules, deadline, portal, judge access, allowed AI assistance, asset requirements and licensing obligations remain unconfirmed. Follow the [submission checklist](docs/SUBMISSION_CHECKLIST.md). No default branch or repository visibility was changed.

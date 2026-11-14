@@ -55,7 +55,8 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
   width: 390px;
   height: min(844px, calc(100dvh - 48px));
   min-height: 560px;
-  overflow: hidden;
+  /* Clip sliding screens without creating a focus-scrollable outer container. */
+  overflow: clip;
   background: var(--surface);
   border-radius: 28px;
   box-shadow: 0 0 0 10px #1c2326, 0 30px 60px -20px rgba(17, 27, 33, 0.45);
@@ -155,6 +156,7 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 /* ---------- chat list ---------- */
 
 .home-body { flex: 1; overflow-y: auto; }
+.prototype-note { margin: 0; padding: 10px 16px; background: #f0f4f3; color: #3b4a54; font-size: 12px; text-align: center; }
 
 .row {
   display: flex; align-items: center; gap: 14px;
@@ -196,7 +198,7 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 /* ---------- conversation ---------- */
 
 .thread {
-  flex: 1; overflow-y: auto;
+  flex: 1; min-height: 0; overflow-y: auto;
   display: flex; flex-direction: column; align-items: flex-start;
   padding: 10px 14px 12px;
   background-color: var(--wallpaper);
@@ -204,6 +206,7 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 }
 
 .chip {
+  flex-shrink: 0;
   align-self: center; max-width: 88%;
   margin: 4px 0 8px; padding: 5px 12px; border-radius: 8px;
   background: rgba(255, 255, 255, 0.92); color: #54656f;
@@ -226,6 +229,7 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 .link-btn { color: var(--green); font-weight: 500; text-decoration: underline; }
 
 .bubble {
+  flex-shrink: 0;
   position: relative; max-width: 84%;
   margin: 2px 0 6px; padding: 6px 9px 7px;
   border-radius: 8px; background: var(--bubble-in);
@@ -266,7 +270,7 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
   font-size: 16px; box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
 }
 .composer-input::placeholder { color: #8696a0; }
-.composer-input:focus { outline: none; }
+.composer-input:focus-visible { outline: 2px solid var(--green); outline-offset: -3px; }
 .send-btn {
   flex: none; width: 46px; height: 46px; padding: 12px 10px 12px 13px;
   border-radius: 50%; background: var(--accent); color: #fff;
@@ -330,8 +334,9 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 
 .toast {
   position: absolute; left: 50%; bottom: 84px; z-index: 10;
+  width: max-content; max-width: calc(100% - 24px);
   padding: 8px 16px; border-radius: 18px;
-  background: rgba(17, 27, 33, 0.88); color: #fff; font-size: 13.500px; white-space: nowrap;
+  background: rgba(17, 27, 33, 0.88); color: #fff; font-size: 13.500px; white-space: normal; text-align: center; overflow-wrap: anywhere;
   opacity: 0; transform: translate(-50%, 8px); pointer-events: none;
   transition: opacity 0.2s, transform 0.2s var(--ease);
 }
