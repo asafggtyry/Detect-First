@@ -422,8 +422,9 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 
 .warning-review { font-size: inherit; text-align: left; }
 .warning-review.is-active { text-decoration: underline; }
+.warning-findings-row { margin-top: 3px; font-size: 12px; line-height: 1; }
 
-.warning-actions { flex: none; display: flex; gap: 10px; margin-top: 12px; }
+.warning-actions { flex: none; display: flex; gap: 10px; margin-top: 8px; }
 .btn {
   flex: 1; height: 44px; border-radius: 22px;
   font-size: 15px; font-weight: 500;
@@ -499,7 +500,7 @@ svg { width: 100%; height: 100%; fill: currentColor; display: block; }
 /* Small phones: tighter warning panel so the message and both actions stay reachable. */
 @media (max-height: 620px) {
   .warning { padding: 12px 14px 10px; }
-  .warning-actions { margin-top: 10px; }
+  .warning-actions { margin-top: 6px; }
   .btn { height: 42px; }
 }
 

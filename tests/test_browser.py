@@ -39,6 +39,27 @@ def home(page):
     page.wait_for_function("!document.querySelector('#phone').classList.contains('chat-open')")
 
 
+def test_hash_routes_open_home_and_back_from_deep_link(page, live_url):
+    from playwright.sync_api import expect
+
+    page.goto(live_url + "/?debug=2026#/chat/u2")
+    expect(page.locator("#scan-status")).to_have_attribute("data-kind", "live")
+    expect(page.locator("#chat-name")).to_have_text("732-882-1944")
+    page.get_by_role("button", name="Back to chats").click()
+    expect(page.get_by_role("button", name="Receive random message")).to_be_visible()
+    expect(page.locator("#chat-list .row")).to_have_count(3)
+
+    page.goto(live_url + "/#/")
+    expect(page.get_by_role("button", name="Receive random message")).to_be_visible()
+    expect(page.locator("#chat-list .row")).to_have_count(3)
+
+    page.locator('[data-chat="u2"]').click()
+    expect(page.locator("#chat-name")).to_have_text("732-882-1944")
+    page.get_by_role("button", name="Back to chats").click()
+    expect(page.get_by_role("button", name="Receive random message")).to_be_visible()
+    assert page.evaluate("location.hash") == "#/"
+
+
 @pytest.mark.parametrize("width,height", [(390, 844), (320, 568)])
 def test_mobile_scenarios_actions_and_reset(page, live_url, width, height):
     from playwright.sync_api import expect

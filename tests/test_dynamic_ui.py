@@ -229,6 +229,24 @@ def test_fixed_demo_chat_highlights_only_live_backend_evidence(page, live_url):
     expect(page.locator(".hl")).to_have_count(0)
 
 
+def test_see_all_findings_lists_only_backend_reasons_without_spans(page, live_url):
+    from playwright.sync_api import expect
+
+    load(page, live_url)
+    page.locator('[data-chat="u2"]').click()
+    link = page.get_by_role("link", name="See all findings")
+    expect(link).to_be_visible()
+    link.click()
+    popup = page.locator("#evidence-pop")
+    expect(popup).to_be_visible()
+    expect(page.locator("#evidence-pop-category")).to_have_text("All findings")
+    expect(page.locator("#evidence-pop-list li")).to_have_count(2)
+    expect(page.locator("#evidence-pop-list")).to_contain_text("Limited role details")
+    expect(page.locator("#evidence-pop-list")).to_contain_text("Employer not verified by demo")
+    expect(page.locator("#evidence-pop-note")).to_contain_text("not an explanation of the ML model")
+    page.screenshot(path=str(SHOTS / "all-findings-390.png"))
+
+
 def test_repeated_unknown_sender_reuses_conversation_and_first_analysis(page, live_url):
     from playwright.sync_api import expect
 

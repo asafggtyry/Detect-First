@@ -487,11 +487,26 @@
 
   // The warning panel stays minimal: the highlighted phrases in the message carry the detail.
   // The model/evidence distinction stays in the data attributes and in the explanation popup.
+  function unanchoredFindings(scan) {
+    var anchored = {};
+    scan.spans.forEach(function (span) { anchored[span.key] = true; });
+    return scan.reasons.filter(function (reason) { return !anchored[reason.key]; });
+  }
+
   function buildWarning(chat, scan, decision) {
     var accepted = decision === "accepted";
+    var unanchored = unanchoredFindings(scan);
     var review = el("button", { class: "link-btn warning-review", type: "button", "data-action": "review-warning",
       "aria-haspopup": "dialog", text: "Review why this was flagged" });
     review.addEventListener("click", function () { toggleReview(review, scan); });
+    var findings = scan.spans.length && unanchored.length
+      ? el("a", { class: "link-btn warning-review warning-findings", href: "#", "aria-haspopup": "dialog",
+          text: "See all findings" })
+      : null;
+    if (findings) findings.addEventListener("click", function (event) {
+      event.preventDefault();
+      toggleReview(findings, scan, unanchored);
+    });
     return el("section", { class: "warning", role: "region", "aria-labelledby": "warning-title",
       "data-warning-source": scan.warningSource || "",
       "data-model": scan.modelFlagged ? "flagged" : "not-flagged",
@@ -503,6 +518,7 @@
           scan.spans.length
             ? el("p", { class: "warning-sub", text: "Tap highlighted text in the message to learn why." })
             : el("p", { class: "warning-sub" }, review))),
+          findings ? el("div", { class: "warning-findings-row" }, findings) : null,
       el("div", { class: "warning-actions" },
         el("button", { class: "btn btn-danger", type: "button", "data-action": "block", text: "Block",
           onclick: function () { decide(chat, "blocked"); } }),
@@ -548,18 +564,21 @@
 
   // Fallback when a message is flagged but nothing could be highlighted:
   // list whatever the backend actually returned, and nothing else.
-  function toggleReview(button, scan) {
+  function toggleReview(button, scan, selectedReasons) {
     if (activeMark === button) { closeEvidence(true); return; }
+    var reasons = selectedReasons || scan.reasons;
     var modelText = scan.modelFlagged
       ? "The ML classifier flagged this message based on wording learned from job postings. It does not point to specific phrases."
       : "";
     showPop(button, {
-      title: "Why this was flagged",
-      text: scan.reasons.length
-        ? (scan.modelFlagged ? modelText + " Separate evidence rules also noted:" : "The analyzer\u2019s evidence rules noted:")
+      title: selectedReasons ? "All findings" : "Why this was flagged",
+      text: reasons.length
+        ? (selectedReasons
+          ? (modelText ? modelText + " " : "") + "The analyzer reported findings without matching highlighted phrases:"
+          : (scan.modelFlagged ? modelText + " Separate evidence rules also noted:" : "The analyzer\u2019s evidence rules noted:"))
         : modelText || "The analyzer flagged this message but supplied no details.",
-      reasons: scan.reasons,
-      note: scan.reasons.length ? RULE_NOTE : scan.modelFlagged ? MODEL_NOTE : ""
+      reasons: reasons,
+      note: reasons.length ? RULE_NOTE : scan.modelFlagged ? MODEL_NOTE : ""
     });
   }
 
