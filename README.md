@@ -2,9 +2,7 @@
 
 **A local messaging prototype that helps students pause before replying to unfamiliar job offers.** Built for the Veritas AI 2026 hackathon; intended track: AI + Finance. Official requirements still need confirmation.
 
-This branch is an experiment based on the verified `release/veritas-2026` commit. It adds a **Test Message** screen while preserving the original model and demo behavior; it has not been merged into or promoted over the verified release. Use a checkout of `experiment/live-detection-lab` to try it; the branch may remain local until explicitly published.
-
-The WhatsApp-inspired demo includes three fictional conversations, a real trained classifier, evidence warnings, **Block**, **Accept Anyway**, and **Reset demo**. The Test Message screen sends arbitrary text only to the same-origin local API and shows ML and evidence-rule results separately. It is not connected to WhatsApp or a phone, does not independently verify employers, and is not financial advice.
+The `feature/dynamic-scanning-integrated` branch combines Fable's WhatsApp-inspired UI with a server-backed randomized incoming-message simulator. The original trained classifier and evidence rules run on the incoming text; synthetic scenario labels never force predictions. The initial three demo conversations, **Test Message**, **Block**, **Accept Anyway**, and **Reset demo** remain available. It is not connected to WhatsApp or a phone, does not independently verify employers, and is not financial advice.
 
 ## Windows setup: start here
 
@@ -13,7 +11,7 @@ You need **64-bit Python 3.12**, Git (if cloning), and a current browser. Tested
 Open PowerShell where you want the project. Once the experiment branch is published, it can be cloned separately from the verified release:
 
 ```powershell
-git clone --branch experiment/live-detection-lab https://github.com/asafggtyry/Detect-First.git
+git clone --branch feature/dynamic-scanning-integrated https://github.com/asafggtyry/Detect-First.git
 cd Detect-First
 python --version
 python -m venv .venv
@@ -23,7 +21,7 @@ python -m venv .venv
 
 Open **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)**. Keep PowerShell open. Stop with **Ctrl+C**. No virtual-environment activation or PowerShell policy change is needed. For a branch ZIP, extract it and open PowerShell in the directory containing this README before the `python --version` step.
 
-The server serves `frontend/`, `/api/scan`, and `/api/analyze` from the same origin. Wait for **Live classifier connected**. Do not open `index.html` directly or use a separate static server. The app never falls back to sample responses.
+The server serves `frontend/` and its APIs from the same origin. Wait for **Live classifier connected**. Do not open `index.html` directly or use a separate static server. The app never falls back to sample responses.
 
 For later runs, from the repository root:
 
@@ -46,12 +44,12 @@ If port 8000 is occupied, run `.\.venv\Scripts\python.exe -m detect_first.server
 
 ## Demo walkthrough
 
-1. Open **Mom**: saved contact, not scanned. This is a scope rule, not proof of safety.
-2. Open **124-5135-2355**: a harmless unknown sender's first message is scanned once and triggers no warning. No warning is not a safety guarantee.
-3. Open **732-882-1944**: inspect the $60 deposit, up to $300/day claim and quick-reply pressure. Scroll the evidence list.
-4. Point out **the ML classifier did not flag this message**. Separate rules trigger this warning. No employer was independently verified.
-5. **Block** removes the reply box. **Accept Anyway** allows simulated replies and reopening the warning. **Reset demo** clears choices/replies and requests fresh scans.
-6. Open **More options → Test Message** to try arbitrary first-contact text. **Analyze** calls the live local backend; compare its model prediction with evidence categories and snippets. **Reset test** clears the page-only draft and result. Test messages are not saved.
+1. **Receive random message** asks the server for one of three synthetic scenarios: saved family/friend, harmless stranger, or potential fraudulent recruiter. The scenario menu can select a type; equal random selection is for demonstration only, not a real-world frequency estimate.
+2. The server returns a conversation ID, message, ground-truth scenario label, and analysis. Saved contacts bypass scanning in this prototype. The actual trained model and evidence rules analyze the first incoming message from an unsaved sender.
+3. Open the message to inspect the model prediction separately from evidence-rule findings. Only exact backend-provided evidence spans are highlighted. Tap a highlight for its category and explanation.
+4. The model may miss recruiter fixtures. In the 30 synthetic demo fixtures, it flagged 3/10 recruiter examples; the combined warning flagged 6/10 and missed 4/10. No normal-stranger fixture triggered a warning. These are demo checks, not real-world accuracy.
+5. **Block** and **Accept Anyway** persist to the server session. Opening a chat does not generate another message or rerun its analysis. **Reset demo** clears server-generated history and decisions plus local presentation state.
+6. **More options → Test Message** analyzes arbitrary first-contact text through the same local model and evidence rules. **Reset test** clears the page-only draft and result; test messages do not enter conversation history.
 
 The home screen starts the two unknown-sender scans. Saved contacts and outgoing replies are not sent for classification. Later messages are outside this first-message-only policy.
 
@@ -72,7 +70,7 @@ Rules inspect work-offer wording, payment wording, daily earnings of at least $2
 
 ## Dataset, baselines and actual metrics
 
-Training uses **OpenML 46655, `fake_job_postings2`**, an English EMSCAD-derived posting dataset: 12,725 records, including 551 fraudulent labels. Case/whitespace deduplication removes 200 records, leaving 12,525. The 2,505-record test split contains 107 fraudulent postings. [Provenance, checksum and licence caveats](data/source.md) identify the public source; raw downloads are Git-ignored.
+Training uses **OpenML 46655, `fake_job_postings2`**, an English EMSCAD-derived posting dataset: 12,725 records, including 551 fraudulent labels. Case/whitespace deduplication removes 200 records, leaving 12,525. The 2,505-record test split contains 107 fraudulent postings. [Provenance, checksum and licence caveats](data/source.md) identify the public source; raw downloads are Git-ignored. The simulator's 30 fictional fixtures are separate and are never training, validation, or final evaluation data.
 
 **Historical posting scores have known near-template contamination.** A stronger prior audit found 548 holdout rows at cosine ≥0.90 against training, including three exact matches after contact/number normalization. The original exact-text test missed those templates. These scores reproduce, but are historical comparisons, not clean generalization estimates or recruitment-chat accuracy.
 
@@ -102,11 +100,13 @@ From the repository root after setup:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt -c requirements-lock.txt
-.\.venv\Scripts\python.exe scripts\download_test_data.py
+if (-not (Test-Path data\raw\fake_job_postings2.arff)) {
+    .\.venv\Scripts\python.exe scripts\download_test_data.py
+}
 $env:PLAYWRIGHT_BROWSERS_PATH = "$PWD\.venv\pw-browsers"
 .\.venv\Scripts\python.exe -m playwright install chromium
 .\.venv\Scripts\python.exe -m pip check
-.\.venv\Scripts\python.exe -m pytest -q --browser-tests --junitxml=reports/experiment_live_detection_tests.xml
+.\.venv\Scripts\python.exe -m pytest -q --browser-tests --junitxml=reports/dynamic_scanning_integrated_tests.xml
 .\.venv\Scripts\python.exe scripts\verify_release_metrics.py
 ```
 
@@ -135,7 +135,7 @@ Training scripts remain for transparency, not demo setup. `scripts/train_model.p
 
 ## Privacy, limits and credits
 
-This is a local single-process educational prototype, with no real messaging, employer verification, calibrated probability, authentic recruitment validation or later-message detection. Block affects only the simulation. Text is processed locally; the server retains hashes/senders/results in memory and localStorage retains choices/replies until successful Reset or browser-data clearing. Use fictional text. [Privacy and dependency notes](docs/PRIVACY.md) describe retention and scope.
+This is a local single-process educational prototype, with no real messaging, employer verification, calibrated probability, authentic recruitment validation or later-message detection. Block affects only the simulation. Text is processed locally; generated conversations, scan results, and decisions are held in memory under the browser's HttpOnly session cookie. Browser localStorage retains only presentation state and simulated outgoing replies until successful Reset or browser-data clearing. Use fictional text. [Privacy and dependency notes](docs/PRIVACY.md) describe retention and scope.
 
 Credits: OpenML/EMSCAD and the University of the Aegean Laboratory of Information & Communication Systems Security; FTC guidance for synthetic patterns; the repository's Fable frontend inspired by WhatsApp (no affiliation); scikit-learn, Flask, Streamlit, joblib, pytest and Playwright. The prior README credits GitHub Copilot SDK in VS Code; **OpenAI Codex assisted release engineering, testing and documentation**. The model was trained within this project, not obtained from a pretrained-model API. Team names/roles and complete AI disclosures need team confirmation.
 

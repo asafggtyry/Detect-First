@@ -1,8 +1,12 @@
 from detect_first.server import create_app
 
 
-def receive(client, seed=None):
-    payload = {} if seed is None else {"seed": seed}
+def receive(client, seed=None, scenario_label=None):
+    payload = {}
+    if seed is not None:
+        payload["seed"] = seed
+    if scenario_label is not None:
+        payload["scenario_label"] = scenario_label
     response = client.post("/api/demo/receive", json=payload)
     assert response.status_code == 200
     return response.json
@@ -120,11 +124,41 @@ def test_truth_label_does_not_force_live_prediction_or_warning():
         "fraudulent_fixtures_missed"
     ] == 1
 
-    rejected = client.post("/api/demo/receive", json={
-        "seed": 1,
-        "scenario_label": "family_friend",
-    })
-    assert rejected.status_code == 400
+    selected = receive(client, scenario_label="family_friend")["conversation"]
+    assert selected["scenario_label"] == "family_friend"
+    assert selected["analysis"]["scanned"] is False
+    assert client.post("/api/demo/receive", json={"scenario_label": "fraudulent"}).status_code == 400
+
+
+def test_repeated_senders_keep_one_conversation_and_only_one_first_scan():
+    calls = []
+    client = create_app(classifier=lambda text: calls.append(text) or False).test_client()
+
+    recruiter_messages = [
+        receive(client, scenario_label="potential_fraudulent_recruiter")["conversation"]
+        for _ in range(11)
+    ]
+    by_sender = {}
+    for conversation in recruiter_messages:
+        prior = by_sender.setdefault(conversation["sender"], conversation["id"])
+        assert conversation["id"] == prior
+
+    assert len(set(item["id"] for item in recruiter_messages)) == 10
+    assert len(calls) == 10
+    history = client.get("/api/demo/history").json
+    repeated = next(item for item in history["conversations"] if len(item["messages"]) == 2)
+    assert repeated["analysis"]["scanned"] is True
+    assert len(repeated["messages"]) == 2
+
+    family = [
+        receive(client, scenario_label="family_friend")["conversation"]
+        for _ in range(20)
+    ]
+    mom_records = [item for item in family if item["sender"] == "mom"]
+    assert len(mom_records) == 2
+    assert {item["id"] for item in mom_records} == {"mom"}
+    assert all(item["analysis"]["scanned"] is False for item in family)
+    assert len(calls) == 10
 
 
 def test_scenario_check_reports_fixture_misses_and_false_positives_without_state():
@@ -158,6 +192,7 @@ def test_scenario_check_reports_fixture_misses_and_false_positives_without_state
 def test_history_decisions_reset_and_api_errors():
     client = create_app(classifier=lambda _: False).test_client()
     assert client.get("/api/demo/history").json["conversations"] == []
+    assert client.get("/api/demo/history").json["decisions"] == {}
     assert client.post("/api/demo/receive", data="{bad", content_type="application/json").status_code == 400
     assert client.post("/api/demo/receive", json={"seed": True}).status_code == 400
     assert client.post("/api/demo/receive", json={"seed": " "}).status_code == 400
@@ -175,6 +210,7 @@ def test_history_decisions_reset_and_api_errors():
         f"/api/demo/conversations/{record['id']}/decision",
         json={"decision": "accept"},
     ).json["conversation"]["decision"] == "accepted"
+    assert client.get("/api/demo/history").json["decisions"][record["id"]] == "accepted"
     assert client.post(
         "/api/demo/conversations/missing/decision", json={"decision": "block"}
     ).status_code == 404
@@ -182,9 +218,14 @@ def test_history_decisions_reset_and_api_errors():
         f"/api/demo/conversations/{record['id']}/decision",
         json={"decision": "ignore"},
     ).status_code == 400
+    assert client.post(
+        f"/api/demo/conversations/{record['id']}/decision",
+        json={"decision": []},
+    ).status_code == 400
 
     assert client.post("/api/reset").json == {"reset": True}
     assert client.get("/api/demo/history").json["conversations"] == []
+    assert client.get("/api/demo/history").json["decisions"] == {}
     assert client.post("/api/demo/reset", json={"unexpected": 1}).status_code == 400
 
 

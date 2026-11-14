@@ -148,6 +148,23 @@ def validate_optional_seed(data: object) -> int | str | None:
     raise ValueError("seed must be an integer or a non-empty string of at most 128 characters.")
 
 
+def validate_receive_options(data: object) -> tuple[int | str | None, str | None]:
+    if data is None:
+        return None, None
+    if not isinstance(data, dict) or set(data) - {"seed", "scenario_label"}:
+        raise ValueError('Expected optional "seed" and "scenario_label" fields.')
+    seed = validate_optional_seed({"seed": data["seed"]}) if "seed" in data else None
+    requested_label = data.get("scenario_label")
+    if requested_label is None or requested_label == "random":
+        return seed, None
+    if requested_label not in SCENARIO_LABELS:
+        raise ValueError(
+            "scenario_label must be random, family_friend, normal_stranger, "
+            "or potential_fraudulent_recruiter."
+        )
+    return seed, requested_label
+
+
 def create_app(*, model_path: Path = ROOT / MODEL_PATH,
                classifier: Callable[[str], bool] | None = None) -> Flask:
     app = Flask(__name__, static_folder=str(ROOT / "frontend"), static_url_path="")
@@ -272,7 +289,7 @@ def create_app(*, model_path: Path = ROOT / MODEL_PATH,
     @app.post("/api/demo/receive")
     def demo_receive():
         try:
-            seed = validate_optional_seed(optional_json_body())
+            seed, scenario_label = validate_receive_options(optional_json_body())
         except ValueError as error:
             return jsonify(error=str(error)), 400
         try:
@@ -280,6 +297,7 @@ def create_app(*, model_path: Path = ROOT / MODEL_PATH,
                 session_id(),
                 lambda data: service.scan(session_id(), data),
                 seed,
+                scenario_label,
             )
             return jsonify(result)
         except SeedConflict as error:
@@ -296,7 +314,7 @@ def create_app(*, model_path: Path = ROOT / MODEL_PATH,
         if not isinstance(data, dict) or set(data) != {"decision"}:
             return jsonify(error='Expected a JSON object with "decision".'), 400
         decision = data["decision"]
-        if decision not in {"block", "accept"}:
+        if not isinstance(decision, str) or decision not in {"block", "accept"}:
             return jsonify(error='decision must be "block" or "accept".'), 400
         stored = simulation.decide(
             session_id(), conversation_id,

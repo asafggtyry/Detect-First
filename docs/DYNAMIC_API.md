@@ -1,26 +1,30 @@
 # Dynamic scanning API
 
-This contract supports the randomized incoming-message demo. The current UI does
-not call these endpoints yet; the frontend integration should use the existing
-`/api/scan` and `/api/analyze` contracts plus the endpoints below.
+This contract describes the integrated randomized incoming-message demo. The
+frontend uses the same-origin session cookie and makes all API requests through
+`frontend/api.js`.
 
 ## Receive a simulated message
 
-`POST /api/demo/receive` accepts an optional deterministic seed:
+`POST /api/demo/receive` accepts an optional scenario selector and seed:
 
 ```json
-{"seed": 123}
+{"scenario_label": "potential_fraudulent_recruiter"}
 ```
 
-The seed may be an integer or a non-empty string (up to 128 characters). It
-initializes a session's random sequence on the first receive. Subsequent
-receives should omit the seed (or send `{}`). A different seed after the first
+`scenario_label` is optional and may be `random`, `family_friend`,
+`normal_stranger`, or `potential_fraudulent_recruiter`. Omit it (or use
+`random`) for equal-probability random selection across the three scenario
+types. Equal selection is for demonstration only, not a claim about real-world
+scam frequency. Within a type, fixtures are not repeated until its fixtures
+have been used.
+
+The optional `seed` may be an integer or a non-empty string (up to 128
+characters). It initializes a session's random sequence on the first receive.
+Subsequent receives should omit the seed. A different seed after the first
 generated message returns `409`; reset the demo with a seed to start a new
-reproducible scenario/message sequence. New unsaved senders still receive
-unique random conversation IDs, so IDs differ across reproducible runs.
-Scenario types are selected with equal probability for demonstration only,
-not as a claim about real-world scam frequency. Within a type, fixture messages
-are not repeated until its fixtures have been used.
+reproducible scenario/message sequence. Scenario and fixture order reproduce,
+but UUIDs for new unsaved senders are intentionally unique across sessions.
 
 Example response:
 
@@ -36,7 +40,8 @@ Example response:
     "messages": [
       {
         "direction": "incoming",
-        "text": "We are hiring for a flexible assistant role. Pay a $35 onboarding fee today to reserve your interview.",
+        "text": "🙂 We are hiring for a flexible assistant role. Pay a $35 onboarding fee today to reserve your interview.",
+        "time": "10:14 AM",
         "synthetic": true
       }
     ],
@@ -72,24 +77,24 @@ Example response:
         {
           "category": "unsolicited_job_offer",
           "excerpt": "hiring",
-          "start": 7,
-          "end": 13,
+          "start": 9,
+          "end": 15,
           "explanation": "This is a work offer in the first message from an unsaved sender.",
           "source": "evidence_rule"
         },
         {
           "category": "upfront_payment_request",
           "excerpt": "Pay a $35 onboarding fee",
-          "start": 45,
-          "end": 69,
+          "start": 47,
+          "end": 71,
           "explanation": "The message asks for a payment to obtain or begin the job.",
           "source": "evidence_rule"
         },
         {
           "category": "urgency_pressure",
           "excerpt": "today",
-          "start": 70,
-          "end": 75,
+          "start": 72,
+          "end": 77,
           "explanation": "The message asks for a quick response or sets a short deadline.",
           "source": "evidence_rule"
         }
@@ -116,14 +121,14 @@ Example response:
 }
 ```
 
-The values above illustrate one selected fixture with the saved model; exact
-predictions depend on the installed classifier. Scenario labels are
+The values above illustrate one selected fixture with the saved model. The
+result fields below are model-version dependent. Scenario labels are
 ground-truth metadata for demo reporting only. The prediction path receives
 only the message, sender ID, saved-contact status, and first-message flag; it
 never receives the scenario label. A missed fraudulent fixture remains
 unflagged if neither the classifier nor evidence rules trigger a warning.
 
-The `simulation_fixture_check` reports generated fraudulent fixtures,
+`simulation_fixture_check` reports generated fraudulent fixtures,
 combined-warning flags/misses, and raw model flags. Warnings on normal-stranger
 fixtures are exposed as synthetic negative examples (possible demo false
 positives). Saved family/friend contacts are deliberately not scanned and are
@@ -132,9 +137,12 @@ The current model has not been changed or retrained for this feature.
 
 ## History, decisions, and reset
 
-- `GET /api/demo/history` returns `{"conversations":[...],"simulation_fixture_check":{...}}`
-  for the browser's current session. It reads state only: opening/reopening a
-  chat does not generate a message or invoke classification.
+- `GET /api/demo/history` returns
+  `{"conversations":[...],"decisions":{},"simulation_fixture_check":{...}}`
+  for the browser's current session. Each conversation includes the server
+  analysis and decision; `decisions` also includes decisions for the three
+  starter chats (`mom`, `u1`, and `u2`). It reads state only: opening/reopening
+  a chat does not generate a message or invoke classification.
 - `GET /api/demo/check` runs all synthetic fixtures through the live analyzer
   without storing messages or changing scan history. It reports, per scenario,
   fixture count, scanned count, model flags, and combined UI warning flags; it
@@ -146,7 +154,9 @@ The current model has not been changed or retrained for this feature.
   synthetic scenario results only, not real-world accuracy.
 - `POST /api/demo/conversations/{id}/decision` accepts
   `{"decision":"block"}` or `{"decision":"accept"}` and returns the updated
-  conversation. Unknown IDs return 404; invalid actions return 400.
+  conversation. The response decision is `blocked` or `accepted`. Decisions
+  for the starter chat IDs are also server-side and included in history.
+  Unknown IDs return 404; invalid actions return 400.
 - `POST /api/demo/reset` accepts the same optional seed shape as receive,
   removes generated history and scan decisions, and returns
   `{"reset":true,"seed":123}`. The existing `POST /api/reset` remains
@@ -154,10 +164,13 @@ The current model has not been changed or retrained for this feature.
   `{"reset":true}`.
 
 Simulation history is in memory and scoped to the browser's HttpOnly session
-cookie. Reset or restarting the local process clears it. Generated scenarios
-and message text are synthetic, fictional fixtures stored only for this demo
-session. They are separate from training, validation, and the frozen final
-evaluation set; no fixtures are used to fit or tune a model.
+cookie. Reset or restarting the local process clears it. The integrated
+frontend hydrates generated conversations, scan results, and decisions from
+the server; it does not use localStorage as authority for those values.
+localStorage retains only presentation state and simulated outgoing replies.
+Generated scenarios and message text are synthetic, fictional fixtures stored
+only for this demo session. They are separate from training, validation, and
+the frozen final evaluation set; no fixtures are used to fit or tune a model.
 
 ## Evidence spans
 
@@ -180,9 +193,11 @@ match in the exact submitted text:
 Offsets are zero-based Python Unicode code-point offsets into the original
 message, with an exclusive `end`; the server guarantees
 `message[start:end] == excerpt`. JavaScript clients should convert code-point
-offsets to UTF-16 indices before using string slicing. Spans are ordered
-deterministically by `(start, end, category)`; overlapping real matches are
-retained rather than silently moved or fabricated.
+offsets to UTF-16 indices before using string slicing. Backend spans are
+ordered deterministically by `(start, end, category)`. Since message marks
+cannot nest, the frontend presents non-overlapping spans deterministically
+(leftmost first, longest first at the same start); it never moves a span to a
+different phrase.
 
 `reasons` remains backward-compatible, including context-only observations
 such as vague job details. Context based on an absence (for example, no

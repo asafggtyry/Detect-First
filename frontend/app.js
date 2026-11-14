@@ -5,7 +5,7 @@
   var Api = window.DetectFirstApi;
   var STORAGE_KEY = "detect-first-demo-v1";
 
-  // The three fixed demonstration conversations. `saved: true` contacts are never scanned.
+  // The starter conversations remain local; generated conversations come from server history.
   var DEMO_CHATS = [
     { id: "mom", name: "Mom", saved: true,
       messages: [{ dir: "in", text: "How are you?", time: "9:41 AM" }] },
@@ -14,7 +14,6 @@
     { id: "u2", name: "732-882-1944", saved: false,
       messages: [{ dir: "in", text: "Hello! We are hiring students for remote work. Deposit $60 in the next 24 hours to secure your position and start earning up to $300 per day. Reply now for onboarding details.", time: "7:52 AM" }] }
   ];
-  var MAX_GENERATED = 200;
   var AVATAR_COLORS = ["#6b8fb5", "#7e9a6c", "#b5846b", "#8a78b0", "#5f9ea0", "#b07891"];
 
   var ICONS = {
@@ -28,10 +27,13 @@
 
   // ---------- state ----------
 
-  // Persisted: what the user did in the demo, and the simulated chats received so far.
+  // Only local presentation state is persisted. Scans, generated chats and decisions
+  // are always hydrated from the server.
   var saved = loadSaved();
-  // In memory only: scan results, re-requested on every load and reset.
   var scans = {};      // chatId -> { status: "scanning" | "done" | "error", flagged, reasons, spans, ... }
+  var generated = [];
+  var serverDecisions = {};
+  var serverIncoming = {};
   var panelOpen = {};  // chatId -> true when an accepted chat's warning was reopened
   var openChatId = null;
   var navigatedInApp = false;
@@ -43,10 +45,12 @@
   var receiving = false;
   var receiveRun = 0;
   var receiveError = "";
+  var historyRun = 0;
+  var historyReady = false;
+  var historyLoading = false;
   var arrival = null;  // { id, at } for the chat that just received a message
 
-  // `sent` holds everything after a chat's first message: replies and later incoming messages.
-  function emptySaved() { return { decisions: {}, read: {}, sent: {}, order: {}, generated: [] }; }
+  function emptySaved() { return { read: {}, sent: {}, order: {} }; }
 
   function validMessage(message, dir) {
     return Boolean(message) && typeof message === "object" &&
@@ -62,20 +66,12 @@
         var restored = emptySaved();
         var ids = {};
         DEMO_CHATS.forEach(function (chat) { ids[chat.id] = true; });
-        (Array.isArray(raw.generated) ? raw.generated : []).slice(0, MAX_GENERATED).forEach(function (chat) {
-          if (!chat || typeof chat !== "object" || typeof chat.id !== "string" ||
-              !/^g-[\w-]{1,40}$/.test(chat.id) || ids[chat.id] ||
-              typeof chat.name !== "string" || !chat.name.trim() || chat.name.length > 200 ||
-              typeof chat.saved !== "boolean" || !Array.isArray(chat.messages) ||
-              chat.messages.length !== 1 || !validMessage(chat.messages[0], "in")) return;
-          ids[chat.id] = true;
-          var first = chat.messages[0];
-          restored.generated.push({ id: chat.id, name: chat.name, saved: chat.saved,
-            messages: [{ dir: "in", text: first.text, time: first.time }] });
+        ["read", "sent", "order"].forEach(function (key) {
+          Object.keys(raw[key] || {}).forEach(function (id) {
+            if (/^[\w-]{1,128}$/.test(id)) ids[id] = true;
+          });
         });
         Object.keys(ids).forEach(function (id) {
-          var decision = raw.decisions && raw.decisions[id];
-          if (decision === "blocked" || decision === "accepted") restored.decisions[id] = decision;
           var read = raw.read && raw.read[id];
           if (read === true) restored.read[id] = 1;
           else if (Number.isInteger(read) && read > 0) restored.read[id] = read;
@@ -97,11 +93,13 @@
 
   // ---------- derived state ----------
 
-  function allChats() { return DEMO_CHATS.concat(saved.generated); }
+  function allChats() { return DEMO_CHATS.concat(generated); }
   function chatById(id) { return allChats().filter(function (c) { return c.id === id; })[0] || null; }
   function isFlagged(chat) { var s = scans[chat.id]; return Boolean(s && s.status === "done" && s.flagged); }
-  function decisionFor(chat) { return saved.decisions[chat.id] || null; }
-  function allMessages(chat) { return chat.messages.concat(saved.sent[chat.id] || []); }
+  function decisionFor(chat) { return serverDecisions[chat.id] || chat.decision || null; }
+  function allMessages(chat) {
+    return chat.messages.concat(serverIncoming[chat.id] || [], saved.sent[chat.id] || []);
+  }
   function incomingCount(chat) {
     return allMessages(chat).filter(function (m) { return m.dir === "in"; }).length;
   }
@@ -137,7 +135,7 @@
 
   // Scan a chat's first incoming message. Saved contacts are never sent to the API.
   function scanChat(chat) {
-    if (chat.saved) return;
+    if (chat.saved || chat.serverBacked) return;
     var first = chat.messages.filter(function (m) { return m.dir === "in"; })[0];
     if (!first) return;
     var run = scanRun;
@@ -156,7 +154,13 @@
   function runScans() {
     ++scanRun;
     scans = {};
-    allChats().forEach(scanChat);
+    allChats().forEach(function (chat) {
+      if (chat.serverBacked && chat.analysis) {
+        scans[chat.id] = Object.assign({ status: "done" }, chat.analysis);
+      } else {
+        scanChat(chat);
+      }
+    });
     render();
   }
 
@@ -587,9 +591,10 @@
 
   function renderReceive() {
     var button = $("receive-btn");
-    button.disabled = receiving;
+    button.disabled = receiving || historyLoading || resetting;
     button.classList.toggle("is-busy", receiving);
-    $("receive-label").textContent = receiving ? "Receiving…"
+    $("receive-label").textContent = historyLoading ? "Loading history…"
+      : receiving ? "Receiving…"
       : scenario === "random" ? "Receive random message"
       : "Receive: " + scenarioById(scenario).short;
 
@@ -615,7 +620,11 @@
   // Ask the backend for one simulated message. Only this button does that:
   // opening or reopening a chat never generates anything.
   function receiveMessage() {
-    if (receiving) return;
+    if (receiving || resetting) return;
+    if (!historyReady) {
+      if (!historyLoading) loadHistory();
+      return;
+    }
     var run = ++receiveRun;
     receiving = true;
     receiveError = "";
@@ -632,32 +641,21 @@
     });
   }
 
-  function deliver(incoming) {
-    var message = { dir: "in", text: incoming.text, time: nowTime() };
-    var chat = allChats().filter(function (c) { return c.name === incoming.name; })[0];
-
-    if (chat) {
-      // A further message from a sender we already have: it joins that chat
-      // and, not being a first message, is not scanned.
-      if (decisionFor(chat) === "blocked") {
-        toast(chat.name + " is blocked. Their new message was not delivered.");
-        return;
-      }
-      (saved.sent[chat.id] = saved.sent[chat.id] || []).push(message);
+  function deliver(response) {
+    var incoming = response.conversation;
+    var chat = chatById(incoming.id);
+    if (DEMO_CHATS.some(function (item) { return item.id === incoming.id; })) {
+      serverIncoming[incoming.id] = incoming.messages;
+    } else if (chat) {
+      chat.messages = incoming.messages;
+      chat.analysis = incoming.analysis;
+      chat.decision = incoming.decision;
     } else {
-      if (saved.generated.length >= MAX_GENERATED) {
-        receiveError = "This demo is full. Reset the demo to receive more messages.";
-        return;
-      }
-      chat = {
-        id: "g-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 1e6).toString(36),
-        name: incoming.name, saved: incoming.saved, messages: [message]
-      };
-      saved.generated.push(chat);
-      if (incoming.analysis) scans[chat.id] = Object.assign({ status: "done" }, incoming.analysis);
-      else scanChat(chat);
+      generated.push(incoming);
+      chat = incoming;
     }
-
+    if (incoming.decision) serverDecisions[incoming.id] = incoming.decision;
+    if (incoming.analysis) scans[incoming.id] = Object.assign({ status: "done" }, incoming.analysis);
     saved.order[chat.id] = nextOrder();
     if (openChatId === chat.id) saved.read[chat.id] = incomingCount(chat);
     persist();
@@ -667,6 +665,47 @@
     toast("New message from " + chat.name);
   }
 
+  function hydrateHistory(history) {
+    generated = [];
+    serverIncoming = {};
+    serverDecisions = Object.assign({}, history.decisions);
+    history.conversations.forEach(function (conversation) {
+      var isStarter = DEMO_CHATS.some(function (chat) { return chat.id === conversation.id; });
+      if (conversation.decision) serverDecisions[conversation.id] = conversation.decision;
+      if (isStarter) {
+        serverIncoming[conversation.id] = conversation.messages;
+        return;
+      }
+      generated.push(conversation);
+      if (!saved.order[conversation.id]) saved.order[conversation.id] = nextOrder();
+    });
+    historyReady = true;
+    persist();
+    runScans();
+    applyRoute();
+  }
+
+  function loadHistory() {
+    if (historyLoading) return;
+    historyLoading = true;
+    receiveError = "";
+    var run = ++historyRun;
+    renderReceive();
+    Api.history().then(function (history) {
+      if (run === historyRun) hydrateHistory(history);
+    }).catch(function (error) {
+      if (run !== historyRun) return;
+      historyReady = false;
+      receiveError = Api.describeError(error, "load conversation history");
+      runScans();
+      applyRoute();
+    }).finally(function () {
+      if (run !== historyRun) return;
+      historyLoading = false;
+      renderReceive();
+    });
+  }
+
   function closeScenarioMenu() {
     $("scenario-menu").hidden = true;
     $("scenario-btn").setAttribute("aria-expanded", "false");
@@ -674,12 +713,19 @@
 
   // ---------- actions ----------
 
+  var decisionRuns = {};
   function decide(chat, decision) {
-    saved.decisions[chat.id] = decision;
-    panelOpen[chat.id] = false;
-    persist();
-    render();
-    toast(decision === "blocked" ? chat.name + " blocked" : "Chat accepted");
+    var run = decisionRuns[chat.id] = (decisionRuns[chat.id] || 0) + 1;
+    Api.decide(chat.id, decision === "blocked" ? "block" : "accept").then(function (updated) {
+      if (decisionRuns[chat.id] !== run) return;
+      serverDecisions[chat.id] = updated.decision;
+      panelOpen[chat.id] = false;
+      render();
+      toast(decision === "blocked" ? chat.name + " blocked" : "Chat accepted");
+    }).catch(function (error) {
+      if (decisionRuns[chat.id] !== run) return;
+      toast(Api.describeError(error, "save this decision"));
+    });
   }
 
   function sendMessage(chat, text) {
@@ -694,17 +740,25 @@
   function resetDemo() {
     if (resetting) return;
     resetting = true;
+    ++historyRun;
+    historyLoading = false;
     ++scanRun;
     closeMenu();
+    renderReceive();
     Api.reset().then(finishReset, function () {
       Object.keys(scans).forEach(function (id) { scans[id] = { status: "error" }; });
+      receiveError = "Reset failed. Check the server and retry.";
       render();
-      toast("Reset failed. Check the server and retry.");
-    }).finally(function () { resetting = false; });
+      toast(receiveError);
+    }).finally(function () { resetting = false; renderReceive(); });
   }
 
   function finishReset() {
     saved = emptySaved();
+    generated = [];
+    serverDecisions = {};
+    serverIncoming = {};
+    historyReady = true;
     panelOpen = {};
     ++receiveRun;
     receiving = false;
@@ -844,6 +898,5 @@
   // ---------- start ----------
 
   renderReceive();
-  runScans();
-  applyRoute();
+  loadHistory();
 })();

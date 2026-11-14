@@ -35,7 +35,7 @@ SIMULATION_FIXTURES = (
     MessageFixture("normal_stranger", "Unknown - (919) 555-0159", "+19195550159", "Hi, this is Jordan from the neighborhood clean-up group.", False),
     MessageFixture("normal_stranger", "Unknown - (702) 555-0108", "+17025550108", "Could you confirm the pickup time for the used bookshelf?", False),
     MessageFixture("potential_fraudulent_recruiter", "Unknown - (646) 555-0130", "+16465550130", "Hi, I'm a recruiter at Northstar Talent. Are you open to hearing about part-time remote openings?", False),
-    MessageFixture("potential_fraudulent_recruiter", "Unknown - (213) 555-0181", "+12135550181", "We are hiring for a flexible assistant role. Pay a $35 onboarding fee today to reserve your interview.", False),
+    MessageFixture("potential_fraudulent_recruiter", "Unknown - (213) 555-0181", "+12135550181", "🙂 We are hiring for a flexible assistant role. Pay a $35 onboarding fee today to reserve your interview.", False),
     MessageFixture("potential_fraudulent_recruiter", "Unknown - (404) 555-0167", "+14045550167", "A remote data-entry position is available. Earn $450 per day and reply now to get started.", False),
     MessageFixture("potential_fraudulent_recruiter", "Unknown - (512) 555-0124", "+15125550124", "Your profile was selected for a coordinator job. Send a $20 equipment deposit within 24 hours.", False),
     MessageFixture("potential_fraudulent_recruiter", "Unknown - (801) 555-0196", "+18015550196", "Hello, we have a work opportunity from home. Purchase a training package before your first shift.", False),

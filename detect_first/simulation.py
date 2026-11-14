@@ -5,6 +5,7 @@ import random
 import re
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime
 from threading import Lock
 from typing import Callable
 
@@ -20,6 +21,8 @@ class SimulationSession:
     seed: int | str | None
     rng: random.Random
     conversations: dict[str, dict] = field(default_factory=dict)
+    sender_ids: dict[str, str] = field(default_factory=dict)
+    decisions: dict[str, str] = field(default_factory=dict)
     used_fixtures: dict[str, set[int]] = field(
         default_factory=lambda: {label: set() for label in SCENARIO_LABELS}
     )
@@ -44,6 +47,7 @@ class SimulationService:
         session_id: str,
         scan: Callable[[dict], dict],
         seed: int | str | None = None,
+        scenario_label: str | None = None,
     ) -> dict:
         with self.lock:
             state = self.sessions.get(session_id)
@@ -60,7 +64,7 @@ class SimulationService:
 
             rng_state = state.rng.getstate()
             used_before = {key: set(value) for key, value in state.used_fixtures.items()}
-            selected_label = state.rng.choice(SCENARIO_LABELS)
+            selected_label = scenario_label or state.rng.choice(SCENARIO_LABELS)
             eligible = [
                 (index, fixture)
                 for index, fixture in enumerate(SIMULATION_FIXTURES)
@@ -77,7 +81,9 @@ class SimulationService:
             fixture_index, fixture = state.rng.choice(eligible)
             state.used_fixtures[selected_label].add(fixture_index)
 
-            conversation_id = self._conversation_id(fixture)
+            conversation_id = state.sender_ids.get(fixture.sender)
+            if conversation_id is None:
+                conversation_id = self._conversation_id(fixture)
             try:
                 scan_result = scan({
                     "sender": conversation_id,
@@ -90,6 +96,7 @@ class SimulationService:
                 state.used_fixtures = used_before
                 raise
 
+            state.sender_ids[fixture.sender] = conversation_id
             existing = state.conversations.get(conversation_id)
             if existing is None:
                 conversation = {
@@ -101,7 +108,7 @@ class SimulationService:
                     "synthetic": True,
                     "messages": [],
                     "analysis": scan_result,
-                    "decision": None,
+                    "decision": state.decisions.get(conversation_id),
                 }
                 state.conversations[conversation_id] = conversation
             else:
@@ -109,6 +116,7 @@ class SimulationService:
             conversation["messages"].append({
                 "direction": "incoming",
                 "text": fixture.message,
+                "time": datetime.now().strftime("%I:%M %p").lstrip("0"),
                 "synthetic": True,
             })
             state.generated += 1
@@ -121,23 +129,42 @@ class SimulationService:
         with self.lock:
             state = self.sessions.get(session_id)
             if state is None:
-                return {"conversations": [], "simulation_fixture_check": self._empty_check()}
+                return {
+                    "conversations": [],
+                    "decisions": {},
+                    "simulation_fixture_check": self._empty_check(),
+                }
+            conversations = copy.deepcopy(list(state.conversations.values()))
+            for conversation in conversations:
+                conversation["decision"] = state.decisions.get(conversation["id"])
             return {
-                "conversations": copy.deepcopy(list(state.conversations.values())),
+                "conversations": conversations,
+                "decisions": dict(state.decisions),
                 "simulation_fixture_check": self._fixture_check(state),
             }
 
     def decide(self, session_id: str, conversation_id: str, decision: str) -> dict | None:
         with self.lock:
             state = self.sessions.get(session_id)
-            if state is None or conversation_id not in state.conversations:
+            if state is None:
+                if conversation_id not in {"mom", "u1", "u2"}:
+                    return None
+                state = SimulationSession(None, random.Random())
+                self.sessions[session_id] = state
+            conversation = state.conversations.get(conversation_id)
+            if conversation is None and conversation_id not in {"mom", "u1", "u2"}:
                 return None
-            state.conversations[conversation_id]["decision"] = decision
-            return copy.deepcopy(state.conversations[conversation_id])
+            state.decisions[conversation_id] = decision
+            if conversation is not None:
+                conversation["decision"] = decision
+                return copy.deepcopy(conversation)
+            return {"id": conversation_id, "decision": decision}
 
     @staticmethod
     def _conversation_id(fixture: MessageFixture) -> str:
         if fixture.saved_contact:
+            if fixture.sender == "mom":
+                return "mom"
             return "saved-" + re.sub(r"[^a-z0-9]+", "-", fixture.sender.lower()).strip("-")
         return str(uuid.uuid4())
 
