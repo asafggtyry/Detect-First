@@ -1,0 +1,20 @@
+{
+  "development_sha256": "3a194ef079549921f52a0b2c48dd58673991763926a198287db2134805bf9b1d",
+  "final_sha256": "e4e81f6b40849761443bcb1634a9b0fc16253061737bcfc49da5cd4383156256",
+  "development_count": 80,
+  "class_counts": {
+    "0": 40,
+    "1": 40
+  },
+  "reference_counts": {
+    "final": 32,
+    "demo": 33
+  },
+  "normalized_exact_overlaps": 0,
+  "internal_exact_duplicates": 0,
+  "maximum_cross_cosine": 0.35222536927790143,
+  "cross_pairs_at_085": 0,
+  "internal_maximum_cosine": 0.2500412626419609,
+  "internal_pairs_at_085": 0,
+  "scope": "Automated lexical audit, not semantic independence; final/demo text and labels not displayed."
+}

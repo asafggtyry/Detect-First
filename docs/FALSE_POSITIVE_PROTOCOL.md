@@ -70,15 +70,20 @@ Select using **development combined-policy results only**. Eligible candidates
 must have FPR <=5% (at most 2/40 legitimate messages), strictly fewer FP than
 original combined, no more FN than original combined, and F1 at least 0.05 above
 original combined. Rank eligible policies by highest F1, then fewer FP, fewer FN,
-then prefer `strong_actions`. If none qualify, retain original; report no
-candidate selected. This rule is not changed after seeing results. Do not use
-final results to choose between candidates.
+then prefer `strong_actions`. If none qualify, retain original for production
+recommendation but select the highest-ranked development candidate for a
+**diagnostic** final comparison, explicitly marked ineligible. This fallback
+keeps the requested final comparison informative without hiding a failed
+development gate. Both candidates are always ranked by F1, fewer FP, fewer FN,
+then `strong_actions`; eligibility takes precedence. This fallback was clarified
+before any scoring, not in response to results. Do not use final results to
+choose between candidates or reverse a failed development gate.
 
 Save all development predictions and commit a selection artifact binding hashes
 of code, data, protocol, production artifact, development report and separation
 audit. A one-shot final command must verify hashes and a clean tree, create an
 exclusive run marker **before** inference, and refuse a repeat or overwrite.
-Evaluate only the selected policy (or original fallback), plus original and ML
+Evaluate only the development-selected policy, plus original and ML
 comparators, on all 32 final messages once. Predict from text before adding the
 label to the result. Report errors without revising policy afterwards.
 
