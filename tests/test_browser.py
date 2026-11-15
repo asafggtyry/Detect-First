@@ -23,11 +23,14 @@ def live_url():
 
 
 @pytest.fixture
-def page():
+def page(request):
     from playwright.sync_api import sync_playwright
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch()
-        context = browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+        dimensions = getattr(getattr(request.node, "callspec", None), "params", {})
+        width, height = dimensions.get("width", 390), dimensions.get("height", 844)
+        context = browser.new_context(viewport={"width": width, "height": height},
+                                      is_mobile=width < 1000, has_touch=width < 1000)
         page = context.new_page()
         yield page
         context.close()
@@ -93,7 +96,7 @@ def test_blind_ai_screen_reveals_labels_and_keeps_arbitrary_input_unscored(page,
     assert page.locator("#blind-metrics").inner_text() == totals
 
 
-@pytest.mark.parametrize("width,height", [(390, 844), (320, 568)])
+@pytest.mark.parametrize("width,height", [(1280, 900), (390, 844), (320, 568)])
 def test_mobile_scenarios_actions_and_reset(page, live_url, width, height):
     from playwright.sync_api import expect
     page.set_viewport_size({"width": width, "height": height})
@@ -146,7 +149,7 @@ def test_mobile_scenarios_actions_and_reset(page, live_url, width, height):
     expect(popup).to_be_in_viewport(ratio=1)
     page.wait_for_timeout(250)
     (ROOT / "reports/browser").mkdir(parents=True, exist_ok=True)
-    page.screenshot(path=str(ROOT / f"reports/browser/highlight-explanation-{width}.png"))
+    page.screenshot(animations="disabled", path=str(ROOT / f"reports/browser/highlight-explanation-{width}.png"))
     page.get_by_role("button", name="Close explanation").click()
     expect(popup).to_be_hidden()
     for name in ["Block", "Accept Anyway"]:
@@ -156,7 +159,7 @@ def test_mobile_scenarios_actions_and_reset(page, live_url, width, height):
         assert box and box["y"] >= 0 and box["y"] + box["height"] <= height
     output = ROOT / "reports/browser"
     output.mkdir(parents=True, exist_ok=True)
-    page.screenshot(path=str(output / f"warning-{width}.png"))
+    page.screenshot(animations="disabled", path=str(output / f"warning-{width}.png"))
     page.get_by_role("button", name="Accept Anyway", exact=True).click()
     expect(page.locator('[data-state="accepted"]')).to_be_visible()
     expect(page.get_by_role("textbox", name="Type a message")).to_be_visible()
@@ -300,7 +303,7 @@ def test_failed_reset_preserves_decisions_and_reload_reuses_scans(page, live_url
     expect(page.locator("#toast")).to_contain_text("Reset failed")
     expect(page.locator("#toast")).to_be_in_viewport(ratio=1)
     assert page.locator("#phone").evaluate("node => node.scrollLeft") == 0
-    page.screenshot(path=str(ROOT / f"reports/browser/reset-error-{width}.png"))
+    page.screenshot(animations="disabled", path=str(ROOT / f"reports/browser/reset-error-{width}.png"))
     page.locator('[data-chat="u2"]').click()
     expect(page.locator('[data-state="blocked"]')).to_be_visible()
     expect(page.locator(".warning")).to_have_count(0)

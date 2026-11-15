@@ -12,7 +12,7 @@ from test_browser import home, live_url, page  # noqa: F401
 pytestmark = pytest.mark.browser
 ROOT = Path(__file__).resolve().parents[1]
 SHOTS = ROOT / "reports" / "browser"
-SIZES = [(390, 844), (320, 568)]
+SIZES = [(1280, 900), (390, 844), (320, 568)]
 
 CHATS_ONLY = ["#receive-btn", "#scenario-btn", "#chat-list", "#menu-btn"]
 TEST_ONLY = ["#test-message", "#analyze-btn", "#reset-test-btn"]
@@ -92,13 +92,13 @@ def test_app_opens_to_chats_and_each_destination_shows_only_its_own_controls(pag
     # The full label fits, even at 320px.
     assert page.locator("#receive-label").evaluate("node => node.scrollWidth <= node.clientWidth")
     SHOTS.mkdir(parents=True, exist_ok=True)
-    page.screenshot(path=str(SHOTS / f"nav-chats-{width}.png"))
+    page.screenshot(animations="disabled", path=str(SHOTS / f"nav-chats-{width}.png"))
 
     tab(page, "Test a Message").click()
     expect_screen(page, "test")
     expect(page.locator("#screen-test .appbar-title")).to_have_text("Test a Message")
     expect(page.locator("#test-unscored")).to_contain_text("Not scored")
-    page.screenshot(path=str(SHOTS / f"nav-test-{width}.png"))
+    page.screenshot(animations="disabled", path=str(SHOTS / f"nav-test-{width}.png"))
 
     tab(page, "AI Evaluation").click()
     expect_screen(page, "evaluation")
@@ -162,7 +162,7 @@ def test_received_message_opens_its_conversation_with_the_real_result_and_persis
     assert requests[-1] == {}
     check_open_conversation(random_chat)
     expect(page.locator("#toast")).to_contain_text("New message from")
-    page.screenshot(path=str(SHOTS / f"nav-received-chat-{width}.png"))
+    page.screenshot(animations="disabled", path=str(SHOTS / f"nav-received-chat-{width}.png"))
     back_to_chats_with_top_row(random_chat)
 
     # The category picker beside the button chooses the sample type only.
@@ -247,7 +247,7 @@ def test_test_a_message_is_independent_and_unscored(page, live_url, width, heigh
     text = page.locator("#screen-test").inner_text()
     assert "Reference label" not in text and "Correct" not in text and "Incorrect" not in text
     page.locator("#test-result").scroll_into_view_if_needed()
-    page.screenshot(path=str(SHOTS / f"nav-test-result-{width}.png"))
+    page.screenshot(animations="disabled", path=str(SHOTS / f"nav-test-result-{width}.png"))
 
     # Nothing else was called, and the chats are untouched.
     assert analyze_requests == [{"message": message}]
@@ -315,13 +315,17 @@ def test_ai_evaluation_reveals_reference_label_and_keeps_readable_running_totals
         assert page.locator(button).evaluate("node => node.scrollWidth <= node.clientWidth")
 
     results = [first]
-    for _ in range(3):
+    for _ in range(31):
         with page.expect_response(lambda response: response.url.endswith("/api/evaluation/next")) as response:
             page.get_by_role("button", name="Next Message", exact=True).click()
         results.append(response.value.json())
         check(results[-1])
-    assert [item["sample_index"] for item in results] == [1, 2, 3, 4]
-    assert len({item["sample_id"] for item in results}) == 4
+    assert [item["sample_index"] for item in results] == list(range(1, 33))
+    assert len({item["sample_id"] for item in results}) == 32
+    expect(page.locator("#blind-next-btn")).to_be_hidden()
+    expect(page.locator("#blind-status")).to_contain_text("All 32 messages were tested")
+    assert any(row["model_prediction"] != row["reference_label"] for row in results)
+    assert any(row["model_prediction"] == row["reference_label"] for row in results)
 
     # Readable column names, no unexplained abbreviations, and an explicit synthetic-data notice.
     headers = page.locator("#screen-blind thead th").all_inner_texts()
@@ -335,9 +339,9 @@ def test_ai_evaluation_reveals_reference_label_and_keeps_readable_running_totals
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     assert page.locator(".blind-table-wrap").evaluate("node => node.scrollWidth <= node.clientWidth")
     page.locator("#blind-sample").scroll_into_view_if_needed()
-    page.screenshot(path=str(SHOTS / f"nav-evaluation-{width}.png"))
+    page.screenshot(animations="disabled", path=str(SHOTS / f"nav-evaluation-{width}.png"))
     page.locator("#blind-results").scroll_into_view_if_needed()
-    page.screenshot(path=str(SHOTS / f"nav-evaluation-totals-{width}.png"))
+    page.screenshot(animations="disabled", path=str(SHOTS / f"nav-evaluation-totals-{width}.png"))
 
     # Progress is kept while visiting another destination, and Restart begins a fresh run.
     tab(page, "Chats").click()
@@ -480,7 +484,7 @@ def test_backend_errors_never_create_fake_messages_or_results(page, live_url, wi
     expect(page.locator("#receive-btn")).to_be_enabled()
     expect(page.get_by_role("button", name="Receive Random Message", exact=True)).to_be_visible()
     if (width, failure) == (390, "http_error"):
-        page.screenshot(path=str(SHOTS / "nav-receive-error-390.png"))
+        page.screenshot(animations="disabled", path=str(SHOTS / "nav-receive-error-390.png"))
 
     tab(page, "AI Evaluation").click()
     expect_screen(page, "evaluation")

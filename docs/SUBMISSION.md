@@ -10,6 +10,12 @@ Students looking for their first job may encounter unfamiliar recruiters promisi
 
 A WhatsApp-inspired interface combines three fictional conversations, a first-message-only scan policy, a real locally trained text classifier, transparent rule observations, and a choice to Block or Accept Anyway. Saved contacts bypass scanning; Reset makes the scenarios repeatable. The project's contribution is this interaction and its explicit separation of learned predictions from deterministic evidence. We do not claim to have invented text classification or to be the first scam-warning application.
 
+The final navigation has **Chats**, **Test a Message**, and **AI Evaluation**.
+Chats opens by default. Incoming simulated messages open automatically and move
+their conversation to the top. Test a Message analyzes arbitrary text without
+inventing a label. AI Evaluation records text-only predictions before revealing
+synthetic reference labels and displaying Correct/Incorrect and running totals.
+
 ## Technical approach
 
 Plain HTML, CSS and JavaScript call a same-origin Flask API. A saved scikit-learn pipeline uses word unigram/bigram TF-IDF and balanced logistic regression trained on an EMSCAD-derived OpenML job-posting dataset. The API returns the model's Boolean prediction separately from evidence categories and the combined warning decision. The app warns if the model flags the text or at least two rule categories appear. Rules inspect wording and client-supplied sender context; they do not verify employers. Failure shows a connection error, never a sample result. There is no paid model API or messaging integration.
@@ -18,7 +24,11 @@ Plain HTML, CSS and JavaScript call a same-origin Flask API. A saved scikit-lear
 
 The historical 2,505-posting holdout reproduces 96.81% accuracy, 61.16% precision, 69.16% recall and 64.91% F1, with 47 false positives and 33 false negatives. The always-legitimate baseline achieves 95.73% accuracy and zero fraud recall. **The posting holdout has known near-template contamination: the prior audit found 548 near matches, including three exact matches after stronger normalization. These are historical comparisons, not clean generalization estimates.**
 
-On 32 hand-authored synthetic messages, the classifier catches only 5 of 16 synthetic scams, misses 11, and flags none of 16 legitimate examples. It catches 2 of 8 subtle scams. A fixed keyword baseline catches 6 of 16. The rejected candidate catches 4 of 16 overall and none of 8 subtle scams, so the original model remains in use. These small, previously exposed synthetic examples are not real-world validation. See [evaluation tables](EVALUATION.md) and the [release test report](../reports/release_verification.md).
+On 32 hand-authored synthetic messages, the classifier catches only 5 of 16 synthetic scams, misses 11, and flags none of 16 legitimate examples. It catches 2 of 8 subtle scams. A fixed keyword baseline catches 6 of 16. The rejected candidate catches 4 of 16 overall and none of 8 subtle scams, so the original model remains in use. These small, previously exposed synthetic examples are not real-world validation. See [evaluation tables](EVALUATION.md) and the [final release test report](../reports/final_release_verification.md).
+
+The app's evidence rules produce TP 9, TN 8, FP 8, FN 7; the combined warning
+produces TP 11, TN 8, FP 8, FN 5. They are separate from the ML figures
+(TP 5, TN 16, FP 0, FN 11) and do not establish real-world detection accuracy.
 
 ## Limitations and responsible scope
 

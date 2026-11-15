@@ -2,16 +2,16 @@
 
 **A local messaging prototype that helps students pause before replying to unfamiliar job offers.** Built for the Veritas AI 2026 hackathon; intended track: AI + Finance. Official requirements still need confirmation.
 
-The `feature/dynamic-scanning-integrated` branch combines Fable's WhatsApp-inspired UI with a server-backed randomized incoming-message simulator. The original trained classifier and evidence rules run on the incoming text; synthetic scenario labels never force predictions. The initial three demo conversations, **Test Message**, **Block**, **Accept Anyway**, and **Reset demo** remain available. It is not connected to WhatsApp or a phone, does not independently verify employers, and is not financial advice.
+The `release/final-detect-first` branch integrates Fable's navigation redesign: **Chats** (the default), **Test a Message**, and **AI Evaluation**. Receive Random Message appears only in Chats, opens the received conversation automatically, and puts it first in the list. The original trained classifier and separate evidence rules run on message text; scenario labels never force predictions. **Block**, **Accept Anyway**, clickable findings, saved-contact skipping, and **Reset demo** remain available. It is not connected to WhatsApp or a phone and does not independently verify employers.
 
 ## Windows setup: start here
 
 You need **64-bit Python 3.12**, Git (if cloning), and a current browser. Tested on Windows with Python 3.12.14 and Chromium. Other platforms/versions are not certified by this release. Install once while online; the installed demo needs no API key, raw dataset, training or frontend build.
 
-Open PowerShell where you want the project. Once the experiment branch is published, it can be cloned separately from the verified release:
+Open PowerShell where you want the project. Clone the final release branch:
 
 ```powershell
-git clone --branch feature/dynamic-scanning-integrated https://github.com/asafggtyry/Detect-First.git
+git clone --branch release/final-detect-first https://github.com/asafggtyry/Detect-First.git
 cd Detect-First
 python --version
 python -m venv .venv
@@ -22,6 +22,14 @@ python -m venv .venv
 Open **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)**. Keep PowerShell open. Stop with **Ctrl+C**. No virtual-environment activation or PowerShell policy change is needed. For a branch ZIP, extract it and open PowerShell in the directory containing this README before the `python --version` step.
 
 The server serves `frontend/` and its APIs from the same origin. Wait for **Live classifier connected**. Do not open `index.html` directly or use a separate static server. The app never falls back to sample responses.
+
+**Optional: enable AI Evaluation and dataset-dependent tests.** Chats, random incoming messages, saved-model inference and Test a Message work without any raw training data. The blind benchmark checks its synthetic messages against the original training source before scoring, so it needs this optional download:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\download_test_data.py
+```
+
+This verifies the public dataset checksum and does not train or replace either model. Nothing downloads on startup. Without this data, **Start Blind Test** returns an actionable error; install the data and retry without restarting. Keep the tracked `data/synthetic/evaluation.jsonl` file too. Evaluation inputs load lazily on the first benchmark request and are cached only after validation succeeds.
 
 For later runs, from the repository root:
 
@@ -46,10 +54,11 @@ If port 8000 is occupied, run `.\.venv\Scripts\python.exe -m detect_first.server
 
 1. On the **Chats** tab, **Receive Random Message** asks the server for one of three synthetic scenarios: saved family/friend, harmless stranger, or potential fraudulent recruiter. The scenario menu can select a type; equal random selection is for demonstration only, not a real-world frequency estimate.
 2. The server returns a conversation ID, message, ground-truth scenario label, and analysis. Saved contacts bypass scanning in this prototype. The actual trained model and evidence rules analyze the first incoming message from an unsaved sender.
-3. Open the message. A flagged first message shows a compact warning (title, one line of guidance, Block and Accept Anyway). Only exact backend-provided evidence spans are highlighted. Tap a highlight for its phrase, category and explanation; these are rule-based observations, not explanations of the ML model. The API still reports the model prediction separately from evidence-rule findings, and the Test Message screen shows both.
+3. The received conversation opens automatically. A flagged first message shows a compact warning (title, one line of guidance, Block and Accept Anyway). Only exact backend-provided evidence spans are highlighted. Tap a highlight for its phrase, category and explanation, or **See all findings** for findings without text spans; these are rule-based observations, not explanations of the ML model. **Back to chats** returns to the list with the newest conversation first. Browser Back/Forward also works.
 4. The model may miss recruiter fixtures. In the 30 synthetic demo fixtures, it flagged 3/10 recruiter examples; the combined warning flagged 6/10 and missed 4/10. No normal-stranger fixture triggered a warning. These are demo checks, not real-world accuracy.
 5. **Block** and **Accept Anyway** persist to the server session. Opening a chat does not generate another message or rerun its analysis. **Reset demo** clears server-generated history and decisions plus local presentation state.
 6. The **Test a Message** tab analyzes arbitrary first-contact text through the same local model and evidence rules. **Reset test** clears the page-only draft and result; test messages do not enter conversation history.
+7. The **AI Evaluation** tab → **Start Blind Test** predicts from text before revealing each synthetic reference label. **Next Message** advances the test; Correct/Incorrect and running totals show actual stored predictions. Arbitrary text has no reference label and is never scored.
 
 The home screen starts the two unknown-sender scans. Saved contacts and outgoing replies are not sent for classification. Later messages are outside this first-message-only policy.
 
@@ -90,6 +99,16 @@ The separate 32-message evaluation is **hand-authored synthetic data**, inspired
 
 The classifier catches **5/16 synthetic scams**, including **2/8 subtle scams**. Zero FP on 16 synthetic negatives does not establish a low real-world false-positive rate. The keyword baseline is separate from the app's multi-category warning policy. All table metrics count classifier/baseline predictions, never combined warnings.
 
+The separate AI Evaluation comparison preserves these results on the same 32 synthetic examples:
+
+| System | TP | TN | FP | FN |
+|---|---:|---:|---:|---:|
+| ML classifier | 5 | 16 | 0 | 11 |
+| Evidence rules | 9 | 8 | 8 | 7 |
+| Combined warning | 11 | 8 | 8 | 5 |
+
+These figures do **not** establish real-world scam-detection accuracy. [Blind evaluation](docs/BLIND_AI_EVALUATION.md) and [detection research](docs/DETECTION_IMPROVEMENT_RESEARCH.md) explain the comparison and limitations.
+
 The rejected research candidate catches **4/16 overall and 0/8 subtle synthetic scams**, so the original remains in use. Better generic SMS-spam scores do not establish recruitment performance. **Authentic first-contact recruitment validation is unavailable.** Neither model is demonstrated reliable for that task.
 
 See [all evaluation tables and matrices](docs/EVALUATION.md), the [dataset/model research report](docs/MODEL_RESEARCH.md), [release metric reproduction](reports/release_metrics.json), and [frozen integration audit](reports/ai_model_integration.md).
@@ -106,13 +125,14 @@ if (-not (Test-Path data\raw\fake_job_postings2.arff)) {
 $env:PLAYWRIGHT_BROWSERS_PATH = "$PWD\.venv\pw-browsers"
 .\.venv\Scripts\python.exe -m playwright install chromium
 .\.venv\Scripts\python.exe -m pip check
-.\.venv\Scripts\python.exe -m pytest -q --browser-tests --junitxml=reports/dynamic_scanning_integrated_tests.xml
+.\.venv\Scripts\python.exe -m pytest -q --browser-tests --basetemp=.venv\pytest-run --junitxml=reports/final_release_tests.xml
 .\.venv\Scripts\python.exe scripts\verify_release_metrics.py
+.\.venv\Scripts\python.exe -m scripts.run_blind_evaluation --output reports/final_blind_evaluation.json
 ```
 
 Tests start their own local server. They exercise the saved model, HTTP contract, sessions/caching, one-off analysis and failures, first-message exclusions, all conversations/actions, Reset and failure recovery in Chromium at mobile and desktop widths. Browser tests require local process/socket permission. Omitting `--browser-tests` explicitly skips browser cases; that is not a complete run. Mobile emulation does not certify physical devices or Safari.
 
-See [complete release verification](reports/release_verification.md) and [JUnit results](reports/release_tests.xml). The metric verifier compares original model/baseline results to the committed reports and checks the artifact hash without fitting anything.
+See [final release verification](reports/final_release_verification.md), [JUnit results](reports/final_release_tests.xml), and the [release checklist](docs/RELEASE_CHECKLIST.md). Earlier `release_*` reports are historical. The metric verifier compares original model/baseline results to the committed reports and checks the artifact hash without fitting anything. Chromium checks cover 1280×900, 390×844 and 320×568. Generated screenshots are in `reports/browser/`; each filename includes its viewport width.
 
 To capture actual browser/API responses from a separately running demo server, run `.\.venv\Scripts\python.exe scripts\verify_live_demo.py` in a second PowerShell window with the same `PLAYWRIGHT_BROWSERS_PATH` setting. Add `--url http://127.0.0.1:8001` if you used that port. This writes `reports/release_demo_responses.json` and home screenshots; it checks that fixture scripts and external requests are absent.
 

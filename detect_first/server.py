@@ -11,7 +11,7 @@ from typing import Callable
 from flask import Flask, jsonify, request, session
 from werkzeug.exceptions import HTTPException, TooManyRequests
 
-from detect_first.blind_evaluation import BlindEvaluationService
+from detect_first.blind_evaluation import BenchmarkUnavailable, BlindEvaluationService
 from detect_first.evidence import explain_message
 from detect_first.model import MODEL_PATH, load_pipeline, predict_scam
 from detect_first.simulation import SeedConflict, SimulationService
@@ -214,6 +214,10 @@ def create_app(*, model_path: Path = ROOT / MODEL_PATH,
     def http_error(error):
         return jsonify(error=error.description), error.code
 
+    @app.errorhandler(BenchmarkUnavailable)
+    def benchmark_unavailable(error):
+        return jsonify(error=str(error), code="benchmark_unavailable"), 503
+
     @app.get("/")
     def index():
         # Establish the cookie before JavaScript starts concurrent requests.
@@ -251,6 +255,8 @@ def create_app(*, model_path: Path = ROOT / MODEL_PATH,
         try:
             seed = validate_optional_seed(optional_json_body())
             return jsonify(blind_evaluation.start(evaluation_session_id(), seed))
+        except BenchmarkUnavailable:
+            raise
         except ValueError as error:
             return jsonify(error=str(error)), 400
         except Exception:
@@ -261,6 +267,8 @@ def create_app(*, model_path: Path = ROOT / MODEL_PATH,
     def evaluation_next():
         try:
             return jsonify(blind_evaluation.next(evaluation_session_id()))
+        except BenchmarkUnavailable:
+            raise
         except Exception:
             app.logger.error("Blind evaluation sample failed.")
             return jsonify(error="Blind evaluation is unavailable."), 503

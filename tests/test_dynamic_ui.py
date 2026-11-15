@@ -58,7 +58,7 @@ def analyze_in_browser(page, message):
     )
 
 
-@pytest.mark.parametrize("width,height", [(390, 844), (320, 568)])
+@pytest.mark.parametrize("width,height", [(1280, 900), (390, 844), (320, 568)])
 def test_real_scenario_selectors_classifier_spans_decisions_and_reset(
     page, live_url, width, height
 ):
@@ -187,7 +187,7 @@ def test_real_scenario_selectors_classifier_spans_decisions_and_reset(
     assert len(scan_requests) == scan_count
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     SHOTS.mkdir(parents=True, exist_ok=True)
-    page.screenshot(path=str(SHOTS / f"dynamic-live-{width}.png"))
+    page.screenshot(animations="disabled", path=str(SHOTS / f"dynamic-live-{width}.png"))
 
     page.get_by_role("button", name="Back to chats").click()
     page.get_by_role("button", name="More options").click()
@@ -236,9 +236,11 @@ def test_fixed_demo_chat_highlights_only_live_backend_evidence(page, live_url):
     expect(page.locator(".hl")).to_have_count(0)
 
 
-def test_see_all_findings_lists_only_backend_reasons_without_spans(page, live_url):
+@pytest.mark.parametrize("width,height", [(1280, 900), (390, 844), (320, 568)])
+def test_see_all_findings_lists_only_backend_reasons_without_spans(page, live_url, width, height):
     from playwright.sync_api import expect
 
+    page.set_viewport_size({"width": width, "height": height})
     load(page, live_url)
     page.locator('[data-chat="u2"]').click()
     link = page.get_by_role("link", name="See all findings")
@@ -251,7 +253,8 @@ def test_see_all_findings_lists_only_backend_reasons_without_spans(page, live_ur
     expect(page.locator("#evidence-pop-list")).to_contain_text("Limited role details")
     expect(page.locator("#evidence-pop-list")).to_contain_text("Employer not verified by demo")
     expect(page.locator("#evidence-pop-note")).to_contain_text("not an explanation of the ML model")
-    page.screenshot(path=str(SHOTS / "all-findings-390.png"))
+    expect(popup).to_be_in_viewport(ratio=1)
+    page.screenshot(animations="disabled", path=str(SHOTS / f"all-findings-{width}.png"))
 
 
 def test_repeated_unknown_sender_reuses_conversation_and_first_analysis(page, live_url):
@@ -440,7 +443,7 @@ def test_flagged_message_without_valid_spans_offers_review_of_real_evidence_only
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     page.wait_for_timeout(250)
     if spans == "missing":
-        page.screenshot(path=str(SHOTS / f"warning-review-{width}.png"))
+        page.screenshot(animations="disabled", path=str(SHOTS / f"warning-review-{width}.png"))
     page.keyboard.press("Escape")
     expect(popup).to_be_hidden()
     expect(review).to_be_focused()

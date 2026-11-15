@@ -1,3 +1,8 @@
 scikit-learn==1.9.1
 streamlit>=1.41,<2.0
 Flask>=3.1,<4.0
+joblib>=1.6,<2.0
+numpy>=2.5,<3.0
+scipy>=1.18,<2.0
+Werkzeug>=3.1,<4.0
+threadpoolctl>=3.8,<4.0

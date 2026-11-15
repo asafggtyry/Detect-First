@@ -1,10 +1,37 @@
 import hashlib
+import json
 from pathlib import Path
 
 from detect_first.blind_evaluation import BlindEvaluationService
 from detect_first.server import ScanService, create_app
+from detect_first.metrics import binary_metrics
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_full_blind_run_matches_frozen_report_and_stored_predictions():
+    app = create_app()
+    client = app.test_client()
+    assert client.post("/api/evaluation/start", json={"seed": 2026}).status_code == 200
+    results = []
+    for _ in range(32):
+        response = client.post("/api/evaluation/next")
+        assert response.status_code == 200
+        results.append(response.json)
+    final = client.post("/api/evaluation/next").json
+    assert final["complete"] is True and final["sample_index"] == 32
+    assert len({row["sample_id"] for row in results}) == 32
+    frozen = json.loads((ROOT / "reports/blind_ai_evaluation.json").read_text())
+    assert final["metrics"] == frozen["metrics"]
+    state = next(iter(app.extensions["blind_evaluation"].sessions.values()))
+    assert state.actual == [row["reference_label"] for row in results]
+    for system, field, stored in (
+        ("model", "model_prediction", state.model_predictions),
+        ("evidence_rules", "evidence_prediction", state.evidence_predictions),
+        ("combined_warning", "combined_prediction", state.combined_predictions),
+    ):
+        assert stored == [row[field] for row in results]
+        assert final["metrics"][system] == binary_metrics(state.actual, stored)
 
 
 def test_classifier_receives_only_message_text_and_same_text_is_independent_of_context():

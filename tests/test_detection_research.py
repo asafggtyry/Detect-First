@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from detect_first.blind_evaluation import BlindEvaluationService
+from detect_first.blind_evaluation import BenchmarkUnavailable, BlindEvaluationService
 from detect_first.data import load_dataset
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,12 +23,14 @@ def test_blind_loader_rejects_exact_normalized_training_overlap(tmp_path):
         "text": training[0].text,
     }) + "\n", encoding="utf-8")
 
-    with pytest.raises(ValueError, match="normalized text"):
+    with pytest.raises(BenchmarkUnavailable, match="could not be validated") as error:
         BlindEvaluationService(
             analyzer,
             evaluation_path=evaluation,
             training_data_path=ROOT / "data/raw/fake_job_postings2.arff",
-        )
+        ).start("leakage-test")
+    assert isinstance(error.value.__cause__, ValueError)
+    assert "normalized text" in str(error.value.__cause__)
 
 
 def test_blind_loader_rejects_invalid_reference_labels(tmp_path):
@@ -40,9 +42,11 @@ def test_blind_loader_rejects_invalid_reference_labels(tmp_path):
         "text": "A message not present in training.",
     }) + "\n", encoding="utf-8")
 
-    with pytest.raises(ValueError, match="label"):
+    with pytest.raises(BenchmarkUnavailable, match="could not be validated") as error:
         BlindEvaluationService(
             analyzer,
             evaluation_path=evaluation,
             training_data_path=ROOT / "data/raw/fake_job_postings2.arff",
-        )
+        ).start("invalid-label-test")
+    assert isinstance(error.value.__cause__, ValueError)
+    assert "label" in str(error.value.__cause__)

@@ -1,0 +1,455 @@
+{
+  "model": {
+    "path": "models\\job_posting_classifier.joblib",
+    "sha256": "6e6359e96e201c8814fdc183f070acef1c35daa963b699b6206bf83eceff2c42",
+    "training_or_threshold_changes": false
+  },
+  "provenance": {
+    "kind": "synthetic",
+    "source": "evaluation.jsonl",
+    "samples": 32,
+    "label_meaning": "Repository-authored fictional first-contact recruitment examples.",
+    "authentic_public_messages": false,
+    "licensing": "Repository-authored synthetic text; no external public-data license applies.",
+    "exact_normalized_overlap_with_training": 0,
+    "near_duplicate_audit": "See reports/data_split_audit.json and docs/EVALUATION.md; this is not authentic-world validation.",
+    "warning": "Synthetic demonstration only; it does not establish real-world recruitment-scam accuracy."
+  },
+  "metrics": {
+    "model": {
+      "examples": 32,
+      "accuracy": 0.65625,
+      "precision": 1.0,
+      "recall": 0.3125,
+      "f1": 0.47619047619047616,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            16,
+            0
+          ],
+          [
+            11,
+            5
+          ]
+        ]
+      },
+      "true_negatives": 16,
+      "false_positives": 0,
+      "false_negatives": 11,
+      "true_positives": 5
+    },
+    "evidence_rules": {
+      "examples": 32,
+      "accuracy": 0.53125,
+      "precision": 0.5294117647058824,
+      "recall": 0.5625,
+      "f1": 0.5454545454545454,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            8,
+            8
+          ],
+          [
+            7,
+            9
+          ]
+        ]
+      },
+      "true_negatives": 8,
+      "false_positives": 8,
+      "false_negatives": 7,
+      "true_positives": 9
+    },
+    "combined_warning": {
+      "examples": 32,
+      "accuracy": 0.59375,
+      "precision": 0.5789473684210527,
+      "recall": 0.6875,
+      "f1": 0.6285714285714286,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            8,
+            8
+          ],
+          [
+            5,
+            11
+          ]
+        ]
+      },
+      "true_negatives": 8,
+      "false_positives": 8,
+      "false_negatives": 5,
+      "true_positives": 11
+    }
+  },
+  "errors": {
+    "model": {
+      "false_alarms": [],
+      "missed_scams": [
+        "clear-scam-04",
+        "clear-scam-02",
+        "subtle-scam-07",
+        "clear-scam-03",
+        "clear-scam-01",
+        "clear-scam-08",
+        "subtle-scam-04",
+        "subtle-scam-02",
+        "subtle-scam-05",
+        "subtle-scam-03",
+        "subtle-scam-01"
+      ]
+    },
+    "evidence_rules": {
+      "false_alarms": [
+        "clear-legit-06",
+        "clear-legit-03",
+        "subtle-legit-05",
+        "clear-legit-08",
+        "clear-legit-07",
+        "subtle-legit-08",
+        "clear-legit-02",
+        "clear-legit-04"
+      ],
+      "missed_scams": [
+        "clear-scam-04",
+        "subtle-scam-08",
+        "clear-scam-07",
+        "clear-scam-03",
+        "subtle-scam-04",
+        "subtle-scam-02",
+        "subtle-scam-03"
+      ]
+    },
+    "combined_warning": {
+      "false_alarms": [
+        "clear-legit-06",
+        "clear-legit-03",
+        "subtle-legit-05",
+        "clear-legit-08",
+        "clear-legit-07",
+        "subtle-legit-08",
+        "clear-legit-02",
+        "clear-legit-04"
+      ],
+      "missed_scams": [
+        "clear-scam-04",
+        "clear-scam-03",
+        "subtle-scam-04",
+        "subtle-scam-02",
+        "subtle-scam-03"
+      ]
+    }
+  },
+  "samples": [
+    {
+      "sample_id": "clear-scam-05",
+      "difficulty": "clear",
+      "text": "Remote work opportunity! No experience needed, earn $900 a day, but only if you reply now and send a $75 onboarding fee.",
+      "reference_label": 1,
+      "model_prediction": 1,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "clear-scam-04",
+      "difficulty": "clear",
+      "text": "We will mail you a check for office supplies. Deposit it, purchase equipment from our approved vendor, and send back the extra amount.",
+      "reference_label": 1,
+      "model_prediction": 0,
+      "evidence_prediction": 0,
+      "combined_prediction": 0
+    },
+    {
+      "sample_id": "clear-legit-06",
+      "difficulty": "clear",
+      "text": "Your application for the bookstore stock assistant role is in review. We will contact you from our school district email address if the hiring manager wants an interview.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "subtle-scam-06",
+      "difficulty": "subtle",
+      "text": "We can offer you a remote data entry position. Please send a photo of your identity document and tax number to prepare your file before we share the contract.",
+      "reference_label": 1,
+      "model_prediction": 1,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "subtle-scam-08",
+      "difficulty": "subtle",
+      "text": "To get started as a home-based customer service representative, purchase the required training materials from this vendor. The course fee is reimbursed after your first month.",
+      "reference_label": 1,
+      "model_prediction": 1,
+      "evidence_prediction": 0,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "clear-scam-02",
+      "difficulty": "clear",
+      "text": "Your remote job is approved. Buy two gift cards for the home office and send us the codes so we can activate payroll.",
+      "reference_label": 1,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "clear-legit-03",
+      "difficulty": "clear",
+      "text": "Our cafe is hiring a weekend cashier. The duties, location, and $17 per hour range are in the public listing. Apply through the company careers page; no payment is required.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "subtle-legit-04",
+      "difficulty": "subtle",
+      "text": "The community center has a weekend recreation assistant opening. Please use its public careers page to review the duties, pay, and contact details.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 0,
+      "combined_prediction": 0
+    },
+    {
+      "sample_id": "subtle-legit-06",
+      "difficulty": "subtle",
+      "text": "The bookstore is interviewing for a seasonal sales associate. The schedule, pay range, and duties are listed on its careers site; interviews are at the store.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 0,
+      "combined_prediction": 0
+    },
+    {
+      "sample_id": "subtle-scam-07",
+      "difficulty": "subtle",
+      "text": "Our hiring team needs you to receive a package at home and reship it to another address. We will reimburse postage after each shipment.",
+      "reference_label": 1,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "clear-scam-07",
+      "difficulty": "clear",
+      "text": "Earn $400 per day stuffing envelopes from home. Send a $40 registration payment now to reserve your kit.",
+      "reference_label": 1,
+      "model_prediction": 1,
+      "evidence_prediction": 0,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "clear-scam-03",
+      "difficulty": "clear",
+      "text": "Congratulations, you are selected without an interview. Pay a refundable background-check deposit by wire transfer today to begin earning $500 daily.",
+      "reference_label": 1,
+      "model_prediction": 0,
+      "evidence_prediction": 0,
+      "combined_prediction": 0
+    },
+    {
+      "sample_id": "subtle-legit-03",
+      "difficulty": "subtle",
+      "text": "The school is looking for a part-time science lab assistant. The role, supervisor, work hours, and pay range are published on the school district jobs page.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 0,
+      "combined_prediction": 0
+    },
+    {
+      "sample_id": "clear-legit-01",
+      "difficulty": "clear",
+      "text": "Thanks for applying to the library page role. Please choose an interview slot from our careers portal. The hourly pay range and duties are listed in the posting; there is no fee to apply.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 0,
+      "combined_prediction": 0
+    },
+    {
+      "sample_id": "clear-legit-05",
+      "difficulty": "clear",
+      "text": "The city parks department received your application for seasonal grounds crew. Please review the interview details and hourly wage on the official city jobs page.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 0,
+      "combined_prediction": 0
+    },
+    {
+      "sample_id": "clear-scam-01",
+      "difficulty": "clear",
+      "text": "We are hiring remote assistants today. Deposit $60 in the next 24 hours to secure your position and earn up to $300 per day. Reply now for onboarding.",
+      "reference_label": 1,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "subtle-legit-05",
+      "difficulty": "subtle",
+      "text": "Your application for the library assistant role was received. The hiring team will review it and email you about the next interview step.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "clear-scam-08",
+      "difficulty": "clear",
+      "text": "We have a job for you. Forward incoming customer payments from your personal account and keep 10 percent as your commission.",
+      "reference_label": 1,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "clear-legit-08",
+      "difficulty": "clear",
+      "text": "Thanks for asking about the restaurant host position. Please apply using the employer's careers page and contact the listed manager with questions. No purchase is needed.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "subtle-scam-04",
+      "difficulty": "subtle",
+      "text": "As a remote order coordinator, you would receive client payments and forward them to our vendors. We provide a small commission for each transfer.",
+      "reference_label": 1,
+      "model_prediction": 0,
+      "evidence_prediction": 0,
+      "combined_prediction": 0
+    },
+    {
+      "sample_id": "subtle-scam-02",
+      "difficulty": "subtle",
+      "text": "The remote assistant role includes a $35 refundable equipment processing charge. Let me know if you would like the payment instructions.",
+      "reference_label": 1,
+      "model_prediction": 0,
+      "evidence_prediction": 0,
+      "combined_prediction": 0
+    },
+    {
+      "sample_id": "clear-legit-07",
+      "difficulty": "clear",
+      "text": "We would like to interview you for the museum guide opening. The position is 12 hours per week at $18 per hour, and the museum's public listing describes the duties.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "subtle-legit-01",
+      "difficulty": "subtle",
+      "text": "Before your interview, please bring a copy of your resume. We can discuss the customer service role, schedule, and pay with the manager.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 0,
+      "combined_prediction": 0
+    },
+    {
+      "sample_id": "subtle-scam-05",
+      "difficulty": "subtle",
+      "text": "The role is ready to start. A one-time $25 account activation payment is part of the standard hiring paperwork.",
+      "reference_label": 1,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "subtle-legit-02",
+      "difficulty": "subtle",
+      "text": "The remote design internship pays $20 per hour. You can read the duties and interview process on the employer's website before deciding whether to apply.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 0,
+      "combined_prediction": 0
+    },
+    {
+      "sample_id": "subtle-legit-08",
+      "difficulty": "subtle",
+      "text": "The local clinic is hiring a part-time receptionist. Apply through the clinic website, where the duties, hourly range, work hours, and interview contact are listed.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "clear-legit-02",
+      "difficulty": "clear",
+      "text": "This is a reminder of your scheduled interview for the part-time math tutor role at the school. The job description and $22 hourly pay are on the district website.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "subtle-scam-03",
+      "difficulty": "subtle",
+      "text": "We will send a check for your laptop. Please purchase it from our supplier and return any remaining funds once it clears.",
+      "reference_label": 1,
+      "model_prediction": 0,
+      "evidence_prediction": 0,
+      "combined_prediction": 0
+    },
+    {
+      "sample_id": "subtle-legit-07",
+      "difficulty": "subtle",
+      "text": "Would you be available to interview for the student recreation assistant role? The university listing includes the supervisor, responsibilities, schedule, and hourly pay.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 0,
+      "combined_prediction": 0
+    },
+    {
+      "sample_id": "subtle-scam-01",
+      "difficulty": "subtle",
+      "text": "For payroll setup before the interview, could you share your bank account and routing numbers? We will explain the role details after onboarding.",
+      "reference_label": 1,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "clear-scam-06",
+      "difficulty": "clear",
+      "text": "To get this work-from-home job, provide your bank login so we can verify your account before your first shift.",
+      "reference_label": 1,
+      "model_prediction": 1,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    },
+    {
+      "sample_id": "clear-legit-04",
+      "difficulty": "clear",
+      "text": "You applied for the summer coding instructor position. Could you meet the program director next Tuesday? The role, pay, and responsibilities are available on our school site.",
+      "reference_label": 0,
+      "model_prediction": 0,
+      "evidence_prediction": 1,
+      "combined_prediction": 1
+    }
+  ],
+  "limitations": [
+    "These 32 messages are repository-authored synthetic examples, not authentic public messages.",
+    "They were excluded from fitting and threshold selection but have already been evaluated historically.",
+    "No authentic, independently labelled first-contact recruitment benchmark is available here.",
+    "Results demonstrate this frozen model and rules on this held-out demonstration set only."
+  ]
+}

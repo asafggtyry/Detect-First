@@ -51,7 +51,17 @@ accuracy or model improvement.
 
 ## Reproduction
 
+App startup and ordinary predictions do not read benchmark files. The first
+Start/Next request lazily loads the synthetic evaluation and original raw
+posting dataset for checksum and exact normalized overlap validation. This
+preserves the leakage guard without making normal demo startup depend on data.
+Missing or invalid benchmark data returns HTTP 503 with code
+`benchmark_unavailable` and recovery instructions; no score is invented.
+Adding valid data allows a retry without restarting. A failed prediction does
+not advance the sample cursor or change any stored metrics.
+
 ```powershell
+.\.venv\Scripts\python.exe scripts\download_test_data.py
 .\.venv\Scripts\python.exe -m scripts.run_blind_evaluation
 .\.venv\Scripts\python.exe -m pytest -q --browser-tests
 ```

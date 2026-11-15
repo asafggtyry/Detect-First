@@ -16,6 +16,10 @@ DEFAULT_EVALUATION_PATH = ROOT / "data" / "synthetic" / "evaluation.jsonl"
 DEFAULT_TRAINING_DATA_PATH = ROOT / "data" / "raw" / "fake_job_postings2.arff"
 
 
+class BenchmarkUnavailable(RuntimeError):
+    """Optional benchmark inputs could not be loaded or safely validated."""
+
+
 @dataclass(frozen=True)
 class BlindSample:
     sample_id: str
@@ -45,10 +49,37 @@ class BlindEvaluationService:
         training_data_path: Path = DEFAULT_TRAINING_DATA_PATH,
     ) -> None:
         self.analyzer = analyzer
-        self.samples = self._load_samples(evaluation_path, training_data_path)
         self.evaluation_path = evaluation_path
+        self.training_data_path = training_data_path
+        self._samples: list[BlindSample] | None = None
+        self._load_lock = Lock()
         self.sessions: dict[str, EvaluationSession] = {}
         self.lock = Lock()
+
+    @property
+    def samples(self) -> list[BlindSample]:
+        # No evaluation files are read during app creation or ordinary inference.
+        # Cache only successful validation; adding the optional data permits retry
+        # without restarting the server. Concurrent first requests load once.
+        with self._load_lock:
+            if self._samples is None:
+                try:
+                    self._samples = self._load_samples(self.evaluation_path, self.training_data_path)
+                except FileNotFoundError as error:
+                    raise BenchmarkUnavailable(
+                        "Blind evaluation needs optional benchmark data. From the repository root, "
+                        "run python scripts/download_test_data.py, then retry Start Blind Test. "
+                        "If data/synthetic/evaluation.jsonl is missing, restore it from the release checkout. "
+                        "Chats and Test a Message work without benchmark data."
+                    ) from error
+                except (OSError, ValueError) as error:
+                    raise BenchmarkUnavailable(
+                        "Blind evaluation data could not be validated. Restore data/synthetic/evaluation.jsonl "
+                        "from the release checkout and re-download data/raw/fake_job_postings2.arff "
+                        "with python scripts/download_test_data.py after removing the invalid dataset. "
+                        "No evaluation was scored."
+                    ) from error
+            return self._samples
 
     @staticmethod
     def _load_samples(
@@ -62,14 +93,20 @@ class BlindEvaluationService:
                     continue
                 row = json.loads(line)
                 required = {"id", "label", "difficulty", "text"}
-                if not required <= row.keys() or row["id"] in seen:
+                if (not isinstance(row, dict) or not required <= row.keys()
+                        or not isinstance(row["id"], str) or not row["id"].strip()
+                        or row["id"] in seen):
                     raise ValueError(f"Invalid or duplicate evaluation row {line_number}.")
-                if row["label"] not in (0, 1) or row["difficulty"] not in {"clear", "subtle"}:
+                if (type(row["label"]) is not int or row["label"] not in (0, 1)
+                        or row["difficulty"] not in ("clear", "subtle")):
                     raise ValueError(f"Invalid evaluation label or difficulty on row {line_number}.")
                 if not isinstance(row["text"], str) or not row["text"].strip():
                     raise ValueError(f"Empty evaluation text on row {line_number}.")
                 seen.add(row["id"])
                 rows.append(row)
+
+        if not rows:
+            raise ValueError("No blind evaluation examples found.")
 
         training_examples, _ = load_dataset(training_data_path)
         training_texts = {normalize_text(example.text) for example in training_examples}
@@ -120,13 +157,15 @@ class BlindEvaluationService:
                 return {"complete": True, **self._status(state)}
 
             sample = self.samples[state.order[state.position]]
-            state.position += 1
             # The analyzer sees only sample.text. The reference label is appended
             # after this call returns, so it cannot affect prediction.
             analysis = self.analyzer(sample.text)
             model_prediction = int(bool(analysis["model_flagged"]))
             evidence_prediction = int(bool(analysis["evidence_flagged"]))
             combined_prediction = int(bool(analysis["is_scam"]))
+            # Commit progress only after all predictions succeeded. A failed
+            # request must retry this sample and leave the stored metrics intact.
+            state.position += 1
             state.actual.append(sample.label)
             state.model_predictions.append(model_prediction)
             state.evidence_predictions.append(evidence_prediction)
