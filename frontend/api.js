@@ -17,7 +17,10 @@ window.DetectFirstApi = (function () {
     history: "/api/demo/history",
     receive: "/api/demo/receive",
     reset: "/api/demo/reset",
-    decide: "/api/demo/conversations/"
+    decide: "/api/demo/conversations/",
+    evaluationStart: "/api/evaluation/start",
+    evaluationNext: "/api/evaluation/next",
+    evaluationArbitrary: "/api/evaluation/arbitrary"
   };
 
   // Display labels for evidence-rule categories. Unknown categories are shown as sent.
@@ -346,6 +349,13 @@ window.DetectFirstApi = (function () {
       });
     },
 
-    receiveMessage: receiveMessage
+    receiveMessage: receiveMessage,
+    startEvaluation: function (seed) {
+      return post(ENDPOINTS.evaluationStart, seed === undefined ? {} : { seed: seed });
+    },
+    nextEvaluation: function () { return post(ENDPOINTS.evaluationNext, {}); },
+    analyzeArbitrary: function (text) {
+      return post(ENDPOINTS.evaluationArbitrary, { message: text });
+    }
   };
 })();

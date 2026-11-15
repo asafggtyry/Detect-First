@@ -11,6 +11,7 @@ from typing import Callable
 from flask import Flask, jsonify, request, session
 from werkzeug.exceptions import HTTPException, TooManyRequests
 
+from detect_first.blind_evaluation import BlindEvaluationService
 from detect_first.evidence import explain_message
 from detect_first.model import MODEL_PATH, load_pipeline, predict_scam
 from detect_first.simulation import SeedConflict, SimulationService
@@ -175,14 +176,21 @@ def create_app(*, model_path: Path = ROOT / MODEL_PATH,
         pipeline = load_pipeline(model_path)
         classifier = lambda text: predict_scam(text, pipeline)
     service = ScanService(classifier)
+    blind_evaluation = BlindEvaluationService(service.analyze)
     simulation = SimulationService()
     app.extensions["scan_service"] = service
+    app.extensions["blind_evaluation"] = blind_evaluation
     app.extensions["demo_simulation"] = simulation
 
     def session_id() -> str:
         if "scan_session" not in session:
             session["scan_session"] = secrets.token_hex(24)
         return session["scan_session"]
+
+    def evaluation_session_id() -> str:
+        if "evaluation_session" not in session:
+            session["evaluation_session"] = secrets.token_hex(24)
+        return session["evaluation_session"]
 
     def optional_json_body() -> object:
         return request.get_json() if request.get_data(cache=True) else None
@@ -237,6 +245,36 @@ def create_app(*, model_path: Path = ROOT / MODEL_PATH,
         except Exception:
             app.logger.error("One-off classifier analysis failed; request may be retried.")
             return jsonify(error="Classifier unavailable. Please retry or restart the local server."), 503
+
+    @app.post("/api/evaluation/start")
+    def evaluation_start():
+        try:
+            seed = validate_optional_seed(optional_json_body())
+            return jsonify(blind_evaluation.start(evaluation_session_id(), seed))
+        except ValueError as error:
+            return jsonify(error=str(error)), 400
+        except Exception:
+            app.logger.error("Blind evaluation could not start.")
+            return jsonify(error="Blind evaluation is unavailable."), 503
+
+    @app.post("/api/evaluation/next")
+    def evaluation_next():
+        try:
+            return jsonify(blind_evaluation.next(evaluation_session_id()))
+        except Exception:
+            app.logger.error("Blind evaluation sample failed.")
+            return jsonify(error="Blind evaluation is unavailable."), 503
+
+    @app.post("/api/evaluation/arbitrary")
+    def evaluation_arbitrary():
+        try:
+            message = validate_analysis(request.get_json())
+            return jsonify(blind_evaluation.arbitrary(message, evaluation_session_id()))
+        except ValueError as error:
+            return jsonify(error=str(error)), 400
+        except Exception:
+            app.logger.error("Arbitrary blind analysis failed.")
+            return jsonify(error="Blind analysis is unavailable."), 503
 
     @app.post("/api/reset")
     def reset():

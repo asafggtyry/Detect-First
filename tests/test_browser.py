@@ -60,6 +60,25 @@ def test_hash_routes_open_home_and_back_from_deep_link(page, live_url):
     assert page.evaluate("location.hash") == "#/"
 
 
+def test_blind_ai_screen_reveals_labels_and_keeps_arbitrary_input_unscored(page, live_url):
+    from playwright.sync_api import expect
+
+    page.goto(live_url)
+    page.get_by_role("button", name="More options").click()
+    page.get_by_role("menuitem", name="Test the AI").click()
+    expect(page.locator("#screen-blind")).to_be_visible()
+    expect(page.locator("#blind-sample")).to_be_visible()
+    expect(page.locator("#blind-sample-text")).not_to_be_empty()
+    expect(page.locator("#blind-predictions")).to_contain_text("Reference label")
+    expect(page.locator("#blind-metrics tr")).to_have_count(3)
+    expect(page.locator("#blind-provenance")).to_contain_text("Synthetic demonstration only")
+
+    page.locator("#blind-arbitrary-text").fill("An arbitrary message with no label.")
+    page.get_by_role("button", name="Analyze without scoring").click()
+    expect(page.locator("#blind-arbitrary-result")).to_contain_text("not scored")
+    expect(page.locator("#blind-arbitrary-result")).to_contain_text("No reference label")
+
+
 @pytest.mark.parametrize("width,height", [(390, 844), (320, 568)])
 def test_mobile_scenarios_actions_and_reset(page, live_url, width, height):
     from playwright.sync_api import expect

@@ -22,6 +22,7 @@
             </button>
             <div class="menu" id="menu" role="menu" hidden>
               <button type="button" role="menuitem" data-action="test-message">Test Message</button>
+              <button type="button" role="menuitem" data-action="blind-evaluation">Test the AI</button>
               <button type="button" role="menuitem" data-action="reset">Reset demo</button>
             </div>
           </div>
@@ -112,6 +113,48 @@
           <p class="test-privacy" id="test-privacy">Your text is sent only to this local app for analysis; it is not saved or sent to a third-party AI service.</p>
           <p class="test-status" id="test-status" role="status" aria-live="polite"></p>
           <div class="test-result" id="test-result" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- Screen 4: optional blind evaluation, separate from the chat demo -->
+      <section class="screen screen-blind" id="screen-blind" aria-label="Test the AI" inert>
+        <header class="appbar testbar">
+          <button class="icon-btn" id="blind-back-btn" type="button" aria-label="Return to chats from Test the AI">
+            <svg viewBox="0 0 24 24"><path d="M20 11H7.800l5.600-5.600L12 4l8 8-8 8-1.400-1.400L7.800 13H20v-2Z"/></svg>
+          </button>
+          <h1 class="appbar-title">Test the AI</h1>
+        </header>
+        <div class="blind-body">
+          <p class="blind-intro">Blind evaluation predicts first, then reveals the stored reference label. These are synthetic demonstration messages, not real-world accuracy evidence.</p>
+          <div class="blind-controls">
+            <button class="btn btn-primary" id="blind-start-btn" type="button">Run blind evaluation</button>
+            <button class="btn btn-ghost" id="blind-next-btn" type="button" disabled>Next sample</button>
+          </div>
+          <p class="blind-status" id="blind-status" role="status" aria-live="polite"></p>
+          <article class="blind-sample" id="blind-sample" hidden>
+            <div class="blind-sample-meta" id="blind-sample-meta"></div>
+            <blockquote id="blind-sample-text"></blockquote>
+            <div class="blind-predictions" id="blind-predictions"></div>
+          </article>
+          <section class="blind-results" aria-labelledby="blind-results-title">
+            <h2 id="blind-results-title">Cumulative results</h2>
+            <p id="blind-provenance"></p>
+            <div class="blind-table-wrap">
+              <table>
+                <thead><tr><th>System</th><th>N</th><th>TP</th><th>TN</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+                <tbody id="blind-metrics"></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="blind-arbitrary" aria-labelledby="blind-arbitrary-title">
+            <h2 id="blind-arbitrary-title">Try an unlabeled message</h2>
+            <p>No reference label is invented or assigned, so this analysis is not scored.</p>
+            <form id="blind-arbitrary-form">
+              <textarea id="blind-arbitrary-text" rows="3" maxlength="5000" aria-label="Unlabeled message"></textarea>
+              <button class="btn btn-ghost" type="submit">Analyze without scoring</button>
+            </form>
+            <div id="blind-arbitrary-result" hidden></div>
+          </section>
         </div>
       </section>
 

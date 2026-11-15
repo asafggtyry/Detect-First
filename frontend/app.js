@@ -40,6 +40,9 @@
   var scanRun = 0;
   var analysisRun = 0;
   var analysisController = null;
+  var blindRun = 0;
+  var blindStarted = false;
+  var blindCurrent = null;
   // Incoming-message simulation.
   var scenario = "random";
   var receiving = false;
@@ -290,6 +293,117 @@
     $("test-status").textContent = "";
     $("analyze-btn").disabled = false;
     $("test-message").focus();
+  }
+
+  function metricNumber(value) { return typeof value === "number" ? value.toFixed(3) : "-"; }
+
+  function renderBlindMetrics(metrics) {
+    var table = $("blind-metrics");
+    table.textContent = "";
+    [
+      ["ML classifier", "model"],
+      ["Evidence rules", "evidence_rules"],
+      ["Combined warning", "combined_warning"]
+    ].forEach(function (item) {
+      var metric = metrics && metrics[item[1]];
+      var matrix = metric && metric.confusion_matrix.rows_actual_columns_predicted;
+      table.appendChild(el("tr", null,
+        el("th", { scope: "row", text: item[0] }),
+        el("td", { text: metric ? String(metric.examples) : "-" }),
+        el("td", { text: metric ? String(metric.true_positives) : "-" }),
+        el("td", { text: metric ? String(metric.true_negatives) : "-" }),
+        el("td", { text: metric ? String(metric.false_positives) : "-" }),
+        el("td", { text: metric ? String(metric.false_negatives) : "-" }),
+        el("td", { text: metricNumber(metric && metric.precision) }),
+        el("td", { text: metricNumber(metric && metric.recall) }),
+        el("td", { text: metricNumber(metric && metric.f1) })));
+    });
+  }
+
+  function renderBlindSample(result) {
+    $("blind-sample").hidden = false;
+    $("blind-sample-meta").textContent = "Sample " + result.sample_index + " of " + result.total_samples +
+      " · " + result.difficulty + " · reference label revealed after prediction";
+    $("blind-sample-text").textContent = result.text;
+    var values = [
+      ["ML prediction", result.model_prediction],
+      ["Evidence rules", result.evidence_prediction],
+      ["Combined warning", result.combined_prediction],
+      ["Reference label", result.reference_label]
+    ];
+    var predictions = $("blind-predictions");
+    predictions.textContent = "";
+    values.forEach(function (item) {
+      predictions.appendChild(el("div", null,
+        el("strong", { text: item[0] }),
+        el("span", { text: item[1] ? "Flagged" : "Not flagged" })));
+    });
+    renderBlindMetrics(result.metrics);
+    $("blind-provenance").textContent = result.provenance.warning;
+    $("blind-status").textContent = result.sample_index === result.total_samples
+      ? "Evaluation complete."
+      : "Prediction recorded; reference label revealed. Select Next sample.";
+  }
+
+  function nextBlindSample() {
+    var run = blindRun;
+    $("blind-next-btn").disabled = true;
+    $("blind-status").textContent = "Predicting sample text...";
+    Api.nextEvaluation().then(function (result) {
+      if (run !== blindRun) return;
+      if (result.complete) {
+        $("blind-status").textContent = "Evaluation complete.";
+        $("blind-next-btn").disabled = true;
+        renderBlindMetrics(result.metrics);
+        return;
+      }
+      blindCurrent = result;
+      renderBlindSample(result);
+      $("blind-next-btn").disabled = result.sample_index >= result.total_samples;
+    }, function () {
+      if (run === blindRun) {
+        $("blind-status").textContent = "Evaluation failed. No sample result was used.";
+        $("blind-next-btn").disabled = false;
+      }
+    });
+  }
+
+  function startBlindEvaluation() {
+    var run = ++blindRun;
+    blindStarted = true;
+    blindCurrent = null;
+    $("blind-start-btn").disabled = true;
+    $("blind-next-btn").disabled = true;
+    $("blind-sample").hidden = true;
+    $("blind-metrics").textContent = "";
+    $("blind-provenance").textContent = "";
+    $("blind-status").textContent = "Starting randomized evaluation...";
+    Api.startEvaluation().then(function () {
+      if (run !== blindRun) return;
+      $("blind-start-btn").disabled = false;
+      $("blind-start-btn").textContent = "Restart blind evaluation";
+      nextBlindSample();
+    }, function () {
+      if (run === blindRun) {
+        $("blind-start-btn").disabled = false;
+        $("blind-status").textContent = "Evaluation failed. Check the local server and try again.";
+      }
+    });
+  }
+
+  function analyzeBlindArbitrary(event) {
+    event.preventDefault();
+    var message = $("blind-arbitrary-text").value.trim();
+    if (!message) return;
+    var output = $("blind-arbitrary-result");
+    output.hidden = false;
+    output.textContent = "Analyzing without a reference label...";
+    Api.analyzeArbitrary(message).then(function (result) {
+      output.textContent = "ML: " + (result.model_prediction ? "flagged" : "not flagged") +
+        " · rules: " + (result.evidence_prediction ? "flagged" : "not flagged") +
+        " · combined: " + (result.combined_prediction ? "flagged" : "not flagged") +
+        " · No reference label was provided; not scored.";
+    }, function () { output.textContent = "Analysis failed. No label was invented."; });
   }
 
   function renderList() {
@@ -843,6 +957,12 @@
     location.hash = "#/test";
   }
 
+  function openBlindEvaluation() {
+    navigatedInApp = true;
+    closeMenu();
+    location.hash = "#/blind";
+  }
+
   function goHome() {
     if (navigatedInApp) history.back();
     else history.replaceState(null, "", location.pathname + location.search);
@@ -855,7 +975,9 @@
     var home = $("screen-home");
     var chatScreen = $("screen-chat");
     var testScreen = $("screen-test");
+    var blindScreen = $("screen-blind");
     var testOpen = !chat && location.hash === "#/test";
+    var blindOpen = !chat && location.hash === "#/blind";
     closeEvidence();
     closeScenarioMenu();
 
@@ -866,6 +988,7 @@
       render();
       chatScreen.removeAttribute("inert");
       testScreen.setAttribute("inert", "");
+      blindScreen.setAttribute("inert", "");
       home.setAttribute("inert", "");
       $("phone").classList.add("chat-open");
       $("phone").classList.remove("test-open");
@@ -873,10 +996,20 @@
       openChatId = null;
       chatScreen.setAttribute("inert", "");
       testScreen.removeAttribute("inert");
+      blindScreen.setAttribute("inert", "");
       home.setAttribute("inert", "");
       $("phone").classList.remove("chat-open");
       $("phone").classList.add("test-open");
       $("test-message").focus();
+    } else if (blindOpen) {
+      openChatId = null;
+      chatScreen.setAttribute("inert", "");
+      testScreen.setAttribute("inert", "");
+      blindScreen.removeAttribute("inert");
+      home.setAttribute("inert", "");
+      $("phone").classList.remove("chat-open");
+      $("phone").classList.add("test-open");
+      if (!blindStarted) startBlindEvaluation();
     } else {
       // Keep the conversation rendered while it slides away.
       openChatId = null;
@@ -884,6 +1017,7 @@
       home.removeAttribute("inert");
       chatScreen.setAttribute("inert", "");
       testScreen.setAttribute("inert", "");
+      blindScreen.setAttribute("inert", "");
       $("phone").classList.remove("chat-open");
       $("phone").classList.remove("test-open");
       renderList();
@@ -930,10 +1064,15 @@
     button.addEventListener("click", resetDemo);
   });
   document.querySelector('[data-action="test-message"]').addEventListener("click", openTestMessage);
+  document.querySelector('[data-action="blind-evaluation"]').addEventListener("click", openBlindEvaluation);
   $("test-form").addEventListener("submit", analyzeTestMessage);
   $("reset-test-btn").addEventListener("click", resetTestMessage);
+  $("blind-start-btn").addEventListener("click", startBlindEvaluation);
+  $("blind-next-btn").addEventListener("click", nextBlindSample);
+  $("blind-arbitrary-form").addEventListener("submit", analyzeBlindArbitrary);
   $("back-btn").addEventListener("click", goHome);
   $("test-back-btn").addEventListener("click", goHome);
+  $("blind-back-btn").addEventListener("click", goHome);
   $("receive-btn").addEventListener("click", receiveMessage);
   $("receive-error-dismiss").addEventListener("click", function () { receiveError = ""; renderReceive(); });
   $("evidence-pop-close").addEventListener("click", function () { closeEvidence(true); });
