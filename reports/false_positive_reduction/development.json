@@ -1,0 +1,4136 @@
+{
+  "metrics": {
+    "ml": {
+      "examples": 80,
+      "accuracy": 0.5,
+      "precision": 0.5,
+      "recall": 0.05,
+      "f1": 0.09090909090909091,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            38,
+            2
+          ],
+          [
+            38,
+            2
+          ]
+        ]
+      },
+      "true_negatives": 38,
+      "false_positives": 2,
+      "false_negatives": 38,
+      "true_positives": 2,
+      "false_positive_rate": 0.05
+    },
+    "original_rules": {
+      "examples": 80,
+      "accuracy": 0.6625,
+      "precision": 0.6101694915254238,
+      "recall": 0.9,
+      "f1": 0.7272727272727273,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            17,
+            23
+          ],
+          [
+            4,
+            36
+          ]
+        ]
+      },
+      "true_negatives": 17,
+      "false_positives": 23,
+      "false_negatives": 4,
+      "true_positives": 36,
+      "false_positive_rate": 0.575
+    },
+    "original_combined": {
+      "examples": 80,
+      "accuracy": 0.65,
+      "precision": 0.6,
+      "recall": 0.9,
+      "f1": 0.72,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            16,
+            24
+          ],
+          [
+            4,
+            36
+          ]
+        ]
+      },
+      "true_negatives": 16,
+      "false_positives": 24,
+      "false_negatives": 4,
+      "true_positives": 36,
+      "false_positive_rate": 0.6
+    },
+    "strong_actions_rules": {
+      "examples": 80,
+      "accuracy": 0.775,
+      "precision": 1.0,
+      "recall": 0.55,
+      "f1": 0.7096774193548387,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            40,
+            0
+          ],
+          [
+            18,
+            22
+          ]
+        ]
+      },
+      "true_negatives": 40,
+      "false_positives": 0,
+      "false_negatives": 18,
+      "true_positives": 22,
+      "false_positive_rate": 0.0
+    },
+    "strong_actions_combined": {
+      "examples": 80,
+      "accuracy": 0.75,
+      "precision": 0.9166666666666666,
+      "recall": 0.55,
+      "f1": 0.6875,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            38,
+            2
+          ],
+          [
+            18,
+            22
+          ]
+        ]
+      },
+      "true_negatives": 38,
+      "false_positives": 2,
+      "false_negatives": 18,
+      "true_positives": 22,
+      "false_positive_rate": 0.05
+    },
+    "strong_actions_sensitive_rules": {
+      "examples": 80,
+      "accuracy": 0.825,
+      "precision": 1.0,
+      "recall": 0.65,
+      "f1": 0.7878787878787878,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            40,
+            0
+          ],
+          [
+            14,
+            26
+          ]
+        ]
+      },
+      "true_negatives": 40,
+      "false_positives": 0,
+      "false_negatives": 14,
+      "true_positives": 26,
+      "false_positive_rate": 0.0
+    },
+    "strong_actions_sensitive_combined": {
+      "examples": 80,
+      "accuracy": 0.8,
+      "precision": 0.9285714285714286,
+      "recall": 0.65,
+      "f1": 0.7647058823529411,
+      "confusion_matrix": {
+        "labels": [
+          "legitimate",
+          "fraudulent"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            38,
+            2
+          ],
+          [
+            14,
+            26
+          ]
+        ]
+      },
+      "true_negatives": 38,
+      "false_positives": 2,
+      "false_negatives": 14,
+      "true_positives": 26,
+      "false_positive_rate": 0.05
+    }
+  },
+  "errors": {
+    "ml": {
+      "false_positive_ids": [
+        "dev-032",
+        "dev-040"
+      ],
+      "false_negative_ids": [
+        "dev-041",
+        "dev-042",
+        "dev-043",
+        "dev-044",
+        "dev-045",
+        "dev-046",
+        "dev-047",
+        "dev-048",
+        "dev-049",
+        "dev-050",
+        "dev-052",
+        "dev-053",
+        "dev-054",
+        "dev-055",
+        "dev-056",
+        "dev-057",
+        "dev-058",
+        "dev-059",
+        "dev-060",
+        "dev-061",
+        "dev-062",
+        "dev-064",
+        "dev-065",
+        "dev-066",
+        "dev-067",
+        "dev-068",
+        "dev-069",
+        "dev-070",
+        "dev-071",
+        "dev-072",
+        "dev-073",
+        "dev-074",
+        "dev-075",
+        "dev-076",
+        "dev-077",
+        "dev-078",
+        "dev-079",
+        "dev-080"
+      ]
+    },
+    "original_rules": {
+      "false_positive_ids": [
+        "dev-001",
+        "dev-002",
+        "dev-003",
+        "dev-004",
+        "dev-005",
+        "dev-007",
+        "dev-009",
+        "dev-010",
+        "dev-011",
+        "dev-013",
+        "dev-014",
+        "dev-016",
+        "dev-017",
+        "dev-018",
+        "dev-021",
+        "dev-024",
+        "dev-030",
+        "dev-031",
+        "dev-032",
+        "dev-034",
+        "dev-035",
+        "dev-036",
+        "dev-039"
+      ],
+      "false_negative_ids": [
+        "dev-052",
+        "dev-056",
+        "dev-060",
+        "dev-066"
+      ]
+    },
+    "original_combined": {
+      "false_positive_ids": [
+        "dev-001",
+        "dev-002",
+        "dev-003",
+        "dev-004",
+        "dev-005",
+        "dev-007",
+        "dev-009",
+        "dev-010",
+        "dev-011",
+        "dev-013",
+        "dev-014",
+        "dev-016",
+        "dev-017",
+        "dev-018",
+        "dev-021",
+        "dev-024",
+        "dev-030",
+        "dev-031",
+        "dev-032",
+        "dev-034",
+        "dev-035",
+        "dev-036",
+        "dev-039",
+        "dev-040"
+      ],
+      "false_negative_ids": [
+        "dev-052",
+        "dev-056",
+        "dev-060",
+        "dev-066"
+      ]
+    },
+    "strong_actions_rules": {
+      "false_positive_ids": [],
+      "false_negative_ids": [
+        "dev-049",
+        "dev-053",
+        "dev-055",
+        "dev-066",
+        "dev-067",
+        "dev-068",
+        "dev-069",
+        "dev-070",
+        "dev-071",
+        "dev-072",
+        "dev-073",
+        "dev-074",
+        "dev-075",
+        "dev-076",
+        "dev-077",
+        "dev-078",
+        "dev-079",
+        "dev-080"
+      ]
+    },
+    "strong_actions_combined": {
+      "false_positive_ids": [
+        "dev-032",
+        "dev-040"
+      ],
+      "false_negative_ids": [
+        "dev-049",
+        "dev-053",
+        "dev-055",
+        "dev-066",
+        "dev-067",
+        "dev-068",
+        "dev-069",
+        "dev-070",
+        "dev-071",
+        "dev-072",
+        "dev-073",
+        "dev-074",
+        "dev-075",
+        "dev-076",
+        "dev-077",
+        "dev-078",
+        "dev-079",
+        "dev-080"
+      ]
+    },
+    "strong_actions_sensitive_rules": {
+      "false_positive_ids": [],
+      "false_negative_ids": [
+        "dev-049",
+        "dev-053",
+        "dev-055",
+        "dev-066",
+        "dev-069",
+        "dev-072",
+        "dev-073",
+        "dev-074",
+        "dev-075",
+        "dev-076",
+        "dev-077",
+        "dev-078",
+        "dev-079",
+        "dev-080"
+      ]
+    },
+    "strong_actions_sensitive_combined": {
+      "false_positive_ids": [
+        "dev-032",
+        "dev-040"
+      ],
+      "false_negative_ids": [
+        "dev-049",
+        "dev-053",
+        "dev-055",
+        "dev-066",
+        "dev-069",
+        "dev-072",
+        "dev-073",
+        "dev-074",
+        "dev-075",
+        "dev-076",
+        "dev-077",
+        "dev-078",
+        "dev-079",
+        "dev-080"
+      ]
+    }
+  },
+  "families": {
+    "authentication": {
+      "ml": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 3
+      },
+      "original_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "original_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      }
+    },
+    "check_forward": {
+      "ml": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 3
+      },
+      "original_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "original_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      }
+    },
+    "early_identity": {
+      "ml": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 6
+      },
+      "original_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "original_combined": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 6
+      },
+      "strong_actions_combined": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 6
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 2
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 2
+      }
+    },
+    "education": {
+      "ml": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "original_rules": {
+        "examples": 4,
+        "false_positives": 2,
+        "false_negatives": 0
+      },
+      "original_combined": {
+        "examples": 4,
+        "false_positives": 2,
+        "false_negatives": 0
+      },
+      "strong_actions_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      }
+    },
+    "gift_card": {
+      "ml": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 4
+      },
+      "original_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "original_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      }
+    },
+    "interview_deadline": {
+      "ml": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "original_rules": {
+        "examples": 4,
+        "false_positives": 3,
+        "false_negatives": 0
+      },
+      "original_combined": {
+        "examples": 4,
+        "false_positives": 3,
+        "false_negatives": 0
+      },
+      "strong_actions_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      }
+    },
+    "latent_deception": {
+      "ml": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 4
+      },
+      "original_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "original_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 4
+      },
+      "strong_actions_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 4
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 4
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 4
+      }
+    },
+    "logistics": {
+      "ml": {
+        "examples": 6,
+        "false_positives": 1,
+        "false_negatives": 0
+      },
+      "original_rules": {
+        "examples": 6,
+        "false_positives": 5,
+        "false_negatives": 0
+      },
+      "original_combined": {
+        "examples": 6,
+        "false_positives": 5,
+        "false_negatives": 0
+      },
+      "strong_actions_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_combined": {
+        "examples": 6,
+        "false_positives": 1,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 6,
+        "false_positives": 1,
+        "false_negatives": 0
+      }
+    },
+    "money_forward": {
+      "ml": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 4
+      },
+      "original_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "original_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      }
+    },
+    "negation": {
+      "ml": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "original_rules": {
+        "examples": 4,
+        "false_positives": 2,
+        "false_negatives": 0
+      },
+      "original_combined": {
+        "examples": 4,
+        "false_positives": 2,
+        "false_negatives": 0
+      },
+      "strong_actions_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      }
+    },
+    "oblique_payment": {
+      "ml": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 4
+      },
+      "original_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "original_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 4
+      },
+      "strong_actions_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 4
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 4
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 4
+      }
+    },
+    "ordinary_contact": {
+      "ml": {
+        "examples": 4,
+        "false_positives": 1,
+        "false_negatives": 0
+      },
+      "original_rules": {
+        "examples": 4,
+        "false_positives": 1,
+        "false_negatives": 0
+      },
+      "original_combined": {
+        "examples": 4,
+        "false_positives": 2,
+        "false_negatives": 0
+      },
+      "strong_actions_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_combined": {
+        "examples": 4,
+        "false_positives": 1,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 4,
+        "false_positives": 1,
+        "false_negatives": 0
+      }
+    },
+    "ordinary_hiring": {
+      "ml": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "original_rules": {
+        "examples": 6,
+        "false_positives": 5,
+        "false_negatives": 0
+      },
+      "original_combined": {
+        "examples": 6,
+        "false_positives": 5,
+        "false_negatives": 0
+      },
+      "strong_actions_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_combined": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      }
+    },
+    "pay_benefits": {
+      "ml": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "original_rules": {
+        "examples": 6,
+        "false_positives": 4,
+        "false_negatives": 0
+      },
+      "original_combined": {
+        "examples": 6,
+        "false_positives": 4,
+        "false_negatives": 0
+      },
+      "strong_actions_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_combined": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      }
+    },
+    "posthire_payroll": {
+      "ml": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "original_rules": {
+        "examples": 6,
+        "false_positives": 1,
+        "false_negatives": 0
+      },
+      "original_combined": {
+        "examples": 6,
+        "false_positives": 1,
+        "false_negatives": 0
+      },
+      "strong_actions_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_combined": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      }
+    },
+    "reshipping": {
+      "ml": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 4
+      },
+      "original_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "original_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 1
+      },
+      "strong_actions_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 4,
+        "false_positives": 0,
+        "false_negatives": 0
+      }
+    },
+    "upfront_payment": {
+      "ml": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 6
+      },
+      "original_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "original_combined": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_combined": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_rules": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      "strong_actions_sensitive_combined": {
+        "examples": 6,
+        "false_positives": 0,
+        "false_negatives": 0
+      }
+    }
+  },
+  "records": [
+    {
+      "id": "dev-001",
+      "reference_label": 0,
+      "family": "ordinary_hiring",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "hiring",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-002",
+      "reference_label": 0,
+      "family": "ordinary_hiring",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "hiring",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-003",
+      "reference_label": 0,
+      "family": "ordinary_hiring",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "recruiting",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-004",
+      "reference_label": 0,
+      "family": "ordinary_hiring",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "employment",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-005",
+      "reference_label": 0,
+      "family": "ordinary_hiring",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-006",
+      "reference_label": 0,
+      "family": "ordinary_hiring",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-007",
+      "reference_label": 0,
+      "family": "interview_deadline",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "hiring",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "urgency_pressure",
+            "evidence": "The message asks for a quick response or sets a short deadline.",
+            "snippet": "today",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-008",
+      "reference_label": 0,
+      "family": "interview_deadline",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-009",
+      "reference_label": 0,
+      "family": "interview_deadline",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "urgency_pressure",
+            "evidence": "The message asks for a quick response or sets a short deadline.",
+            "snippet": "Urgent",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "recruiting",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-010",
+      "reference_label": 0,
+      "family": "interview_deadline",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "employment",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-011",
+      "reference_label": 0,
+      "family": "pay_benefits",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unrealistic_earnings",
+            "evidence": "The message advertises at least $200 per day; that claim is not verified.",
+            "snippet": "pays $280 per day",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-012",
+      "reference_label": 0,
+      "family": "pay_benefits",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-013",
+      "reference_label": 0,
+      "family": "pay_benefits",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "hiring",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "upfront_payment_request",
+            "evidence": "The message asks for a payment to obtain or begin the job.",
+            "snippet": "fee of $48",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-014",
+      "reference_label": 0,
+      "family": "pay_benefits",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "apply for",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-015",
+      "reference_label": 0,
+      "family": "pay_benefits",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-016",
+      "reference_label": 0,
+      "family": "pay_benefits",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-017",
+      "reference_label": 0,
+      "family": "negation",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "upfront_payment_request",
+            "evidence": "The message asks for a payment to obtain or begin the job.",
+            "snippet": "pay a training fee",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-018",
+      "reference_label": 0,
+      "family": "negation",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "upfront_payment_request",
+            "evidence": "The message asks for a payment to obtain or begin the job.",
+            "snippet": "purchase equipment",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "employment",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-019",
+      "reference_label": 0,
+      "family": "negation",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-020",
+      "reference_label": 0,
+      "family": "negation",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-021",
+      "reference_label": 0,
+      "family": "education",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-022",
+      "reference_label": 0,
+      "family": "education",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-023",
+      "reference_label": 0,
+      "family": "education",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-024",
+      "reference_label": 0,
+      "family": "education",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "upfront_payment_request",
+            "evidence": "The message asks for a payment to obtain or begin the job.",
+            "snippet": "pay a hiring fee",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "hiring",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-025",
+      "reference_label": 0,
+      "family": "posthire_payroll",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-026",
+      "reference_label": 0,
+      "family": "posthire_payroll",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-027",
+      "reference_label": 0,
+      "family": "posthire_payroll",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-028",
+      "reference_label": 0,
+      "family": "posthire_payroll",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-029",
+      "reference_label": 0,
+      "family": "posthire_payroll",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-030",
+      "reference_label": 0,
+      "family": "posthire_payroll",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "employment",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-031",
+      "reference_label": 0,
+      "family": "logistics",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-032",
+      "reference_label": 0,
+      "family": "logistics",
+      "predictions": {
+        "ml": 1,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "hiring",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-033",
+      "reference_label": 0,
+      "family": "logistics",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-034",
+      "reference_label": 0,
+      "family": "logistics",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "position",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-035",
+      "reference_label": 0,
+      "family": "logistics",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "vacancy",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-036",
+      "reference_label": 0,
+      "family": "logistics",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "hiring",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-037",
+      "reference_label": 0,
+      "family": "ordinary_contact",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-038",
+      "reference_label": 0,
+      "family": "ordinary_contact",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-039",
+      "reference_label": 0,
+      "family": "ordinary_contact",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-040",
+      "reference_label": 0,
+      "family": "ordinary_contact",
+      "predictions": {
+        "ml": 1,
+        "original_rules": 0,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-041",
+      "reference_label": 1,
+      "family": "upfront_payment",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "upfront_payment_request",
+            "evidence": "The message asks for a payment to obtain or begin the job.",
+            "snippet": "Pay the enrollment fee",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "applicant_payment",
+            "start": 36,
+            "end": 72,
+            "excerpt": "Pay the enrollment fee of $73 before",
+            "explanation": "Payment/purchase wording is tied to a hiring prerequisite.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "applicant_payment",
+            "start": 36,
+            "end": 72,
+            "excerpt": "Pay the enrollment fee of $73 before",
+            "explanation": "Payment/purchase wording is tied to a hiring prerequisite.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-042",
+      "reference_label": 1,
+      "family": "upfront_payment",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "position",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "upfront_payment_request",
+            "evidence": "The message asks for a payment to obtain or begin the job.",
+            "snippet": "send a refundable deposit",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "applicant_payment",
+            "start": 0,
+            "end": 67,
+            "excerpt": "To secure this museum assistant position, send a refundable deposit",
+            "explanation": "Payment/purchase wording is tied to a hiring prerequisite.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "applicant_payment",
+            "start": 0,
+            "end": 67,
+            "excerpt": "To secure this museum assistant position, send a refundable deposit",
+            "explanation": "Payment/purchase wording is tied to a hiring prerequisite.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-043",
+      "reference_label": 1,
+      "family": "upfront_payment",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "vacancy",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "upfront_payment_request",
+            "evidence": "The message asks for a payment to obtain or begin the job.",
+            "snippet": "buy the equipment",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "applicant_payment",
+            "start": 38,
+            "end": 60,
+            "excerpt": "must buy the equipment",
+            "explanation": "Payment/purchase wording is tied to a hiring prerequisite.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "applicant_payment",
+            "start": 38,
+            "end": 60,
+            "excerpt": "must buy the equipment",
+            "explanation": "Payment/purchase wording is tied to a hiring prerequisite.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-044",
+      "reference_label": 1,
+      "family": "upfront_payment",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "applicant_payment",
+            "start": 21,
+            "end": 55,
+            "excerpt": "transfer $96 for activation before",
+            "explanation": "Payment/purchase wording is tied to a hiring prerequisite.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "applicant_payment",
+            "start": 21,
+            "end": 55,
+            "excerpt": "transfer $96 for activation before",
+            "explanation": "Payment/purchase wording is tied to a hiring prerequisite.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-045",
+      "reference_label": 1,
+      "family": "upfront_payment",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "employment",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "urgency_pressure",
+            "evidence": "The message asks for a quick response or sets a short deadline.",
+            "snippet": "today",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "applicant_payment",
+            "start": 47,
+            "end": 87,
+            "excerpt": "pay an onboarding charge today to unlock",
+            "explanation": "Payment/purchase wording is tied to a hiring prerequisite.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "applicant_payment",
+            "start": 47,
+            "end": 87,
+            "excerpt": "pay an onboarding charge today to unlock",
+            "explanation": "Payment/purchase wording is tied to a hiring prerequisite.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-046",
+      "reference_label": 1,
+      "family": "upfront_payment",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "applicant_payment",
+            "start": 17,
+            "end": 62,
+            "excerpt": "once you purchase our mandatory certification",
+            "explanation": "Payment/purchase wording is tied to a hiring prerequisite.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "applicant_payment",
+            "start": 17,
+            "end": 62,
+            "excerpt": "once you purchase our mandatory certification",
+            "explanation": "Payment/purchase wording is tied to a hiring prerequisite.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-047",
+      "reference_label": 1,
+      "family": "gift_card",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "recruiting",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "gift_card_transfer",
+            "start": 31,
+            "end": 71,
+            "excerpt": "buy three gift cards and email the codes",
+            "explanation": "Gift-card action is paired with transmission of codes or numbers.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "gift_card_transfer",
+            "start": 31,
+            "end": 71,
+            "excerpt": "buy three gift cards and email the codes",
+            "explanation": "Gift-card action is paired with transmission of codes or numbers.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-048",
+      "reference_label": 1,
+      "family": "gift_card",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "gift_card_transfer",
+            "start": 28,
+            "end": 57,
+            "excerpt": "Send us the gift card numbers",
+            "explanation": "Gift-card action is paired with transmission of codes or numbers.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "gift_card_transfer",
+            "start": 28,
+            "end": 57,
+            "excerpt": "Send us the gift card numbers",
+            "explanation": "Gift-card action is paired with transmission of codes or numbers.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-049",
+      "reference_label": 1,
+      "family": "gift_card",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "employment",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-050",
+      "reference_label": 1,
+      "family": "gift_card",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "gift_card_transfer",
+            "start": 34,
+            "end": 66,
+            "excerpt": "buy a gift card and send the PIN",
+            "explanation": "Gift-card action is paired with transmission of codes or numbers.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "gift_card_transfer",
+            "start": 34,
+            "end": 66,
+            "excerpt": "buy a gift card and send the PIN",
+            "explanation": "Gift-card action is paired with transmission of codes or numbers.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-051",
+      "reference_label": 1,
+      "family": "check_forward",
+      "predictions": {
+        "ml": 1,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "check_redirection",
+            "start": 46,
+            "end": 86,
+            "excerpt": "Deposit our check and wire the remainder",
+            "explanation": "Check deposit is paired with forwarding or spending its funds.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "check_redirection",
+            "start": 46,
+            "end": 86,
+            "excerpt": "Deposit our check and wire the remainder",
+            "explanation": "Check deposit is paired with forwarding or spending its funds.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-052",
+      "reference_label": 1,
+      "family": "check_forward",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [
+          {
+            "category": "check_redirection",
+            "start": 27,
+            "end": 75,
+            "excerpt": "cash the cheque we send and transfer the balance",
+            "explanation": "Check deposit is paired with forwarding or spending its funds.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "check_redirection",
+            "start": 27,
+            "end": 75,
+            "excerpt": "cash the cheque we send and transfer the balance",
+            "explanation": "Check deposit is paired with forwarding or spending its funds.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-053",
+      "reference_label": 1,
+      "family": "check_forward",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "hiring",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-054",
+      "reference_label": 1,
+      "family": "check_forward",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "upfront_payment_request",
+            "evidence": "The message asks for a payment to obtain or begin the job.",
+            "snippet": "buying equipment",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "check_redirection",
+            "start": 26,
+            "end": 67,
+            "excerpt": "depositing the check and buying equipment",
+            "explanation": "Check deposit is paired with forwarding or spending its funds.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "check_redirection",
+            "start": 26,
+            "end": 67,
+            "excerpt": "depositing the check and buying equipment",
+            "explanation": "Check deposit is paired with forwarding or spending its funds.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-055",
+      "reference_label": 1,
+      "family": "money_forward",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-056",
+      "reference_label": 1,
+      "family": "money_forward",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [
+          {
+            "category": "personal_account_transfer",
+            "start": 16,
+            "end": 87,
+            "excerpt": "accept customer payments into your own account and transfer them onward",
+            "explanation": "Receiving and forwarding funds uses a personal account.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "personal_account_transfer",
+            "start": 16,
+            "end": 87,
+            "excerpt": "accept customer payments into your own account and transfer them onward",
+            "explanation": "Receiving and forwarding funds uses a personal account.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-057",
+      "reference_label": 1,
+      "family": "money_forward",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "position",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "personal_account_transfer",
+            "start": 27,
+            "end": 100,
+            "excerpt": "collect incoming transfers in your personal account and wire the proceeds",
+            "explanation": "Receiving and forwarding funds uses a personal account.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "personal_account_transfer",
+            "start": 27,
+            "end": 100,
+            "excerpt": "collect incoming transfers in your personal account and wire the proceeds",
+            "explanation": "Receiving and forwarding funds uses a personal account.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-058",
+      "reference_label": 1,
+      "family": "money_forward",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "Employment",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "personal_account_transfer",
+            "start": 27,
+            "end": 85,
+            "excerpt": "receive company funds in your account and send the balance",
+            "explanation": "Receiving and forwarding funds uses a personal account.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "personal_account_transfer",
+            "start": 27,
+            "end": 85,
+            "excerpt": "receive company funds in your account and send the balance",
+            "explanation": "Receiving and forwarding funds uses a personal account.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-059",
+      "reference_label": 1,
+      "family": "reshipping",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "home_reshipping",
+            "start": 44,
+            "end": 106,
+            "excerpt": "Receive packages at your house, remove the receipts and reship",
+            "explanation": "Home parcel receipt is paired with repackaging or forwarding.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "home_reshipping",
+            "start": 44,
+            "end": 106,
+            "excerpt": "Receive packages at your house, remove the receipts and reship",
+            "explanation": "Home parcel receipt is paired with repackaging or forwarding.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-060",
+      "reference_label": 1,
+      "family": "reshipping",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [
+          {
+            "category": "home_reshipping",
+            "start": 16,
+            "end": 55,
+            "excerpt": "accept parcels at your home and forward",
+            "explanation": "Home parcel receipt is paired with repackaging or forwarding.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "home_reshipping",
+            "start": 16,
+            "end": 55,
+            "excerpt": "accept parcels at your home and forward",
+            "explanation": "Home parcel receipt is paired with repackaging or forwarding.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-061",
+      "reference_label": 1,
+      "family": "reshipping",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "home_reshipping",
+            "start": 23,
+            "end": 71,
+            "excerpt": "receive electronics at your apartment, repackage",
+            "explanation": "Home parcel receipt is paired with repackaging or forwarding.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "home_reshipping",
+            "start": 23,
+            "end": 71,
+            "excerpt": "receive electronics at your apartment, repackage",
+            "explanation": "Home parcel receipt is paired with repackaging or forwarding.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-062",
+      "reference_label": 1,
+      "family": "reshipping",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "recruiting",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "home_reshipping",
+            "start": 43,
+            "end": 98,
+            "excerpt": "Collect packages delivered to your residence and reship",
+            "explanation": "Home parcel receipt is paired with repackaging or forwarding.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "home_reshipping",
+            "start": 43,
+            "end": 98,
+            "excerpt": "Collect packages delivered to your residence and reship",
+            "explanation": "Home parcel receipt is paired with repackaging or forwarding.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-063",
+      "reference_label": 1,
+      "family": "authentication",
+      "predictions": {
+        "ml": 1,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "employment",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "authentication_secret",
+            "start": 35,
+            "end": 68,
+            "excerpt": "send your online banking password",
+            "explanation": "The message requests transmission of an authentication secret.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "authentication_secret",
+            "start": 35,
+            "end": 68,
+            "excerpt": "send your online banking password",
+            "explanation": "The message requests transmission of an authentication secret.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-064",
+      "reference_label": 1,
+      "family": "authentication",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "authentication_secret",
+            "start": 37,
+            "end": 65,
+            "excerpt": "Reply with the one-time code",
+            "explanation": "The message requests transmission of an authentication secret.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "authentication_secret",
+            "start": 37,
+            "end": 65,
+            "excerpt": "Reply with the one-time code",
+            "explanation": "The message requests transmission of an authentication secret.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-065",
+      "reference_label": 1,
+      "family": "authentication",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 1,
+        "strong_actions_combined": 1,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "position",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [
+          {
+            "category": "authentication_secret",
+            "start": 30,
+            "end": 51,
+            "excerpt": "share your bank login",
+            "explanation": "The message requests transmission of an authentication secret.",
+            "source": "experimental_evidence_rule"
+          }
+        ],
+        "strong_actions_sensitive": [
+          {
+            "category": "authentication_secret",
+            "start": 30,
+            "end": 51,
+            "excerpt": "share your bank login",
+            "explanation": "The message requests transmission of an authentication secret.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-066",
+      "reference_label": 1,
+      "family": "authentication",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 0,
+        "original_combined": 0,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-067",
+      "reference_label": 1,
+      "family": "early_identity",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": [
+          {
+            "category": "early_sensitive_information",
+            "start": 0,
+            "end": 66,
+            "excerpt": "Before we discuss the job duties, send your Social Security number",
+            "explanation": "A sensitive-data request uses an early-hiring or reply/chat context.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-068",
+      "reference_label": 1,
+      "family": "early_identity",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": [
+          {
+            "category": "early_sensitive_information",
+            "start": 0,
+            "end": 63,
+            "excerpt": "To book an interview for this job, reply with your bank account",
+            "explanation": "A sensitive-data request uses an early-hiring or reply/chat context.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-069",
+      "reference_label": 1,
+      "family": "early_identity",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "hiring",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-070",
+      "reference_label": 1,
+      "family": "early_identity",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "vacancy",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": [
+          {
+            "category": "early_sensitive_information",
+            "start": 9,
+            "end": 64,
+            "excerpt": "not been interviewed yet, but send your account details",
+            "explanation": "A sensitive-data request uses an early-hiring or reply/chat context.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-071",
+      "reference_label": 1,
+      "family": "early_identity",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 1,
+        "strong_actions_sensitive_combined": 1
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "employment",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": [
+          {
+            "category": "early_sensitive_information",
+            "start": 33,
+            "end": 67,
+            "excerpt": "provide your routing number before",
+            "explanation": "A sensitive-data request uses an early-hiring or reply/chat context.",
+            "source": "experimental_evidence_rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-072",
+      "reference_label": 1,
+      "family": "early_identity",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "urgency_pressure",
+            "evidence": "The message asks for a quick response or sets a short deadline.",
+            "snippet": "today",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-073",
+      "reference_label": 1,
+      "family": "oblique_payment",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-074",
+      "reference_label": 1,
+      "family": "oblique_payment",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "work opportunity",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-075",
+      "reference_label": 1,
+      "family": "oblique_payment",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "hiring",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-076",
+      "reference_label": 1,
+      "family": "oblique_payment",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "vacancy",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-077",
+      "reference_label": 1,
+      "family": "latent_deception",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "recruiting",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-078",
+      "reference_label": 1,
+      "family": "latent_deception",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "job",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-079",
+      "reference_label": 1,
+      "family": "latent_deception",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "vacancy",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "vague_job_details",
+            "evidence": "No role or duty terms recognized by this prototype's limited word list were found.",
+            "snippet": null,
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    },
+    {
+      "id": "dev-080",
+      "reference_label": 1,
+      "family": "latent_deception",
+      "predictions": {
+        "ml": 0,
+        "original_rules": 1,
+        "original_combined": 1,
+        "strong_actions_rules": 0,
+        "strong_actions_combined": 0,
+        "strong_actions_sensitive_rules": 0,
+        "strong_actions_sensitive_combined": 0
+      },
+      "rule_observations": {
+        "original": [
+          {
+            "category": "unsolicited_job_offer",
+            "evidence": "This is a work offer in the first message from an unsaved sender.",
+            "snippet": "hiring",
+            "source": "evidence_rule"
+          },
+          {
+            "category": "unverified_employer",
+            "evidence": "No employer name appears in the message or sender metadata; this demo cannot independently verify the sender.",
+            "snippet": null,
+            "source": "evidence_rule"
+          }
+        ],
+        "strong_actions": [],
+        "strong_actions_sensitive": []
+      }
+    }
+  ],
+  "scope": "Authored synthetic development only; no independent human labeling.",
+  "frozen_commit": "c6443aeaa1822cc67223c7c064c5bfa132fc955d",
+  "inputs": {
+    "detect_first/__init__.py": "ae2b69cfac4381f9021fd06da0f509d8e4e719587e95e9615e76d2b5434193d8",
+    "detect_first/baselines.py": "9b824469a32d2b4a7704ee1685614d281a40d11e6e3f33e13f7fa5ee652a9015",
+    "detect_first/blind_evaluation.py": "d303ae0ffe2f5b73f0bf8d2e1c920dee03a190e08f76b2c5ec2a5d1d0dee00c6",
+    "detect_first/data.py": "157627b382d71b8bb4a13b4ead108b66b5ebc6530e92380d7551c690fb7fc166",
+    "detect_first/evaluation.py": "aaff1897af78aa395d9018fa90362e5cf67abd9647d8ab5a143d0c34a4d4d488",
+    "detect_first/evidence.py": "fcdef264a89afbab7f1ce766b76610ae59723b577190ded2f0330169500c1072",
+    "detect_first/experimental_policy.py": "2c36930d9f713848844ce8926d69b3e29f899a94e6fe990c551a8cae73b7f661",
+    "detect_first/message_data.py": "fdd83bdf957b0743ce2b3c694b27f069c6a022879d104a96dea63c13f5c49778",
+    "detect_first/message_model.py": "cae201a251c09a907391f3dccb5b8c7cbd7c0e993b47dd3936cb2f95cf08efd2",
+    "detect_first/metrics.py": "9f2079d4e6afc2f52ed8aed945b54fc2d303279204042b3d6a30631cc9924261",
+    "detect_first/model.py": "99730be11b6762e8b8591638cf37a3190dc08adcbe4e9fe6efa3ee263f01d1cb",
+    "detect_first/server.py": "529d01c6a084c082b6b043a03a994b6d627c3d6094823c4f8949b52027ff5598",
+    "detect_first/simulation.py": "8a76084b9bc7cb0da2e4d0509356f40041e6ee3540235df40c1d932068ad3330",
+    "detect_first/simulation_fixtures.py": "435185c611febeb5334dae45c74856f688ca0a039875e449cd5c7994802a465b",
+    "detect_first/state.py": "1e5084e8e6759539b8ccc85986ec64775cf917e9a6715aa9dbbc6532a191d1b1",
+    "data/development/false_positive_reduction.jsonl": "3a194ef079549921f52a0b2c48dd58673991763926a198287db2134805bf9b1d",
+    "data/development/README.md": "28a3aa9a251108075683dbf248286ea2f2ad18b684b22cfc2a6c20dd01ac8559",
+    "docs/FALSE_POSITIVE_PROTOCOL.md": "ddb8c27df6f85188fa8b268ef9db11741f3200a440efc19aceb9743b7b859066",
+    "scripts/experiment_false_positives.py": "f623abf1d06a62910600cb432b5f6c180aaeca150c76509f8bf8e6263f1309e5",
+    "models/job_posting_classifier.joblib": "6e6359e96e201c8814fdc183f070acef1c35daa963b699b6206bf83eceff2c42",
+    "data/synthetic/evaluation.jsonl": "e4e81f6b40849761443bcb1634a9b0fc16253061737bcfc49da5cd4383156256"
+  }
+}

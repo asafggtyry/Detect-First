@@ -1,0 +1,35 @@
+{
+  "selected_policy": "strong_actions_sensitive",
+  "eligibility": {
+    "strong_actions": false,
+    "strong_actions_sensitive": false
+  },
+  "passes_development_gate": false,
+  "selection_scope": "development only; ineligible winner is diagnostic, not a deployment recommendation",
+  "inputs": {
+    "detect_first/__init__.py": "ae2b69cfac4381f9021fd06da0f509d8e4e719587e95e9615e76d2b5434193d8",
+    "detect_first/baselines.py": "9b824469a32d2b4a7704ee1685614d281a40d11e6e3f33e13f7fa5ee652a9015",
+    "detect_first/blind_evaluation.py": "d303ae0ffe2f5b73f0bf8d2e1c920dee03a190e08f76b2c5ec2a5d1d0dee00c6",
+    "detect_first/data.py": "157627b382d71b8bb4a13b4ead108b66b5ebc6530e92380d7551c690fb7fc166",
+    "detect_first/evaluation.py": "aaff1897af78aa395d9018fa90362e5cf67abd9647d8ab5a143d0c34a4d4d488",
+    "detect_first/evidence.py": "fcdef264a89afbab7f1ce766b76610ae59723b577190ded2f0330169500c1072",
+    "detect_first/experimental_policy.py": "2c36930d9f713848844ce8926d69b3e29f899a94e6fe990c551a8cae73b7f661",
+    "detect_first/message_data.py": "fdd83bdf957b0743ce2b3c694b27f069c6a022879d104a96dea63c13f5c49778",
+    "detect_first/message_model.py": "cae201a251c09a907391f3dccb5b8c7cbd7c0e993b47dd3936cb2f95cf08efd2",
+    "detect_first/metrics.py": "9f2079d4e6afc2f52ed8aed945b54fc2d303279204042b3d6a30631cc9924261",
+    "detect_first/model.py": "99730be11b6762e8b8591638cf37a3190dc08adcbe4e9fe6efa3ee263f01d1cb",
+    "detect_first/server.py": "529d01c6a084c082b6b043a03a994b6d627c3d6094823c4f8949b52027ff5598",
+    "detect_first/simulation.py": "8a76084b9bc7cb0da2e4d0509356f40041e6ee3540235df40c1d932068ad3330",
+    "detect_first/simulation_fixtures.py": "435185c611febeb5334dae45c74856f688ca0a039875e449cd5c7994802a465b",
+    "detect_first/state.py": "1e5084e8e6759539b8ccc85986ec64775cf917e9a6715aa9dbbc6532a191d1b1",
+    "data/development/false_positive_reduction.jsonl": "3a194ef079549921f52a0b2c48dd58673991763926a198287db2134805bf9b1d",
+    "data/development/README.md": "28a3aa9a251108075683dbf248286ea2f2ad18b684b22cfc2a6c20dd01ac8559",
+    "docs/FALSE_POSITIVE_PROTOCOL.md": "ddb8c27df6f85188fa8b268ef9db11741f3200a440efc19aceb9743b7b859066",
+    "scripts/experiment_false_positives.py": "f623abf1d06a62910600cb432b5f6c180aaeca150c76509f8bf8e6263f1309e5",
+    "models/job_posting_classifier.joblib": "6e6359e96e201c8814fdc183f070acef1c35daa963b699b6206bf83eceff2c42",
+    "data/synthetic/evaluation.jsonl": "e4e81f6b40849761443bcb1634a9b0fc16253061737bcfc49da5cd4383156256"
+  },
+  "development_report_sha256": "152396d640093f4ca4224fd3ebea63974489e288bd382378aa0bcc6ee664635d",
+  "separation_sha256": "c1b3fe15b0798f7a2173cc04f264300066e8df9cf1049f7d26f59ad8f4cc8117",
+  "frozen_commit": "c6443aeaa1822cc67223c7c064c5bfa132fc955d"
+}
