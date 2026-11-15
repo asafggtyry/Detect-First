@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The optional **Test the AI** screen runs a randomized blind evaluation separate
+The **AI Evaluation** tab (formerly **Test the AI**) runs a randomized blind evaluation separate
 from the WhatsApp-style chat demo. For each sample, the analyzer receives only
 the message text. It records the raw ML prediction, evaluates the existing
 first-contact evidence rules, records the combined warning, and only then
@@ -56,6 +56,16 @@ accuracy or model improvement.
 .\.venv\Scripts\python.exe -m pytest -q --browser-tests
 ```
 
-The interactive evaluator's arbitrary-message field intentionally returns
+The evaluator's arbitrary-message endpoint intentionally returns
 `reference_label: null` and is never scored. It demonstrates predictions only;
-it cannot manufacture ground truth.
+it cannot manufacture ground truth. In the app, arbitrary text is entered on the
+**Test a Message** tab, which is likewise unscored; the AI Evaluation tab links
+to it instead of carrying a second input box.
+
+## Reading the screen
+
+The tab shows each message with the three predictions marked **Correct** or
+**Incorrect** against the reference label, and running totals per system:
+**Correct** (TP + TN), **Missed Scams** (FN) and **False Alarms** (FP), plus
+"Caught x of y scams" (recall as a count). Precision, recall and F1 remain in
+`reports/blind_ai_evaluation.json` and the table above.

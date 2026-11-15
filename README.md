@@ -44,12 +44,12 @@ If port 8000 is occupied, run `.\.venv\Scripts\python.exe -m detect_first.server
 
 ## Demo walkthrough
 
-1. **Receive random message** asks the server for one of three synthetic scenarios: saved family/friend, harmless stranger, or potential fraudulent recruiter. The scenario menu can select a type; equal random selection is for demonstration only, not a real-world frequency estimate.
+1. On the **Chats** tab, **Receive Random Message** asks the server for one of three synthetic scenarios: saved family/friend, harmless stranger, or potential fraudulent recruiter. The scenario menu can select a type; equal random selection is for demonstration only, not a real-world frequency estimate.
 2. The server returns a conversation ID, message, ground-truth scenario label, and analysis. Saved contacts bypass scanning in this prototype. The actual trained model and evidence rules analyze the first incoming message from an unsaved sender.
 3. Open the message. A flagged first message shows a compact warning (title, one line of guidance, Block and Accept Anyway). Only exact backend-provided evidence spans are highlighted. Tap a highlight for its phrase, category and explanation; these are rule-based observations, not explanations of the ML model. The API still reports the model prediction separately from evidence-rule findings, and the Test Message screen shows both.
 4. The model may miss recruiter fixtures. In the 30 synthetic demo fixtures, it flagged 3/10 recruiter examples; the combined warning flagged 6/10 and missed 4/10. No normal-stranger fixture triggered a warning. These are demo checks, not real-world accuracy.
 5. **Block** and **Accept Anyway** persist to the server session. Opening a chat does not generate another message or rerun its analysis. **Reset demo** clears server-generated history and decisions plus local presentation state.
-6. **More options → Test Message** analyzes arbitrary first-contact text through the same local model and evidence rules. **Reset test** clears the page-only draft and result; test messages do not enter conversation history.
+6. The **Test a Message** tab analyzes arbitrary first-contact text through the same local model and evidence rules. **Reset test** clears the page-only draft and result; test messages do not enter conversation history.
 
 The home screen starts the two unknown-sender scans. Saved contacts and outgoing replies are not sent for classification. Later messages are outside this first-message-only policy.
 

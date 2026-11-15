@@ -64,19 +64,33 @@ def test_blind_ai_screen_reveals_labels_and_keeps_arbitrary_input_unscored(page,
     from playwright.sync_api import expect
 
     page.goto(live_url)
-    page.get_by_role("button", name="More options").click()
-    page.get_by_role("menuitem", name="Test the AI").click()
+    page.get_by_role("link", name="AI Evaluation").click()
     expect(page.locator("#screen-blind")).to_be_visible()
+    # The redesign starts the blind test from an explicit button instead of on arrival.
+    expect(page.locator("#blind-sample")).to_be_hidden()
+    page.get_by_role("button", name="Start Blind Test").click()
     expect(page.locator("#blind-sample")).to_be_visible()
     expect(page.locator("#blind-sample-text")).not_to_be_empty()
     expect(page.locator("#blind-predictions")).to_contain_text("Reference label")
     expect(page.locator("#blind-metrics tr")).to_have_count(3)
     expect(page.locator("#blind-provenance")).to_contain_text("Synthetic demonstration only")
 
-    page.locator("#blind-arbitrary-text").fill("An arbitrary message with no label.")
-    page.get_by_role("button", name="Analyze without scoring").click()
-    expect(page.locator("#blind-arbitrary-result")).to_contain_text("not scored")
-    expect(page.locator("#blind-arbitrary-result")).to_contain_text("No reference label")
+    # Arbitrary input moved to Test a Message: still analyzed by the real backend, never scored.
+    totals = page.locator("#blind-metrics").inner_text()
+    expect(page.locator(".blind-own")).to_contain_text("cannot be scored")
+    page.locator(".blind-own").get_by_role("link", name="Test a Message").click()
+    expect(page.locator("#screen-test")).to_be_visible()
+    expect(page.locator("#test-unscored")).to_contain_text("Not scored")
+    expect(page.locator("#test-unscored")).to_contain_text("no reference label")
+    page.get_by_role("textbox", name="Message to analyze").fill("An arbitrary message with no label.")
+    page.get_by_role("button", name="Analyze", exact=True).click()
+    expect(page.locator("#test-status")).to_have_text("Analysis complete.")
+    expect(page.locator("[data-model-result]")).to_be_visible()
+    assert "Correct" not in page.locator("#test-result").inner_text()
+    assert "Reference label" not in page.locator("#test-result").inner_text()
+    page.get_by_role("link", name="AI Evaluation").click()
+    expect(page.locator("#screen-blind")).to_be_visible()
+    assert page.locator("#blind-metrics").inner_text() == totals
 
 
 @pytest.mark.parametrize("width,height", [(390, 844), (320, 568)])
@@ -202,8 +216,7 @@ def test_test_message_lab_uses_live_api_without_changing_demo_state(page, live_u
     expect(page.locator("#scan-status")).to_have_attribute("data-kind", "live")
     assert len(scan_requests) == 2
 
-    page.get_by_role("button", name="More options").click()
-    page.get_by_role("menuitem", name="Test Message").click()
+    page.get_by_role("link", name="Test a Message").click()
     expect(page.locator("#screen-test")).to_be_visible()
     message = "Hi, we're hiring for a remote assistant. Deposit $25 today to get started. Reply now for details."
     page.get_by_role("textbox", name="Message to analyze").fill(message)
@@ -227,7 +240,7 @@ def test_test_message_lab_uses_live_api_without_changing_demo_state(page, live_u
     expect(page.locator("#test-verdict")).to_have_text("No major warning signals detected")
     expect(page.locator(".test-caution")).to_contain_text("does not prove the message is safe")
     assert analysis_requests == [{"message": message}, {"message": second_message}]
-    page.get_by_role("button", name="Back to chats").click()
+    page.get_by_role("link", name="Chats").click()
     page.locator('[data-chat="u2"]').click()
     expect(page.locator(".warning")).to_be_visible()
     assert len(scan_requests) == 2
@@ -238,8 +251,7 @@ def test_test_message_lab_api_failure_does_not_show_a_verdict(page, live_url):
     page.route("**/api/analyze", lambda route: route.fulfill(
         status=503, content_type="application/json", body='{"error":"Unavailable"}'))
     page.goto(live_url)
-    page.get_by_role("button", name="More options").click()
-    page.get_by_role("menuitem", name="Test Message").click()
+    page.get_by_role("link", name="Test a Message").click()
     message = "Private one-off message that must not be stored"
     page.get_by_role("textbox", name="Message to analyze").fill(message)
     page.get_by_role("button", name="Analyze", exact=True).click()

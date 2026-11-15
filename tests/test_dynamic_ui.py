@@ -30,7 +30,14 @@ def receive(page, scenario="random"):
         page.locator("#receive-btn").click()
     result = response.value
     assert result.status == 200
-    return result.json()
+    data = result.json()
+    # A received message now opens its conversation; return to Chats so callers start from the list.
+    from playwright.sync_api import expect
+    expect(page.locator("#phone")).to_have_attribute("data-screen", "chat")
+    assert page.evaluate("location.hash") == "#/chat/" + data["conversation"]["id"]
+    home(page)
+    expect(page.locator("#chat-list .row").first).to_have_attribute("data-chat", data["conversation"]["id"])
+    return data
 
 
 def analyze_in_browser(page, message):

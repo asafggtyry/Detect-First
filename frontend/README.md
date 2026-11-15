@@ -70,3 +70,18 @@ The browser integration tests start the real Python API and do not intercept
 `/api/demo/receive` or `/api/scan`. See [the dynamic API contract](../docs/DYNAMIC_API.md)
 and [root README](../README.md) for all endpoints, setup, data provenance, and
 model limitations.
+
+## Navigation
+
+A bottom tab bar gives three destinations, each a hash route so the browser's
+back and forward buttons work: **Chats** (`#/`, the default and the fallback for
+any unknown route), **Test a Message** (`#/test`) and **AI Evaluation**
+(`#/evaluation`). Exactly one screen is active (`#phone[data-screen]`); the
+others are hidden and `inert`. A conversation (`#/chat/{id}`) slides over the
+tab bar and has its own back arrow.
+
+The receive bar is docked at the bottom of Chats only: **Receive Random
+Message** plus a category picker (Random by default). A successful response
+opens the returned conversation; a failure shows a banner on Chats and adds
+nothing. AI Evaluation starts from **Start Blind Test**, advances with **Next
+Message**, and validates every evaluation response before showing it.

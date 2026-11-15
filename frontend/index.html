@@ -10,7 +10,7 @@
 </head>
 <body>
   <div class="stage">
-    <main class="phone" id="phone">
+    <main class="phone" id="phone" data-screen="chats">
 
       <!-- Screen 1: messaging home -->
       <section class="screen screen-home" id="screen-home" aria-label="Chats">
@@ -21,8 +21,6 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
             </button>
             <div class="menu" id="menu" role="menu" hidden>
-              <button type="button" role="menuitem" data-action="test-message">Test Message</button>
-              <button type="button" role="menuitem" data-action="blind-evaluation">Test the AI</button>
               <button type="button" role="menuitem" data-action="reset">Reset demo</button>
             </div>
           </div>
@@ -41,23 +39,22 @@
           <p class="list-foot" id="scan-status" role="status" aria-live="polite"></p>
         </div>
 
-        <!-- Simulated incoming message, with an optional presenter scenario -->
-        <div class="receive">
+        <!-- Simulated incoming message from the backend, with a category picker. Chats only. -->
+        <div class="receive" id="receive">
           <div class="scenario-menu" id="scenario-menu" role="menu" aria-label="Demo scenario" hidden>
             <div id="scenario-options"></div>
             <p class="scenario-note">Chooses the kind of sample message only. The classifier decides every verdict.</p>
           </div>
-          <div class="receive-fab">
-            <button class="receive-main" id="receive-btn" type="button">
-              <span class="receive-ico" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Zm-3 9h-4v4h-2v-4H7V9h4V5h2v4h4v2Z"/></svg>
-              </span>
-              <span id="receive-label">Receive random message</span>
-            </button>
-            <button class="receive-caret" id="scenario-btn" type="button" aria-label="Choose demo scenario" aria-haspopup="true" aria-expanded="false">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 14 5-5 5 5H7Z"/></svg>
-            </button>
-          </div>
+          <button class="receive-main" id="receive-btn" type="button">
+            <span class="receive-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Zm-3 9h-4v4h-2v-4H7V9h4V5h2v4h4v2Z"/></svg>
+            </span>
+            <span id="receive-label">Receive Random Message</span>
+          </button>
+          <button class="receive-caret" id="scenario-btn" type="button" aria-label="Choose demo scenario: Random" aria-haspopup="true" aria-expanded="false">
+            <span id="scenario-current">Random</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5H7Z"/></svg>
+          </button>
         </div>
       </section>
 
@@ -91,19 +88,17 @@
         </div>
       </section>
 
-      <!-- Screen 3: isolated one-off message analysis -->
-      <section class="screen screen-test" id="screen-test" aria-label="Test Message" inert>
-        <header class="appbar testbar">
-          <button class="icon-btn" id="test-back-btn" type="button" aria-label="Back to chats">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11H7.800l5.600-5.600L12 4l-8 8 8 8 1.400-1.400L7.800 13H20v-2Z"/></svg>
-          </button>
-          <h1 class="appbar-title">Test Message</h1>
+      <!-- Screen 3: Test a Message (one-off, unscored analysis) -->
+      <section class="screen screen-test" id="screen-test" aria-label="Test a Message" inert>
+        <header class="appbar">
+          <h1 class="appbar-title">Test a Message</h1>
         </header>
         <div class="test-body">
-          <p class="test-intro">Try any first-contact message. Analysis runs locally through the same Python model and evidence rules used by the demo.</p>
+          <p class="test-intro">Paste any first-contact message to see what the detector reports. It runs through the same Python model and evidence rules as the chats.</p>
+          <p class="info-note" id="test-unscored">Not scored. A message you type has no reference label, so there is no verified answer to mark it against.</p>
           <form id="test-form" class="test-form">
             <label for="test-message">Message to analyze</label>
-            <textarea id="test-message" name="message" rows="6" maxlength="5000" required
+            <textarea id="test-message" name="message" rows="5" maxlength="5000" required
               aria-describedby="test-privacy" spellcheck="true"></textarea>
             <div class="test-controls">
               <button class="btn btn-primary" id="analyze-btn" type="submit">Analyze</button>
@@ -116,47 +111,60 @@
         </div>
       </section>
 
-      <!-- Screen 4: optional blind evaluation, separate from the chat demo -->
-      <section class="screen screen-blind" id="screen-blind" aria-label="Test the AI" inert>
-        <header class="appbar testbar">
-          <button class="icon-btn" id="blind-back-btn" type="button" aria-label="Return to chats from Test the AI">
-            <svg viewBox="0 0 24 24"><path d="M20 11H7.800l5.600-5.600L12 4l8 8-8 8-1.400-1.400L7.800 13H20v-2Z"/></svg>
-          </button>
-          <h1 class="appbar-title">Test the AI</h1>
+      <!-- Screen 4: AI Evaluation (blind test on stored synthetic messages) -->
+      <section class="screen screen-blind" id="screen-blind" aria-label="AI Evaluation" inert>
+        <header class="appbar">
+          <h1 class="appbar-title">AI Evaluation</h1>
         </header>
         <div class="blind-body">
-          <p class="blind-intro">Blind evaluation predicts first, then reveals the stored reference label. These are synthetic demonstration messages, not real-world accuracy evidence.</p>
+          <p class="blind-intro">See how the detector does on practice messages: it answers first, then the correct label is revealed.</p>
+          <p class="info-note" id="blind-synthetic">Synthetic test messages written for this demo. Results are not proof of real-world accuracy.</p>
           <div class="blind-controls">
-            <button class="btn btn-primary" id="blind-start-btn" type="button">Run blind evaluation</button>
-            <button class="btn btn-ghost" id="blind-next-btn" type="button" disabled>Next sample</button>
+            <button class="btn btn-primary" id="blind-next-btn" type="button" hidden>Next Message</button>
+            <button class="btn btn-primary" id="blind-start-btn" type="button">Start Blind Test</button>
           </div>
           <p class="blind-status" id="blind-status" role="status" aria-live="polite"></p>
-          <article class="blind-sample" id="blind-sample" hidden>
+          <article class="blind-sample" id="blind-sample" aria-label="Current test message" hidden>
             <div class="blind-sample-meta" id="blind-sample-meta"></div>
             <blockquote id="blind-sample-text"></blockquote>
             <div class="blind-predictions" id="blind-predictions"></div>
           </article>
-          <section class="blind-results" aria-labelledby="blind-results-title">
-            <h2 id="blind-results-title">Cumulative results</h2>
-            <p id="blind-provenance"></p>
+          <section class="blind-results" id="blind-results" aria-labelledby="blind-results-title" hidden>
+            <h2 id="blind-results-title">Running totals</h2>
+            <p class="blind-tested" id="blind-tested"></p>
             <div class="blind-table-wrap">
               <table>
-                <thead><tr><th>System</th><th>N</th><th>TP</th><th>TN</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+                <thead><tr>
+                  <th scope="col">System</th>
+                  <th scope="col" title="Messages this system labelled the same way as the reference label">Correct</th>
+                  <th scope="col" title="Scam messages this system did not flag">Missed Scams</th>
+                  <th scope="col" title="Legitimate messages this system flagged as scams">False Alarms</th>
+                </tr></thead>
                 <tbody id="blind-metrics"></tbody>
               </table>
             </div>
+            <p class="blind-legend">Correct: matched the reference label. Missed scam: a scam that was not flagged. False alarm: a legitimate message that was flagged.</p>
+            <p id="blind-provenance"></p>
           </section>
-          <section class="blind-arbitrary" aria-labelledby="blind-arbitrary-title">
-            <h2 id="blind-arbitrary-title">Try an unlabeled message</h2>
-            <p>No reference label is invented or assigned, so this analysis is not scored.</p>
-            <form id="blind-arbitrary-form">
-              <textarea id="blind-arbitrary-text" rows="3" maxlength="5000" aria-label="Unlabeled message"></textarea>
-              <button class="btn btn-ghost" type="submit">Analyze without scoring</button>
-            </form>
-            <div id="blind-arbitrary-result" hidden></div>
-          </section>
+          <p class="blind-own">Want to try your own message? It has no reference label, so it cannot be scored. Use <a class="link-btn" href="#/test">Test a Message</a>.</p>
         </div>
       </section>
+
+      <!-- One consistent way to move between the three destinations -->
+      <nav class="tabbar" id="tabbar" aria-label="Main navigation">
+        <a href="#/" data-tab="chats" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2ZM7 9h10v2H7V9Zm6 5H7v-2h6v2Zm4-6H7V6h10v2Z"/></svg>
+          <span>Chats</span>
+        </a>
+        <a href="#/test" data-tab="test">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.500 14h-.8l-.3-.3A6.500 6.500 0 1 0 14 15.500l.3.3v.8l5 5 1.500-1.500-5.300-5.100Zm-6 0a4.500 4.500 0 1 1 0-9 4.500 4.500 0 0 1 0 9Z"/></svg>
+          <span>Test a Message</span>
+        </a>
+        <a href="#/evaluation" data-tab="evaluation">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3h-4.200a3 3 0 0 0-5.600 0H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm-7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm-2 14-4-4 1.400-1.400L10 14.200l6.600-6.600L18 9l-8 8Z"/></svg>
+          <span>AI Evaluation</span>
+        </a>
+      </nav>
 
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
     </main>

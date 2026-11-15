@@ -41,8 +41,7 @@
   var analysisRun = 0;
   var analysisController = null;
   var blindRun = 0;
-  var blindStarted = false;
-  var blindCurrent = null;
+  var currentScreen = "chats";   // "chats" | "chat" | "test" | "evaluation"
   // Incoming-message simulation.
   var scenario = "random";
   var receiving = false;
@@ -295,115 +294,117 @@
     $("test-message").focus();
   }
 
-  function metricNumber(value) { return typeof value === "number" ? value.toFixed(3) : "-"; }
+  // ---------- AI Evaluation (blind test on stored synthetic messages) ----------
 
-  function renderBlindMetrics(metrics) {
+  var BLIND_SYSTEMS = [
+    { name: "Trained model", metrics: "model", prediction: "model_prediction" },
+    { name: "Evidence rules", metrics: "evidence_rules", prediction: "evidence_prediction" },
+    { name: "Combined system", metrics: "combined_warning", prediction: "combined_prediction" }
+  ];
+
+  // "idle" before a run, "running" while messages remain, "complete" at the end.
+  function setBlindState(state, busy) {
+    var start = $("blind-start-btn");
+    var next = $("blind-next-btn");
+    start.textContent = state === "idle" ? "Start Blind Test" : "Restart Blind Test";
+    start.className = "btn " + (state === "running" ? "btn-ghost" : "btn-primary");
+    start.disabled = Boolean(busy);
+    next.hidden = state !== "running";
+    next.disabled = Boolean(busy);
+  }
+
+  function renderBlindTotals(result) {
+    var metrics = result.metrics || {};
     var table = $("blind-metrics");
     table.textContent = "";
-    [
-      ["ML classifier", "model"],
-      ["Evidence rules", "evidence_rules"],
-      ["Combined warning", "combined_warning"]
-    ].forEach(function (item) {
-      var metric = metrics && metrics[item[1]];
-      var matrix = metric && metric.confusion_matrix.rows_actual_columns_predicted;
-      table.appendChild(el("tr", null,
-        el("th", { scope: "row", text: item[0] }),
-        el("td", { text: metric ? String(metric.examples) : "-" }),
-        el("td", { text: metric ? String(metric.true_positives) : "-" }),
-        el("td", { text: metric ? String(metric.true_negatives) : "-" }),
-        el("td", { text: metric ? String(metric.false_positives) : "-" }),
-        el("td", { text: metric ? String(metric.false_negatives) : "-" }),
-        el("td", { text: metricNumber(metric && metric.precision) }),
-        el("td", { text: metricNumber(metric && metric.recall) }),
-        el("td", { text: metricNumber(metric && metric.f1) })));
+    BLIND_SYSTEMS.forEach(function (system) {
+      var metric = metrics[system.metrics];
+      var scams = metric ? metric.true_positives + metric.false_negatives : 0;
+      table.appendChild(el("tr", { "data-system": system.metrics },
+        el("th", { scope: "row" },
+          el("strong", { text: system.name }),
+          el("small", { text: !metric ? "Nothing tested yet"
+            : scams ? "Caught " + metric.true_positives + " of " + scams + (scams === 1 ? " scam" : " scams")
+            : "No scam messages yet" })),
+        el("td", { "data-total": "correct",
+          text: metric ? (metric.true_positives + metric.true_negatives) + " of " + metric.examples : "–" }),
+        el("td", { "data-total": "missed", text: metric ? String(metric.false_negatives) : "–" }),
+        el("td", { "data-total": "false-alarms", text: metric ? String(metric.false_positives) : "–" })));
     });
+    $("blind-tested").textContent = "Messages Tested: " + result.sample_index + " of " + result.total_samples;
+    $("blind-provenance").textContent = result.provenance && result.provenance.warning || "";
+    $("blind-results").hidden = false;
   }
 
   function renderBlindSample(result) {
+    var isScam = Boolean(result.reference_label);
     $("blind-sample").hidden = false;
-    $("blind-sample-meta").textContent = "Sample " + result.sample_index + " of " + result.total_samples +
-      " · " + result.difficulty + " · reference label revealed after prediction";
+    $("blind-sample-meta").textContent = "Message " + result.sample_index + " of " + result.total_samples +
+      " · " + result.difficulty + " example";
     $("blind-sample-text").textContent = result.text;
-    var values = [
-      ["ML prediction", result.model_prediction],
-      ["Evidence rules", result.evidence_prediction],
-      ["Combined warning", result.combined_prediction],
-      ["Reference label", result.reference_label]
-    ];
+
     var predictions = $("blind-predictions");
     predictions.textContent = "";
-    values.forEach(function (item) {
-      predictions.appendChild(el("div", null,
-        el("strong", { text: item[0] }),
-        el("span", { text: item[1] ? "Flagged" : "Not flagged" })));
+    BLIND_SYSTEMS.forEach(function (system) {
+      var flagged = Boolean(result[system.prediction]);
+      var correct = flagged === isScam;
+      predictions.appendChild(el("div", { class: "blind-row", "data-system": system.metrics,
+        "data-correct": String(correct) },
+        el("span", { class: "blind-row-name", text: system.name }),
+        el("span", { class: "blind-row-prediction", text: flagged ? "Flagged as scam" : "Not flagged" }),
+        el("span", { class: "blind-verdict", text: correct ? "Correct" : "Incorrect" }),
+        correct ? null
+          : el("span", { class: "blind-row-why", text: isScam ? "Missed scam" : "False alarm" })));
     });
-    renderBlindMetrics(result.metrics);
-    $("blind-provenance").textContent = result.provenance.warning;
-    $("blind-status").textContent = result.sample_index === result.total_samples
-      ? "Evaluation complete."
-      : "Prediction recorded; reference label revealed. Select Next sample.";
+    predictions.appendChild(el("div", { class: "blind-reference", "data-reference": isScam ? "scam" : "not-scam" },
+      el("span", { text: "Reference label" }),
+      el("strong", { text: isScam ? "Scam" : "Not a scam" }),
+      el("small", { text: "Revealed only after the predictions above were recorded." })));
+    renderBlindTotals(result);
   }
 
   function nextBlindSample() {
     var run = blindRun;
-    $("blind-next-btn").disabled = true;
-    $("blind-status").textContent = "Predicting sample text...";
+    setBlindState("running", true);
+    $("blind-status").textContent = "Getting predictions for the next message…";
     Api.nextEvaluation().then(function (result) {
       if (run !== blindRun) return;
-      if (result.complete) {
-        $("blind-status").textContent = "Evaluation complete.";
-        $("blind-next-btn").disabled = true;
-        renderBlindMetrics(result.metrics);
+      if (result.complete && !result.text) {
+        renderBlindTotals(result);
+        setBlindState("complete");
+        $("blind-status").textContent = "Blind test complete. All " + result.total_samples + " messages were tested.";
         return;
       }
-      blindCurrent = result;
       renderBlindSample(result);
-      $("blind-next-btn").disabled = result.sample_index >= result.total_samples;
-    }, function () {
-      if (run === blindRun) {
-        $("blind-status").textContent = "Evaluation failed. No sample result was used.";
-        $("blind-next-btn").disabled = false;
-      }
+      var last = result.sample_index >= result.total_samples;
+      setBlindState(last ? "complete" : "running");
+      $("blind-status").textContent = last
+        ? "Blind test complete. All " + result.total_samples + " messages were tested."
+        : "Predictions recorded, then the reference label was revealed.";
+    }, function (error) {
+      if (run !== blindRun) return;
+      setBlindState("running");
+      $("blind-status").textContent = Api.describeError(error, "test the next message") + " No result was made up.";
     });
   }
 
   function startBlindEvaluation() {
     var run = ++blindRun;
-    blindStarted = true;
-    blindCurrent = null;
-    $("blind-start-btn").disabled = true;
-    $("blind-next-btn").disabled = true;
+    var wasIdle = $("blind-next-btn").hidden && $("blind-sample").hidden;
+    setBlindState(wasIdle ? "idle" : "running", true);
     $("blind-sample").hidden = true;
+    $("blind-results").hidden = true;
     $("blind-metrics").textContent = "";
     $("blind-provenance").textContent = "";
-    $("blind-status").textContent = "Starting randomized evaluation...";
+    $("blind-status").textContent = "Starting a new randomized blind test…";
     Api.startEvaluation().then(function () {
       if (run !== blindRun) return;
-      $("blind-start-btn").disabled = false;
-      $("blind-start-btn").textContent = "Restart blind evaluation";
       nextBlindSample();
-    }, function () {
-      if (run === blindRun) {
-        $("blind-start-btn").disabled = false;
-        $("blind-status").textContent = "Evaluation failed. Check the local server and try again.";
-      }
+    }, function (error) {
+      if (run !== blindRun) return;
+      setBlindState("idle");
+      $("blind-status").textContent = Api.describeError(error, "start the blind test") + " No result was made up.";
     });
-  }
-
-  function analyzeBlindArbitrary(event) {
-    event.preventDefault();
-    var message = $("blind-arbitrary-text").value.trim();
-    if (!message) return;
-    var output = $("blind-arbitrary-result");
-    output.hidden = false;
-    output.textContent = "Analyzing without a reference label...";
-    Api.analyzeArbitrary(message).then(function (result) {
-      output.textContent = "ML: " + (result.model_prediction ? "flagged" : "not flagged") +
-        " · rules: " + (result.evidence_prediction ? "flagged" : "not flagged") +
-        " · combined: " + (result.combined_prediction ? "flagged" : "not flagged") +
-        " · No reference label was provided; not scored.";
-    }, function () { output.textContent = "Analysis failed. No label was invented."; });
   }
 
   function renderList() {
@@ -746,6 +747,12 @@
 
   // ---------- incoming-message simulation ----------
 
+  // Short names for the category picker beside the receive button.
+  var SCENARIO_CHIPS = {
+    random: "Random", family_friend: "Family", normal_stranger: "Stranger",
+    potential_fraudulent_recruiter: "Recruiter"
+  };
+
   function scenarioById(id) {
     return Api.SCENARIOS.filter(function (s) { return s.id === id; })[0] || Api.SCENARIOS[0];
   }
@@ -754,10 +761,15 @@
     var button = $("receive-btn");
     button.disabled = receiving || historyLoading || resetting;
     button.classList.toggle("is-busy", receiving);
-    $("receive-label").textContent = historyLoading ? "Loading history…"
+    $("receive").classList.toggle("is-busy", receiving || historyLoading);
+    $("receive-label").textContent = historyLoading ? "Loading chats…"
       : receiving ? "Receiving…"
-      : scenario === "random" ? "Receive random message"
-      : "Receive: " + scenarioById(scenario).short;
+      : scenario === "random" ? "Receive Random Message"
+      : "Receive Message";
+    var chip = SCENARIO_CHIPS[scenario] || scenarioById(scenario).label;
+    $("scenario-current").textContent = chip;
+    $("scenario-btn").setAttribute("aria-label", "Choose demo scenario: " + chip);
+    $("scenario-btn").disabled = receiving;
 
     $("receive-error").hidden = !receiveError;
     $("receive-error-text").textContent = receiveError;
@@ -824,6 +836,8 @@
     render();
     document.querySelector(".home-body").scrollTop = 0;
     toast("New message from " + chat.name);
+    // Success state: go straight to the conversation, unless the user has moved elsewhere.
+    if (currentScreen === "chats") openChat(chat.id);
   }
 
   function hydrateHistory(history) {
@@ -951,75 +965,58 @@
     location.hash = "#/chat/" + id;
   }
 
-  function openTestMessage() {
-    navigatedInApp = true;
-    closeMenu();
-    location.hash = "#/test";
-  }
-
-  function openBlindEvaluation() {
-    navigatedInApp = true;
-    closeMenu();
-    location.hash = "#/blind";
-  }
-
   function goHome() {
     if (navigatedInApp) history.back();
     else history.replaceState(null, "", location.pathname + location.search);
     if (!navigatedInApp) applyRoute();
   }
 
-  function applyRoute() {
-    var match = /^#\/chat\/([\w-]+)$/.exec(location.hash);
+  var SCREENS = { chats: "screen-home", chat: "screen-chat", test: "screen-test", evaluation: "screen-blind" };
+
+  // The root URL (or anything unrecognised) is always the Chats list.
+  function routeFor(hash) {
+    var match = /^#\/chat\/([\w-]+)$/.exec(hash);
     var chat = match ? chatById(match[1]) : null;
-    var home = $("screen-home");
-    var chatScreen = $("screen-chat");
-    var testScreen = $("screen-test");
-    var blindScreen = $("screen-blind");
-    var testOpen = !chat && location.hash === "#/test";
-    var blindOpen = !chat && location.hash === "#/blind";
+    if (chat) return { screen: "chat", chat: chat };
+    if (hash === "#/test") return { screen: "test" };
+    if (hash === "#/evaluation" || hash === "#/blind") return { screen: "evaluation" };
+    return { screen: "chats" };
+  }
+
+  // Exactly one screen is active; every other screen is hidden and inert.
+  function applyRoute() {
+    var route = routeFor(location.hash);
     closeEvidence();
     closeScenarioMenu();
+    closeMenu();
+    currentScreen = route.screen;
 
-    if (chat) {
-      openChatId = chat.id;
-      var seen = incomingCount(chat);
-      if (saved.read[chat.id] !== seen) { saved.read[chat.id] = seen; persist(); }
+    var phone = $("phone");
+    phone.setAttribute("data-screen", route.screen);
+    phone.classList.toggle("chat-open", route.screen === "chat");
+    Object.keys(SCREENS).forEach(function (name) {
+      if (name === route.screen) $(SCREENS[name]).removeAttribute("inert");
+      else $(SCREENS[name]).setAttribute("inert", "");
+    });
+    if (route.screen === "chat") $("tabbar").setAttribute("inert", "");
+    else $("tabbar").removeAttribute("inert");
+    var activeTab = route.screen === "chat" ? "chats" : route.screen;
+    Array.prototype.forEach.call($("tabbar").querySelectorAll("a"), function (tab) {
+      if (tab.getAttribute("data-tab") === activeTab) tab.setAttribute("aria-current", "page");
+      else tab.removeAttribute("aria-current");
+    });
+
+    if (route.screen === "chat") {
+      openChatId = route.chat.id;
+      var seen = incomingCount(route.chat);
+      if (saved.read[route.chat.id] !== seen) { saved.read[route.chat.id] = seen; persist(); }
       render();
-      chatScreen.removeAttribute("inert");
-      testScreen.setAttribute("inert", "");
-      blindScreen.setAttribute("inert", "");
-      home.setAttribute("inert", "");
-      $("phone").classList.add("chat-open");
-      $("phone").classList.remove("test-open");
-    } else if (testOpen) {
-      openChatId = null;
-      chatScreen.setAttribute("inert", "");
-      testScreen.removeAttribute("inert");
-      blindScreen.setAttribute("inert", "");
-      home.setAttribute("inert", "");
-      $("phone").classList.remove("chat-open");
-      $("phone").classList.add("test-open");
-      $("test-message").focus();
-    } else if (blindOpen) {
-      openChatId = null;
-      chatScreen.setAttribute("inert", "");
-      testScreen.setAttribute("inert", "");
-      blindScreen.removeAttribute("inert");
-      home.setAttribute("inert", "");
-      $("phone").classList.remove("chat-open");
-      $("phone").classList.add("test-open");
-      if (!blindStarted) startBlindEvaluation();
-    } else {
-      // Keep the conversation rendered while it slides away.
-      openChatId = null;
+      return;
+    }
+    // Keep the conversation rendered while it slides away.
+    openChatId = null;
+    if (route.screen === "chats") {
       navigatedInApp = false;
-      home.removeAttribute("inert");
-      chatScreen.setAttribute("inert", "");
-      testScreen.setAttribute("inert", "");
-      blindScreen.setAttribute("inert", "");
-      $("phone").classList.remove("chat-open");
-      $("phone").classList.remove("test-open");
       renderList();
     }
   }
@@ -1063,16 +1060,11 @@
   Array.prototype.forEach.call(document.querySelectorAll('[data-action="reset"]'), function (button) {
     button.addEventListener("click", resetDemo);
   });
-  document.querySelector('[data-action="test-message"]').addEventListener("click", openTestMessage);
-  document.querySelector('[data-action="blind-evaluation"]').addEventListener("click", openBlindEvaluation);
   $("test-form").addEventListener("submit", analyzeTestMessage);
   $("reset-test-btn").addEventListener("click", resetTestMessage);
   $("blind-start-btn").addEventListener("click", startBlindEvaluation);
   $("blind-next-btn").addEventListener("click", nextBlindSample);
-  $("blind-arbitrary-form").addEventListener("submit", analyzeBlindArbitrary);
   $("back-btn").addEventListener("click", goHome);
-  $("test-back-btn").addEventListener("click", goHome);
-  $("blind-back-btn").addEventListener("click", goHome);
   $("receive-btn").addEventListener("click", receiveMessage);
   $("receive-error-dismiss").addEventListener("click", function () { receiveError = ""; renderReceive(); });
   $("evidence-pop-close").addEventListener("click", function () { closeEvidence(true); });

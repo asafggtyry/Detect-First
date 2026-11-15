@@ -302,6 +302,28 @@ window.DetectFirstApi = (function () {
     return post(ENDPOINTS.receive, body).then(normalizeIncoming);
   }
 
+  // Blind-evaluation responses are shown as returned, so reject anything incomplete
+  // rather than render a partly made-up result.
+  function checkEvaluation(raw) {
+    function bit(value) { return value === 0 || value === 1; }
+    var ok = raw && typeof raw === "object" &&
+      Number.isInteger(raw.sample_index) && Number.isInteger(raw.total_samples) &&
+      raw.total_samples > 0 && raw.sample_index >= 0 && raw.sample_index <= raw.total_samples &&
+      raw.metrics && typeof raw.metrics === "object";
+    if (ok && typeof raw.text !== "undefined") {
+      ok = typeof raw.text === "string" && raw.text.length > 0 && raw.sample_index > 0 &&
+        bit(raw.model_prediction) && bit(raw.evidence_prediction) &&
+        bit(raw.combined_prediction) && bit(raw.reference_label) &&
+        ["model", "evidence_rules", "combined_warning"].every(function (key) {
+          var metric = raw.metrics[key];
+          return metric && ["examples", "true_positives", "true_negatives", "false_positives", "false_negatives"]
+            .every(function (field) { return Number.isInteger(metric[field]) && metric[field] >= 0; });
+        });
+    }
+    if (!ok) throw invalid("Invalid evaluation response");
+    return raw;
+  }
+
   // ---------- public ----------
 
   return {
@@ -351,9 +373,9 @@ window.DetectFirstApi = (function () {
 
     receiveMessage: receiveMessage,
     startEvaluation: function (seed) {
-      return post(ENDPOINTS.evaluationStart, seed === undefined ? {} : { seed: seed });
+      return post(ENDPOINTS.evaluationStart, seed === undefined ? {} : { seed: seed }).then(checkEvaluation);
     },
-    nextEvaluation: function () { return post(ENDPOINTS.evaluationNext, {}); },
+    nextEvaluation: function () { return post(ENDPOINTS.evaluationNext, {}).then(checkEvaluation); },
     analyzeArbitrary: function (text) {
       return post(ENDPOINTS.evaluationArbitrary, { message: text });
     }
